@@ -28,7 +28,7 @@ check_missing_packages () {
   fi
   # zeranoe's build scripts use wget, though we don't here...
   # other things we might need: cmake libgmp-dev libmpfr-dev libmpc-dev libboost-all-dev texinfo
-  local check_packages=('curl' 'pkg-config' 'make' 'git' 'svn' 'gcc' 'autoconf' 'automake' 'yasm' 'cvs' 'flex' 'bison' 'makeinfo' 'g++' 'ed' 'hg' 'pax' 'unzip' 'patch' 'wget' 'xz' 'nasm' 'gperf' 'autogen' 'bzip2' 'cargo' 'netatalk')  
+  local check_packages=('curl' 'pkg-config' 'make' 'git' 'svn' 'gcc' 'autoconf' 'automake' 'yasm' 'cvs' 'flex' 'bison' 'makeinfo' 'g++' 'ed' 'hg' 'pax' 'unzip' 'patch' 'wget' 'xz' 'nasm' 'gperf' 'autogen' 'bzip2' 'cargo' 'netatalk' 'hfsprogs' 'hfsutils' 'fondu')  
   # autoconf-archive is just for leptonica FWIW
   # I'm not actually sure if VENDOR being set to centos is a thing or not. On all the centos boxes I can test on it's not been set at all.
   # that being said, if it where set I would imagine it would be set to centos... And this contition will satisfy the "Is not initially set"
@@ -583,6 +583,7 @@ find_all_build_exes() {
 
 build_dependencies() {
   echo "Building retro86 dependency libraries..."
+  #cat mpw-gm.img__0.bin | unbin - || exit 1
 }
 
 build_retro86() {

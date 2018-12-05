@@ -701,18 +701,33 @@ void dumpRes(ResFile *res, FILE *outFile)
 	return;
 }
 
+int cmpResType(const void * a, const void * b)
+{
+	const ResType *ap = (const ResType *)a;
+	const ResType *bp = (const ResType *)b;
+
+	return strcmp(ap->resourceType, bp->resourceType);
+}
+
 void dumpResDiffData(ResFile *res, FILE *outFile)
 {
 	{
 		int idx;
 		int inidx;
+		ResType * sortResourceTypes = NULL;
 
 		for(idx = 0; idx < res->numMaps; idx++)
 		{
 			fprintf(outFile, "resMaps[%d]\n", idx);
+
+			sortResourceTypes = malloc(sizeof (ResType) * res->resourceMaps[idx].numTypes);
+
+			memcpy(sortResourceTypes, res->resourceMaps[idx].resourceTypes, sizeof (ResType) * res->resourceMaps[idx].numTypes);
+
+			qsort(sortResourceTypes, res->resourceMaps[idx].numTypes, sizeof (ResType), cmpResType);
 			for(inidx = 0; inidx < res->resourceMaps[idx].numTypes; inidx++)
 			{
-				ResType * curResType = &res->resourceMaps[idx].resourceTypes[inidx];
+				ResType * curResType = &sortResourceTypes[inidx];
 
 				fprintf(outFile, "\tresType[%d]\n", inidx);
 				fprintf(outFile, "\t\tresource type: \"%s\"\n", curResType->resourceType);
@@ -785,6 +800,9 @@ void dumpResDiffData(ResFile *res, FILE *outFile)
 					fprintf(outFile, "\t\thandle to resource: %08x\n", curReference->resourceHandle);
 				}
 			}
+
+			free(sortResourceTypes);
+			sortResourceTypes = NULL;
 		}
 	}
 	/*{
