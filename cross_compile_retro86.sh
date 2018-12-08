@@ -28,7 +28,7 @@ check_missing_packages () {
   fi
   # zeranoe's build scripts use wget, though we don't here...
   # other things we might need: cmake libgmp-dev libmpfr-dev libmpc-dev libboost-all-dev texinfo
-  local check_packages=('curl' 'pkg-config' 'make' 'git' 'svn' 'gcc' 'autoconf' 'automake' 'yasm' 'cvs' 'flex' 'bison' 'makeinfo' 'g++' 'ed' 'hg' 'pax' 'unzip' 'patch' 'wget' 'xz' 'nasm' 'gperf' 'autogen' 'bzip2' 'cargo' 'netatalk' 'hfsprogs' 'hfsutils' 'fondu')  
+  local check_packages=('curl' 'pkg-config' 'make' 'git' 'svn' 'gcc' 'autoconf' 'automake' 'yasm' 'cvs' 'flex' 'bison' 'makeinfo' 'g++' 'ed' 'hg' 'pax' 'unzip' 'patch' 'wget' 'xz' 'nasm' 'gperf' 'autogen' 'bzip2' 'cargo' 'wine')  
   # autoconf-archive is just for leptonica FWIW
   # I'm not actually sure if VENDOR being set to centos is a thing or not. On all the centos boxes I can test on it's not been set at all.
   # that being said, if it where set I would imagine it would be set to centos... And this contition will satisfy the "Is not initially set"
@@ -49,6 +49,8 @@ check_missing_packages () {
   if [ "${VENDOR}" = "redhat" ] || [ "${VENDOR}" = "centos" ]; then
     if [ -n "$(hash cmake 2>&1)" ] && [ -n "$(hash cmake3 2>&1)" ]; then missing_packages=('cmake' "${missing_packages[@]}"); fi
   fi
+  check_packages+=('wine-binfmt') # the rest of the world
+  ls /usr/share/binfmts/wine 2>/dev/null 1>/dev/null || missing_packages=("wine-binfmt" "${missing_packages[@]}")
   if [[ -n "${missing_packages[@]}" ]]; then
     clear
     echo "Could not find the following execs (svn is actually package subversion, makeinfo is actually package texinfo, hg is actually package mercurial if you're missing them): ${missing_packages[*]}"
@@ -60,6 +62,13 @@ check_missing_packages () {
     echo "for RHEL/CentOS: First ensure you have epel repos available, then run $ sudo yum install subversion texinfo mercurial libtool autogen gperf nasm patch unzip pax ed gcc-c++ bison flex yasm automake autoconf gcc zlib-devel cvs bzip2 cargo cmake3 -y"
     echo "for fedora: if your distribution comes with a modern version of cmake then use the same as RHEL/CentOS but replace cmake3 with cmake."
     exit 1
+  fi
+  binfmts_wine=
+  update-binfmts --display wine 2>/dev/null 1>/dev/null || binfmts_wine=1
+  echo "$binfmts_wine"
+  if [ "$binfmts_wine" ]; then
+	  echo "Wine not defined as default binfmt for windows executables, please run: sudo update-binfmts --import /usr/share/binfmts/wine"
+	  exit 1
   fi
 
   export REQUIRED_CMAKE_VERSION="3.0.0"
@@ -567,6 +576,54 @@ reset_cflags() {
   export CFLAGS=$original_cflags
 }
 
+build_gmp() {
+  download_and_unpack_file https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
+  cd gmp-6.1.2
+    #export CC_FOR_BUILD=/usr/bin/gcc # Are these needed?
+    #export CPP_FOR_BUILD=usr/bin/cpp
+    generic_configure "ABI=$bits_target"
+    #unset CC_FOR_BUILD
+    #unset CPP_FOR_BUILD
+    do_make_and_make_install
+  cd ..
+}
+
+build_mpfr() {
+  download_and_unpack_file https://www.mpfr.org/mpfr-3.1.5/mpfr-3.1.5.tar.xz
+  cd mpfr-3.1.5
+    #export CC_FOR_BUILD=/usr/bin/gcc # Are these needed?
+    #export CPP_FOR_BUILD=usr/bin/cpp
+    generic_configure "ABI=$bits_target"
+    #unset CC_FOR_BUILD
+    #unset CPP_FOR_BUILD
+    do_make_and_make_install
+  cd ..
+}
+
+build_mpc() {
+  download_and_unpack_file http://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz
+  cd mpc-1.0.3
+    #export CC_FOR_BUILD=/usr/bin/gcc # Are these needed?
+    #export CPP_FOR_BUILD=usr/bin/cpp
+    generic_configure "ABI=$bits_target"
+    #unset CC_FOR_BUILD
+    #unset CPP_FOR_BUILD
+    do_make_and_make_install
+  cd ..
+}
+
+build_isl() {
+  download_and_unpack_file http://isl.gforge.inria.fr/isl-0.18.tar.xz
+  cd isl-0.18
+    #export CC_FOR_BUILD=/usr/bin/gcc # Are these needed?
+    #export CPP_FOR_BUILD=usr/bin/cpp
+    generic_configure --with-piplib=no "ABI=$bits_target"
+    #unset CC_FOR_BUILD
+    #unset CPP_FOR_BUILD
+    do_make_and_make_install
+  cd ..
+}
+
 find_all_build_exes() {
   local found=""
 # NB that we're currently in the sandbox dir...
@@ -583,6 +640,25 @@ find_all_build_exes() {
 
 build_dependencies() {
   echo "Building retro86 dependency libraries..."
+
+  if [ ! -d ../../MPW-GM ]; then
+	  if [ -f ../../mpw-gm.img__0.bin ]; then
+		  mkdir -p tmp || exit 1
+		  node ../../ndif_research/decompress.js ../../mpw-gm.img__0.bin ../../mpw-gm.ro.img || exit 1
+                  sudo mount -t hfs -o loop ../../mpw-gm.ro.img tmp || exit 1
+		  cp -r tmp/MPW-GM ../../MPW-GM || exit 1
+		  sudo umount tmp || exit 1
+		  rmdir tmp || exit 1
+	  else
+		  echo 'Failed to find a MPW-GM image file, please put one into the Retro86 build directory. The following images are handled: mpw-gm.img__0.bin'
+		  exit 1
+	  fi
+  fi
+
+  build_gmp
+  build_mpfr
+  build_mpc
+  build_isl
   #cat mpw-gm.img__0.bin | unbin - || exit 1
 }
 
@@ -591,6 +667,13 @@ build_retro86() {
   do_git_checkout https://github.com/autc04/Retro68.git Retro68
   #apply_patch file://$patch_dir/dosbox.diff
   cd Retro68
+    mkdir -p ~/.wine/drive_c/temp
+    patch -p0 < $patch_dir/Retro68-build-toolchain.bash.diff
+    cd gcc/gcc
+    patch -p0 < $patch_dir/gcc-exec-tool.in.diff
+    cd ../..
+    wine regedit $patch_dir/wine_tmp_path.reg
+    sed -i -e 's#SELFTEST_FLAGS = -nostdinc -x c /dev/null -S -o /dev/null \\#SELFTEST_FLAGS = -nostdinc -x c nul -S -o nul \\#g' gcc/gcc/Makefile.in
     export SDL_CONFIG="${cross_prefix}sdl-config"
     export CC=${cross_prefix}gcc
     export CXX=${cross_prefix}g++
@@ -600,8 +683,29 @@ build_retro86() {
     #export LIBS="-lSDL_net -liphlpapi -lwsock32 -lws2_32 -lSDL_sound -lspeex -lmodplug -lmikmod -lsmpeg -lFLAC -lvorbisfile -lvorbis -logg -lstdc++"
     #export LIBS="-lspeex -lmodplug -lmikmod -lsmpeg -lFLAC -lvorbisfile -lvorbis -logg -lstdc++"
     export LDFLAGS="-static-libgcc -static-libstdc++ -s"
+
+    if [ ! -d InterfacesAndLibraries/Libraries ]; then
+	    echo cp -r ../../../MPW-GM/Interfaces\&Libraries/Libraries/Libraries InterfacesAndLibraries/Libraries
+	    cp -r ../../../MPW-GM/Interfaces\&Libraries/Libraries/Libraries InterfacesAndLibraries/Libraries
+    fi
+    if [ ! -d InterfacesAndLibraries/SharedLibraries ]; then
+	    echo cp -r ../../../MPW-GM/Interfaces\&Libraries/Libraries/SharedLibraries InterfacesAndLibraries/SharedLibraries
+	    cp -r ../../../MPW-GM/Interfaces\&Libraries/Libraries/SharedLibraries InterfacesAndLibraries/SharedLibraries
+    fi
+    if [ ! -d InterfacesAndLibraries/CIncludes ]; then
+	    echo cp -r ../../../MPW-GM/Interfaces\&Libraries/Interfaces/CIncludes InterfacesAndLibraries/CIncludes
+	    cp -r ../../../MPW-GM/Interfaces\&Libraries/Interfaces/CIncludes InterfacesAndLibraries/CIncludes
+    fi
+    if [ ! -d InterfacesAndLibraries/RIncludes ]; then
+	    echo cp -r ../../../MPW-GM/Interfaces\&Libraries/Interfaces/RIncludes InterfacesAndLibraries/RIncludes
+	    cp -r ../../../MPW-GM/Interfaces\&Libraries/Interfaces/RIncludes InterfacesAndLibraries/RIncludes
+    fi
     chmod a+x ./build-toolchain.bash
-    ./build-toolchain.bash --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
+    cd ..
+    rm -rf Retro68-build
+    mkdir Retro68-build
+    cd Retro68-build
+    ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
     unset LDFLAGS
     unset LIBS
     unset SDL_CONFIG

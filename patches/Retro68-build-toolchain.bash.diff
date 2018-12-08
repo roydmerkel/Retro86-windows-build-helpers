@@ -1,0 +1,240 @@
+--- build-toolchain.bash.old	2018-12-05 20:04:45.752963676 -0800
++++ build-toolchain.bash	2018-12-07 15:21:05.756970284 -0800
+@@ -33,6 +33,10 @@
+ HOST_CMAKE_FLAGS=()
+ CMAKE_GENERATOR=
+ 
++BUILD=
++HOST=
++CROSS_PREFIX=
++
+ function usage()
+ {
+ 	echo "Usage: $0 [options]"
+@@ -47,6 +51,9 @@
+ 	echo "    --host-c-compiler         specify C compiler (needed on Mac OS X 10.4)"
+ 	echo "    --ninja                   use ninja for cmake builds"
+ 	echo "    --help                    show this help message"
++	echo "    --build                   configure for building on BUILD [guessed]"
++	echo "    --host                    cross-compile to build programs to run on HOST [BUILD]"
++	echo "    --cross-prefix            cross compiler prefix for cmake"
+ }
+ 
+ for ARG in $*; do
+@@ -75,6 +82,15 @@
+ 			HOST_CMAKE_FLAGS[${#HOST_CMAKE_FLAGS[@]}]="-DCMAKE_C_COMPILER=${ARG#*=}"
+ 			HOST_C_COMPILER="${ARG#*=}"
+ 			;;
++		--build=*)
++			BUILD="${ARG#*=}"
++			;;
++		--host=*)
++			HOST="${ARG#*=}"
++			;;
++		--cross-prefix=*)
++			CROSS_PREFIX="${ARG#*=}"
++			;;
+         --ninja)
+             CMAKE_GENERATOR=-GNinja
+             ;;
+@@ -328,7 +344,15 @@
+ 		# Build binutils for 68K
+ 		mkdir -p binutils-build
+ 		cd binutils-build
+-		$SRC/binutils/configure --target=m68k-apple-macos --prefix=$PREFIX --disable-doc
++		if [ "$BUILD" != "" -a "$HOST" != "" ]; then
++			$SRC/binutils/configure --host=$HOST --build=$BUILD --target=m68k-apple-macos --prefix=$PREFIX --disable-doc
++		elif [ "$BUILD" != "" ]; then 
++			$SRC/binutils/configure --build=$BUILD --target=m68k-apple-macos --prefix=$PREFIX --disable-doc
++		elif [ "$HOST" != "" ]; then 
++			$SRC/binutils/configure --host=$HOST --target=m68k-apple-macos --prefix=$PREFIX --disable-doc
++		else
++			$SRC/binutils/configure --target=m68k-apple-macos --prefix=$PREFIX --disable-doc
++		fi
+ 		make -j8
+ 		make install
+ 		cd ..
+@@ -337,9 +361,57 @@
+ 		mkdir -p gcc-build
+ 		cd gcc-build
+ 		export target_configargs="--disable-nls --enable-libstdcxx-dual-abi=no --disable-libstdcxx-verbose"
+-		$SRC/gcc/configure --target=m68k-apple-macos --prefix=$PREFIX \
+-				--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
+-				--disable-libssp MAKEINFO=missing
++		if [ "$BUILD" != "" -a "$HOST" != "" ]; then
++			$SRC/gcc/configure --host=$HOST --build=$BUILD \
++					--target=m68k-apple-macos --prefix=$PREFIX \
++					--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
++					--disable-libssp MAKEINFO=missing
++		elif [ "$BUILD" != "" ]; then 
++			$SRC/gcc/configure --build=$BUILD \
++					--target=m68k-apple-macos --prefix=$PREFIX \
++					--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
++					--disable-libssp MAKEINFO=missing
++		elif [ "$HOST" != "" ]; then 
++			$SRC/gcc/configure --host=$HOST \
++					--target=m68k-apple-macos --prefix=$PREFIX \
++					--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
++					--disable-libssp MAKEINFO=missing
++		else
++			$SRC/gcc/configure --target=m68k-apple-macos --prefix=$PREFIX \
++					--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
++					--disable-libssp MAKEINFO=missing
++		fi
++
++		sed -i -e 's#S\["GCC_FOR_TARGET"\]="m68k-apple-macos-gcc"#S["GCC_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/"#g' config.status
++		sed -i -e 's#S\["CXX_FOR_TARGET"\]="m68k-apple-macos-c[+][+]"#S["CXX_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xg++.exe -B$$r/$(HOST_SUBDIR)/gcc/ -nostdinc++ `if test -f $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags; then $(SHEL"\\\n"L) $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags --build-includes; else echo -funconfigured-libstdc++-v3 ; fi` -L$$r/$(TARGET_SUBDIR)/li"\\\n"bstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs"#g' config.status
++		sed -i -e 's#S\["CC_FOR_TARGET"\]="m68k-apple-macos-cc"#S["CC_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/"#g' config.status
++		sed -i -e 's#S\["RAW_CXX_FOR_TARGET"\]="m68k-apple-macos-c[+][+]"#S["RAW_CXX_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -shared-libgcc -B$$r/$(HOST_SUBDIR)/gcc -nostdinc++ -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libst"\\\n"dc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs"#g' config.status
++
++		sed -i -e 's#S\["AS_FOR_TARGET"\]="m68k-apple-macos-as"#S["AS_FOR_TARGET"]="'"$PREFIX"'m68k-apple-macos/bin/as.exe"#g' config.status
++		sed -i -e 's#S\["AR_FOR_TARGET"\]="m68k-apple-macos-ar"#S["AR_FOR_TARGET"]="'"$PREFIX"'m68k-apple-macos/bin/ar.exe"#g' config.status
++		sed -i -e 's#S\["LD_FOR_TARGET"\]="m68k-apple-macos-ld"#S["LD_FOR_TARGET"]="'"$PREFIX"'m68k-apple-macos/bin/ld.exe"#g' config.status
++		sed -i -e 's#S\["NM_FOR_TARGET"\]="m68k-apple-macos-nm"#S["NM_FOR_TARGET"]="'"$PREFIX"'m68k-apple-macos/bin/nm.exe"#g' config.status
++		sed -i -e 's#S\["STRIP_FOR_TARGET"\]="m68k-apple-macos-strip"#S["STRIP_FOR_TARGET"]="'"$PREFIX"'m68k-apple-macos/bin/strip.exe"#g' config.status
++		sed -i -e 's#S\["READELF_FOR_TARGET"\]="m68k-apple-macos-readelf"#S["READELF_FOR_TARGET"]="'"$PREFIX"'m68k-apple-macos/bin/readelf.exe"#g' config.status
++		sed -i -e 's#S\["RANLIB_FOR_TARGET"\]="m68k-apple-macos-ranlib"#S["RANLIB_FOR_TARGET"]="'"$PREFIX"'m68k-apple-macos/bin/ranlib.exe"#g' config.status
++		sed -i -e 's#S\["OBJDUMP_FOR_TARGET"\]="m68k-apple-macos-objdump"#S["OBJDUMP_FOR_TARGET"]="'"$PREFIX"'m68k-apple-macos/bin/objdump.exe"#g' config.status
++		sed -i -e 's#S\["OBJCOPY_FOR_TARGET"\]="m68k-apple-macos-objcopy"#S["OBJCOPY_FOR_TARGET"]="'"$PREFIX"'m68k-apple-macos/bin/objcopy.exe"#g' config.status
++
++		sed -i -e 's#GCC_FOR_TARGET=$(STAGE_CC_WRAPPER) m68k-apple-macos-gcc#GCC_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/#g' Makefile
++		sed -i -e 's#CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) m68k-apple-macos-c[+][+]#CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xg++.exe -B$$r/$(HOST_SUBDIR)/gcc/ -nostdinc++ `if test -f $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags; then $(SHELL) $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags --build-includes; else echo -funconfigured-libstdc++-v3 ; fi` -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs#g' Makefile
++		sed -i -e 's#CC_FOR_TARGET=$(STAGE_CC_WRAPPER) m68k-apple-macos-cc#CC_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/#g' Makefile
++		sed -i -e 's#RAW_CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) m68k-apple-macos-c[+][+]#RAW_CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xgcc.exe -shared-libgcc -B$$r/$(HOST_SUBDIR)/gcc -nostdinc++ -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs#g' Makefile
++
++		sed -i -e 's#AS_FOR_TARGET=m68k-apple-macos-as#AS_FOR_TARGET='"$PREFIX"'m68k-apple-macos/bin/as.exe#g' Makefile
++		sed -i -e 's#AR_FOR_TARGET=m68k-apple-macos-ar#AR_FOR_TARGET='"$PREFIX"'m68k-apple-macos/bin/ar.exe#g' Makefile
++		sed -i -e 's#LD_FOR_TARGET=m68k-apple-macos-ld#LD_FOR_TARGET='"$PREFIX"'m68k-apple-macos/bin/ld.exe#g' Makefile
++		sed -i -e 's#NM_FOR_TARGET=m68k-apple-macos-nm#NM_FOR_TARGET='"$PREFIX"'m68k-apple-macos/bin/nm.exe#g' Makefile
++		sed -i -e 's#STRIP_FOR_TARGET=m68k-apple-macos-strip#STRIP_FOR_TARGET='"$PREFIX"'m68k-apple-macos/bin/strip.exe#g' Makefile
++		sed -i -e 's#READELF_FOR_TARGET=m68k-apple-macos-readelf#READELF_FOR_TARGET='"$PREFIX"'m68k-apple-macos/bin/readelf.exe#g' Makefile
++		sed -i -e 's#RANLIB_FOR_TARGET=m68k-apple-macos-ranlib#RANLIB_FOR_TARGET='"$PREFIX"'m68k-apple-macos/bin/ranlib.exe#g' Makefile
++		sed -i -e 's#OBJDUMP_FOR_TARGET=m68k-apple-macos-objdump#OBJDUMP_FOR_TARGET='"$PREFIX"'m68k-apple-macos/bin/objdump.exe#g' Makefile
++		sed -i -e 's#OBJCOPY_FOR_TARGET=m68k-apple-macos-objcopy#OBJCOPY_FOR_TARGET='"$PREFIX"'m68k-apple-macos/bin/objcopy.exe#g' Makefile
++
+ 		# There seems to be a build failure in parallel builds; ignore any errors and try again without -j8.
+ 		make -j8 || make
+ 		make install
+@@ -353,10 +425,10 @@
+ 
+ 		# Move the real linker aside and install symlinks to Elf2Mac
+ 		# (Elf2Mac is built by cmake below)
+-		mv $PREFIX/bin/m68k-apple-macos-ld $PREFIX/bin/m68k-apple-macos-ld.real
+-		mv $PREFIX/m68k-apple-macos/bin/ld $PREFIX/m68k-apple-macos/bin/ld.real
+-		ln -s $PREFIX/bin/Elf2Mac $PREFIX/bin/m68k-apple-macos-ld
+-		ln -s $PREFIX/bin/Elf2Mac $PREFIX/m68k-apple-macos/bin/ld
++		mv $PREFIX/bin/m68k-apple-macos-ld.exe $PREFIX/bin/m68k-apple-macos-ld.exe.real
++		mv $PREFIX/m68k-apple-macos/bin/ld.exe $PREFIX/m68k-apple-macos/bin/ld.exe.real
++		ln -s $PREFIX/bin/Elf2Mac.exe $PREFIX/bin/m68k-apple-macos-ld.exe
++		ln -s $PREFIX/bin/Elf2Mac.exe $PREFIX/m68k-apple-macos/bin/ld.exe
+ 
+ 		if [ $CLEAN_AFTER_BUILD != false ]; then
+ 			rm -rf binutils-build
+@@ -386,7 +458,15 @@
+ 		# Build binutils for PPC
+ 		mkdir -p binutils-build-ppc
+ 		cd binutils-build-ppc
+-		$SRC/binutils/configure --target=powerpc-apple-macos --prefix=$PREFIX --disable-doc
++		if [ "$BUILD" != "" -a "$HOST" != "" ]; then
++			$SRC/binutils/configure --host=$HOST --build=$BUILD --target=powerpc-apple-macos --prefix=$PREFIX --disable-doc
++		elif [ "$BUILD" != "" ]; then 
++			$SRC/binutils/configure --build=$BUILD --target=powerpc-apple-macos --prefix=$PREFIX --disable-doc
++		elif [ "$HOST" != "" ]; then 
++			$SRC/binutils/configure --host=$HOST --target=powerpc-apple-macos --prefix=$PREFIX --disable-doc
++		else
++			$SRC/binutils/configure --target=powerpc-apple-macos --prefix=$PREFIX --disable-doc
++		fi
+ 		make -j8
+ 		make install
+ 		cd ..
+@@ -395,8 +475,50 @@
+ 		mkdir -p gcc-build-ppc
+ 		cd gcc-build-ppc
+ 		export target_configargs="--disable-nls --enable-libstdcxx-dual-abi=no --disable-libstdcxx-verbose"
+-		$SRC/gcc/configure --target=powerpc-apple-macos --prefix=$PREFIX \
+-			--enable-languages=c,c++ --disable-libssp --disable-lto MAKEINFO=missing
++		if [ "$BUILD" != "" -a "$HOST" != "" ]; then
++			$SRC/gcc/configure --host=$HOST --build=$BUILD --target=powerpc-apple-macos --prefix=$PREFIX \
++				--enable-languages=c,c++ --disable-libssp --disable-lto MAKEINFO=missing
++		elif [ "$BUILD" != "" ]; then 
++			$SRC/gcc/configure --build=$BUILD --target=powerpc-apple-macos --prefix=$PREFIX \
++				--enable-languages=c,c++ --disable-libssp --disable-lto MAKEINFO=missing
++		elif [ "$HOST" != "" ]; then 
++			$SRC/gcc/configure --host=$HOST --target=powerpc-apple-macos --prefix=$PREFIX \
++				--enable-languages=c,c++ --disable-libssp --disable-lto MAKEINFO=missing
++		else
++			$SRC/gcc/configure --target=powerpc-apple-macos --prefix=$PREFIX \
++				--enable-languages=c,c++ --disable-libssp --disable-lto MAKEINFO=missing
++		fi
++
++		sed -i -e 's#S\["GCC_FOR_TARGET"\]="powerpc-apple-macos-gcc"#S["GCC_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/"#g' config.status
++		sed -i -e 's#S\["CXX_FOR_TARGET"\]="powerpc-apple-macos-c[+][+]"#S["CXX_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xg++.exe -B$$r/$(HOST_SUBDIR)/gcc/ -nostdinc++ `if test -f $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags; then $(SHEL"\\\n"L) $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags --build-includes; else echo -funconfigured-libstdc++-v3 ; fi` -L$$r/$(TARGET_SUBDIR)/li"\\\n"bstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs"#g' config.status
++		sed -i -e 's#S\["CC_FOR_TARGET"\]="powerpc-apple-macos-cc"#S["CC_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/"#g' config.status
++		sed -i -e 's#S\["RAW_CXX_FOR_TARGET"\]="powerpc-apple-macos-c[+][+]"#S["RAW_CXX_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -shared-libgcc -B$$r/$(HOST_SUBDIR)/gcc -nostdinc++ -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libst"\\\n"dc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs"#g' config.status
++
++		sed -i -e 's#S\["AS_FOR_TARGET"\]="powerpc-apple-macos-as"#S["AS_FOR_TARGET"]="'"$PREFIX"'powerpc-apple-macos/bin/as.exe"#g' config.status
++		sed -i -e 's#S\["AR_FOR_TARGET"\]="powerpc-apple-macos-ar"#S["AR_FOR_TARGET"]="'"$PREFIX"'powerpc-apple-macos/bin/ar.exe"#g' config.status
++		sed -i -e 's#S\["LD_FOR_TARGET"\]="powerpc-apple-macos-ld"#S["LD_FOR_TARGET"]="'"$PREFIX"'powerpc-apple-macos/bin/ld.exe"#g' config.status
++		sed -i -e 's#S\["NM_FOR_TARGET"\]="powerpc-apple-macos-nm"#S["NM_FOR_TARGET"]="'"$PREFIX"'powerpc-apple-macos/bin/nm.exe"#g' config.status
++		sed -i -e 's#S\["STRIP_FOR_TARGET"\]="powerpc-apple-macos-strip"#S["STRIP_FOR_TARGET"]="'"$PREFIX"'powerpc-apple-macos/bin/strip.exe"#g' config.status
++		sed -i -e 's#S\["READELF_FOR_TARGET"\]="powerpc-apple-macos-readelf"#S["READELF_FOR_TARGET"]="'"$PREFIX"'powerpc-apple-macos/bin/readelf.exe"#g' config.status
++		sed -i -e 's#S\["RANLIB_FOR_TARGET"\]="powerpc-apple-macos-ranlib"#S["RANLIB_FOR_TARGET"]="'"$PREFIX"'powerpc-apple-macos/bin/ranlib.exe"#g' config.status
++		sed -i -e 's#S\["OBJDUMP_FOR_TARGET"\]="powerpc-apple-macos-objdump"#S["OBJDUMP_FOR_TARGET"]="'"$PREFIX"'powerpc-apple-macos/bin/objdump.exe"#g' config.status
++		sed -i -e 's#S\["OBJCOPY_FOR_TARGET"\]="powerpc-apple-macos-objcopy"#S["OBJCOPY_FOR_TARGET"]="'"$PREFIX"'powerpc-apple-macos/bin/objcopy.exe"#g' config.status
++
++		sed -i -e 's#GCC_FOR_TARGET=$(STAGE_CC_WRAPPER) powerpc-apple-macos-gcc#GCC_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/#g' Makefile
++		sed -i -e 's#CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) powerpc-apple-macos-c[+][+]#CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xg++.exe -B$$r/$(HOST_SUBDIR)/gcc/ -nostdinc++ `if test -f $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags; then $(SHELL) $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags --build-includes; else echo -funconfigured-libstdc++-v3 ; fi` -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs#g' Makefile
++		sed -i -e 's#CC_FOR_TARGET=$(STAGE_CC_WRAPPER) powerpc-apple-macos-cc#CC_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/#g' Makefile
++		sed -i -e 's#RAW_CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) powerpc-apple-macos-c[+][+]#RAW_CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xgcc.exe -shared-libgcc -B$$r/$(HOST_SUBDIR)/gcc -nostdinc++ -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs#g' Makefile
++
++		sed -i -e 's#AS_FOR_TARGET=powerpc-apple-macos-as#AS_FOR_TARGET='"$PREFIX"'powerpc-apple-macos/bin/as.exe#g' Makefile
++		sed -i -e 's#AR_FOR_TARGET=powerpc-apple-macos-ar#AR_FOR_TARGET='"$PREFIX"'powerpc-apple-macos/bin/ar.exe#g' Makefile
++		sed -i -e 's#LD_FOR_TARGET=powerpc-apple-macos-ld#LD_FOR_TARGET='"$PREFIX"'powerpc-apple-macos/bin/ld.exe#g' Makefile
++		sed -i -e 's#NM_FOR_TARGET=powerpc-apple-macos-nm#NM_FOR_TARGET='"$PREFIX"'powerpc-apple-macos/bin/nm.exe#g' Makefile
++		sed -i -e 's#STRIP_FOR_TARGET=powerpc-apple-macos-strip#STRIP_FOR_TARGET='"$PREFIX"'powerpc-apple-macos/bin/strip.exe#g' Makefile
++		sed -i -e 's#READELF_FOR_TARGET=powerpc-apple-macos-readelf#READELF_FOR_TARGET='"$PREFIX"'powerpc-apple-macos/bin/readelf.exe#g' Makefile
++		sed -i -e 's#RANLIB_FOR_TARGET=powerpc-apple-macos-ranlib#RANLIB_FOR_TARGET='"$PREFIX"'powerpc-apple-macos/bin/ranlib.exe#g' Makefile
++		sed -i -e 's#OBJDUMP_FOR_TARGET=powerpc-apple-macos-objdump#OBJDUMP_FOR_TARGET='"$PREFIX"'powerpc-apple-macos/bin/objdump.exe#g' Makefile
++		sed -i -e 's#OBJCOPY_FOR_TARGET=powerpc-apple-macos-objcopy#OBJCOPY_FOR_TARGET='"$PREFIX"'powerpc-apple-macos/bin/objcopy.exe#g' Makefile
++
+ 		make -j8
+ 		make install
+ 		unset target_configargs
+@@ -419,7 +541,15 @@
+ 	rm -rf hfsutils
+ 	cp -r $SRC/hfsutils .
+ 	cd hfsutils
+-	./configure --prefix=$PREFIX --enable-devlibs
++	if [ "$BUILD" != "" -a "$HOST" != "" ]; then
++		./configure --host=$HOST --build=$BUILD --prefix=$PREFIX --enable-devlibs
++	elif [ "$BUILD" != "" ]; then 
++		./configure --build=$BUILD --prefix=$PREFIX --enable-devlibs
++	elif [ "$HOST" != "" ]; then 
++		./configure --host=$HOST --prefix=$PREFIX --enable-devlibs
++	else
++		./configure --prefix=$PREFIX --enable-devlibs
++	fi
+ 	make
+ 	make install
+ 	cd ..
+@@ -439,9 +569,18 @@
+ 
+ mkdir -p build-host
+ cd build-host
+-cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
++if [ "$CROSS_PREFIX" != "" ]; then
++	cmake ${SRC} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
++else
++	cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
++fi
+ cd ..
+-cmake --build build-host --target install
++if [ "$CROSS_PREFIX" != "" ]; then
++	cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=$PREFIX --build build-host --target install
++else
++	cmake --build build-host --target install
++fi
++CROSS_PREFIX
+ 
+ 	# make tools (such as MakeImport and the compilers) available for later commands
+ export PATH=$PREFIX/bin:$PATH

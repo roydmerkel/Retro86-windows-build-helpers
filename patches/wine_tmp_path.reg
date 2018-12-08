@@ -1,0 +1,10 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment]
+"TEMP"="Z:\\tmp"
+"TMP"="Z:\\tmp"
+
+[HKEY_CURRENT_USER\Environment]
+"TEMP"="Z:\\tmp"
+"TMP"="Z:\\tmp"
+
