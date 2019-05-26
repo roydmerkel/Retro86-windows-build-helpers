@@ -1,0 +1,136 @@
+--- configure.old	2019-05-25 14:57:41.440521397 -0700
++++ configure	2019-05-26 16:14:32.604086825 -0700
+@@ -684,13 +684,19 @@
+ gcc_cv_readelf
+ gcc_cv_objdump
+ ORIGINAL_NM_FOR_TARGET
++WINE_ORIGINAL_NM_FOR_TARGET
+ gcc_cv_nm
+ ORIGINAL_LD_GOLD_FOR_TARGET
+ ORIGINAL_LD_BFD_FOR_TARGET
+ ORIGINAL_LD_FOR_TARGET
+ ORIGINAL_PLUGIN_LD_FOR_TARGET
++WINE_ORIGINAL_LD_FOR_TARGET
++WINE_ORIGINAL_LD_GOLD_FOR_TARGET
++WINE_ORIGINAL_LD_BFD_FOR_TARGET
++WINE_ORIGINAL_PLUGIN_LD_FOR_TARGET
+ gcc_cv_ld
+ ORIGINAL_AS_FOR_TARGET
++WINE_ORIGINAL_AS_FOR_TARGET
+ gcc_cv_as
+ enable_fast_install
+ objdir
+@@ -876,6 +882,8 @@
+ PATH_SEPARATOR
+ SHELL'
+ ac_subst_files='option_includes
++wine_find_str_workarround
++exec_tool_c
+ language_hooks'
+ ac_user_opts='
+ enable_option_checking
+@@ -21867,10 +21875,12 @@
+ 
+ case "$ORIGINAL_AS_FOR_TARGET" in
+   ./as | ./as$build_exeext) ;;
+-  *) ac_config_files="$ac_config_files as:exec-tool.in"
++  *) ac_config_files="$ac_config_files as.cmd:exec-tool.cmd.in"
+  ;;
+ esac
+ 
++WINE_ORIGINAL_AS_FOR_TARGET=`winepath -w $gcc_cv_as`
++
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking what assembler to use" >&5
+ $as_echo_n "checking what assembler to use... " >&6; }
+ if test "$gcc_cv_as" = ../gas/as-new$build_exeext; then
+@@ -22027,6 +22037,7 @@
+ fi
+ 
+ ORIGINAL_PLUGIN_LD_FOR_TARGET=$gcc_cv_ld
++WINE_ORIGINAL_PLUGIN_LD_FOR_TARGET=`winepath -w $gcc_cv_ld`
+ PLUGIN_LD_SUFFIX=`basename $gcc_cv_ld | sed -e "s,$target_alias-,,"`
+ # if the PLUGIN_LD is set ld-new, just have it as ld
+ # as that is the installed named.
+@@ -22039,6 +22050,7 @@
+ if test "${with_plugin_ld+set}" = set; then :
+   withval=$with_plugin_ld; if test x"$withval" != x; then
+    ORIGINAL_PLUGIN_LD_FOR_TARGET="$withval"
++   WINE_ORIGINAL_PLUGIN_LD_FOR_TARGET=`winepath -w "$withval"`
+    PLUGIN_LD_SUFFIX="$withval"
+  fi
+ fi
+@@ -22106,10 +22118,12 @@
+ 
+ case "$ORIGINAL_LD_FOR_TARGET" in
+   ./collect-ld | ./collect-ld$build_exeext) ;;
+-  *) ac_config_files="$ac_config_files collect-ld:exec-tool.in"
++  *) ac_config_files="$ac_config_files collect-ld.cmd:exec-tool.cmd.in"
+  ;;
+ esac
+ 
++WINE_ORIGINAL_LD_FOR_TARGET=`winepath -w $gcc_cv_ld`
++
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking what linker to use" >&5
+ $as_echo_n "checking what linker to use... " >&6; }
+ if test "$gcc_cv_ld" = ../ld/ld-new$build_exeext \
+@@ -22143,6 +22157,8 @@
+ 	gcc_cv_gld_minor_version=`expr "$gcc_cv_gld_version" : "VERSION=[0-9]*\.\([0-9]*\)"`
+ 	ORIGINAL_LD_BFD_FOR_TARGET=../ld/ld-new$build_exeext
+ 	ORIGINAL_LD_GOLD_FOR_TARGET=../gold/ld-new$build_exeext
++	WINE_ORIGINAL_LD_BFD_FOR_TARGET=..\\ld\\ld-new$build_exeext
++	WINE_ORIGINAL_LD_GOLD_FOR_TARGET=..\\gold\\ld-new$build_exeext
+ else
+ 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gcc_cv_ld" >&5
+ $as_echo "$gcc_cv_ld" >&6; }
+@@ -22150,6 +22166,8 @@
+ 	gcc_cvs_ld_program=`dirname $gcc_cv_ld`/`basename $gcc_cv_ld $host_exeext`
+ 	ORIGINAL_LD_BFD_FOR_TARGET=${gcc_cvs_ld_program}.bfd$host_exeext
+ 	ORIGINAL_LD_GOLD_FOR_TARGET=${gcc_cvs_ld_program}.gold$host_exeext
++	WINE_ORIGINAL_LD_BFD_FOR_TARGET=`winepath -w ${gcc_cvs_ld_program}.bfd$host_exeext`
++	WINE_ORIGINAL_LD_GOLD_FOR_TARGET=`winepath -w ${gcc_cvs_ld_program}.gold$host_exeext`
+ fi
+ 
+ 
+@@ -22230,9 +22248,10 @@
+ 
+ case "$ORIGINAL_NM_FOR_TARGET" in
+   ./nm | ./nm$build_exeext) ;;
+-  *) ac_config_files="$ac_config_files nm:exec-tool.in"
++  *) ac_config_files="$ac_config_files nm.cmd:exec-tool.cmd.in"
+  ;;
+ esac
++WINE_ORIGINAL_NM_FOR_TARGET=`winepath -w $gcc_cv_nm`
+ 
+ 
+ # Figure out what objdump we will be using.
+@@ -29333,6 +29352,17 @@
+ ${AWK} -f $srcdir/opt-include.awk $all_opt_files > option-includes.mk
+ option_includes="option-includes.mk"
+ 
++${LN_S} $srcdir/wineFindStrWorkarround.exe wineFindStrWorkarround.exe
++wine_find_str_workarround="wineFindStrWorkarround.exe"
++
++${SED} -e "s#@WINE_ORIGINAL_AS_FOR_TARGET@#$WINE_ORIGINAL_AS_FOR_TARGET#gc" $srcdir/exec-tool.c.in > exec-tool.c.tmp
++${SED} -ei "s#@WINE_ORIGINAL_PLUGIN_LD_FOR_TARGET@#$WINE_ORIGINAL_PLUGIN_LD_FOR_TARGET#gc" exec-tool.c.tmp
++${SED} -ei "s#@WINE_ORIGINAL_LD_FOR_TARGET@#$WINE_ORIGINAL_LD_FOR_TARGET#gc" exec-tool.c.tmp
++${SED} -ei "s#@WINE_ORIGINAL_LD_BFD_FOR_TARGET@#$WINE_ORIGINAL_LD_BFD_FOR_TARGET#gc" exec-tool.c.tmp
++${SED} -ei "s#@WINE_ORIGINAL_LD_GOLD_FOR_TARGET@#$WINE_ORIGINAL_LD_GOLD_FOR_TARGET#gc" exec-tool.c.tmp
++${SED} -ei "s#@WINE_ORIGINAL_NM_FOR_TARGET@#$WINE_ORIGINAL_NM_FOR_TARGET#gc" exec-tool.c.tmp
++${MV} exec-tool.c.tmp exec-tool.c
++exec_tool_c="exec-tool.c"
+ 
+ # --------
+ # UNSORTED
+@@ -30575,9 +30605,9 @@
+     "auto-host.h") CONFIG_HEADERS="$CONFIG_HEADERS auto-host.h:config.in" ;;
+     "depdir") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir" ;;
+     "gccdepdir") CONFIG_COMMANDS="$CONFIG_COMMANDS gccdepdir" ;;
+-    "as") CONFIG_FILES="$CONFIG_FILES as:exec-tool.in" ;;
+-    "collect-ld") CONFIG_FILES="$CONFIG_FILES collect-ld:exec-tool.in" ;;
+-    "nm") CONFIG_FILES="$CONFIG_FILES nm:exec-tool.in" ;;
++    "as") CONFIG_FILES="$CONFIG_FILES as.cmd:exec-tool.cmd.in" ;;
++    "collect-ld") CONFIG_FILES="$CONFIG_FILES collect-ld.cmd:exec-tool.cmd.in" ;;
++    "nm") CONFIG_FILES="$CONFIG_FILES nm.cmd:exec-tool.cmd.in" ;;
+     "clearcap.map") CONFIG_LINKS="$CONFIG_LINKS clearcap.map:${srcdir}/config/$clearcap_map" ;;
+     "$all_outputs") CONFIG_FILES="$CONFIG_FILES $all_outputs" ;;
+     "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;

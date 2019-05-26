@@ -360,6 +360,18 @@ do_configure() {
   fi
 }
 
+do_compile() {
+  local compile_source="$1"
+  local compile_dest="$2"
+  local cur_dir2=$(pwd)
+
+  echo
+  echo "building $compile_source as $compile_dest"
+  echo
+  echo ${cross_prefix}g++ $compile_source -o $cur_dir2/$compile_dest 
+  nice ${cross_prefix}g++ $compile_source -o $cur_dir2/$compile_dest || exit 1
+}
+
 do_make() {
   local extra_make_options="$1 -j $cpu_count"
   local cur_dir2=$(pwd)
@@ -624,6 +636,14 @@ build_isl() {
   cd ..
 }
 
+build_bash() {
+  download_and_unpack_file ftp://ftp.gnu.org/gnu/bash/bash-4.4.18.tar.gz
+  cd bash-4.4.18
+    generic_configure
+    do_make_and_make_install
+  cd ..
+}
+
 find_all_build_exes() {
   local found=""
 # NB that we're currently in the sandbox dir...
@@ -659,18 +679,23 @@ build_dependencies() {
   build_mpfr
   build_mpc
   build_isl
+  #build_bash
   #cat mpw-gm.img__0.bin | unbin - || exit 1
 }
 
 build_retro86() {
   #rm dosbox.diff*
   do_git_checkout https://github.com/autc04/Retro68.git Retro68
+  do_compile $patch_dir/wineFindStrWorkarround.c Retro68/gcc/gcc/wineFindStrWorkarround.exe
+  cp $patch_dir/exec-tool.cmd.in Retro68/gcc/gcc/exec-tool.cmd.in
   #apply_patch file://$patch_dir/dosbox.diff
   cd Retro68
     mkdir -p ~/.wine/drive_c/temp
     patch -p0 < $patch_dir/Retro68-build-toolchain.bash.diff
     cd gcc/gcc
     patch -p0 < $patch_dir/gcc-exec-tool.in.diff
+    patch -p0 < $patch_dir/gcc-configure.ac.diff
+    patch -p0 < $patch_dir/gcc-configure.diff
     cd ../..
     wine regedit $patch_dir/wine_tmp_path.reg
     sed -i -e 's#SELFTEST_FLAGS = -nostdinc -x c /dev/null -S -o /dev/null \\#SELFTEST_FLAGS = -nostdinc -x c nul -S -o nul \\#g' gcc/gcc/Makefile.in

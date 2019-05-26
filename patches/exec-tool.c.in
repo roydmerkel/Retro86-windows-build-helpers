@@ -1,0 +1,467 @@
+// Copyright (C) 2007-2017 Free Software Foundation, Inc.
+// This file is part of GCC.
+
+// GCC is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3, or (at your option)
+// any later version.
+
+// GCC is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with GCC; see the file COPYING3.  If not see
+// <http://www.gnu.org/licenses/>.
+
+// Invoke as, ld or nm from the build tree.
+
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ORIGINAL_AS_FOR_TARGET "@ORIGINAL_AS_FOR_TARGET@"
+#define ORIGINAL_LD_FOR_TARGET "@ORIGINAL_LD_FOR_TARGET@"
+#define ORIGINAL_LD_BFD_FOR_TARGET "@ORIGINAL_LD_BFD_FOR_TARGET@"
+#define ORIGINAL_LD_GOLD_FOR_TARGET "@ORIGINAL_LD_GOLD_FOR_TARGET@"
+#define ORIGINAL_PLUGIN_LD_FOR_TARGET "@ORIGINAL_PLUGIN_LD_FOR_TARGET@"
+#define ORIGINAL_NM_FOR_TARGET "@ORIGINAL_NM_FOR_TARGET@"
+#define exeext "@host_exeext@"
+#define FAST_INSTALL "@enable_fast_install@"
+#define objdir "@objdir@"
+
+#ifdef __unix__
+    #include <unistd.h>
+    #include <linux/limits.h>
+    #include <sys/types.h>
+    #include <sys/wait.h>
+#elif defined(__WIN32__) || defined(_WIN32) || defined(__CYGWIN32__) || defined(_MSC_VER)
+    #include <direct.h>
+    #include <io.h>
+    #include <process.h>
+#endif
+
+void getPWD(const char *path, char *out)
+{
+	char cwd[1024];
+	char cwd2[1024];
+
+#ifdef __unix__
+	getcwd(cwd, sizeof(cwd));
+#elif defined(__WIN32__) || defined(_WIN32) || defined(__CYGWIN32__) || defined(_MSC_VER)
+	_getcwd(cwd, sizeof(cwd));
+#endif
+
+	chdir(path);
+#ifdef __unix__
+	getcwd(cwd2, sizeof(cwd2));
+#elif defined(__WIN32__) || defined(_WIN32) || defined(__CYGWIN32__) || defined(_MSC_VER)
+	_getcwd(cwd2, sizeof(cwd2));
+#endif
+	chdir(cwd);
+
+	strcpy(out, cwd2);
+}
+
+void basename(const char *path, char *out)
+{
+	const char *tmp = strrchr(path, '/');
+	char *outPtr;
+
+	if(tmp != NULL)
+	{
+		strcpy(out, tmp+1);
+	}
+	else
+	{
+		tmp = strrchr(path, '\\');
+
+		if(tmp != NULL)
+		{
+			strcpy(out, tmp+1);
+		}
+		else
+		{
+			strcpy(out, path);
+		}
+	}
+
+	outPtr = strchr(out, '.');
+	if(outPtr != NULL)
+	{
+		*outPtr='\0';
+	}
+}
+
+void dirname(const char *path, char *out)
+{
+	char *tmp;
+
+	strcpy(out, path);
+	tmp = strrchr(out, '/');
+	if(tmp != NULL)
+	{
+		*tmp = '\0';
+	}
+	else
+	{
+		tmp = strrchr(out, '\\');
+
+		if(tmp != NULL)
+		{
+			*tmp = '\0';
+		}
+		else
+		{
+			out[0] = '.';
+			out[1] = '.';
+		}
+	}
+}
+
+int main(int argc, char **argv)
+{
+	const char *strrchrFSlash = strrchr(argv[0], '/');
+	const char *strrchrBSlash = strrchr(argv[0], '\\');
+	char invoked[PATH_MAX];
+	char id[PATH_MAX];
+	const char *original;
+	const char *prog;
+	const char *dir;
+	const char *fast_install;
+
+	fast_install = FAST_INSTALL;
+
+	basename(argv[0], invoked);
+	strcpy(id, invoked);
+
+	if(!strcasecmp(invoked, "as"))
+	{
+		original=ORIGINAL_AS_FOR_TARGET;
+		prog="as-new" exeext;
+		dir="gas";
+	}
+	else if(!strcasecmp(invoked, "collect-ld"))
+	{
+		int i;
+		int fuseLdBfd = 0;
+		int fuseLdGold = 0;
+
+		//Check -fuse-ld=bfd and -fuse-ld=gold
+		for(int i = 1; i < argc; i++)
+		{
+			if(!strcmp(argv[i], "-fuse-ld=bfd"))
+			{
+				fuseLdBfd = 1;
+				break;
+			}
+			else if(!strcmp(argv[i], "-fuse-ld=gold"))
+			{
+				fuseLdGold = 1;
+				break;
+			}
+		}
+
+		if(fuseLdBfd)
+		{
+			original=ORIGINAL_LD_BFD_FOR_TARGET;
+		}
+		else if(fuseLdGold)
+		{
+			original=ORIGINAL_LD_GOLD_FOR_TARGET;
+		}
+		else
+		{
+			// when using a linker plugin, gcc will always pass '-plugin' as the
+			// first or second option to the linker.
+
+			if(argc >= 2 && !strcmp(argv[1], "-plugin"))
+			{
+				original=ORIGINAL_PLUGIN_LD_FOR_TARGET;
+			}
+			else if(argc >= 3 && !strcmp(argv[2], "-plugin"))
+			{
+				original=ORIGINAL_PLUGIN_LD_FOR_TARGET;
+			}
+			else
+			{
+				original=ORIGINAL_LD_FOR_TARGET;
+			}
+		}
+
+		prog="ld-new" exeext;
+
+		if(!strcmp(original, "../gold/ld-new" exeext))
+		{
+			dir="gold";
+			// No need to handle relink since gold doesn't use libtool.
+			fast_install="yes";
+		}
+		else if(!strcmp(original, "..\\gold\\ld-new" exeext))
+		{
+			dir="gold";
+			// No need to handle relink since gold doesn't use libtool.
+			fast_install="yes";
+		}
+		else if(!strcmp(original, "../gold\\ld-new" exeext))
+		{
+			dir="gold";
+			// No need to handle relink since gold doesn't use libtool.
+			fast_install="yes";
+		}
+		else if(!strcmp(original, "..\\gold/ld-new" exeext))
+		{
+			dir="gold";
+			// No need to handle relink since gold doesn't use libtool.
+			fast_install="yes";
+		}
+		else
+		{
+			dir="ld";
+		}
+		strcpy(id, "ld");
+	}
+	else if(!strcasecmp(invoked, "nm"))
+	{
+		original=ORIGINAL_NM_FOR_TARGET;
+		prog="nm-new" exeext;
+		dir="binutils";
+	}
+
+	if(!strncmp(original, "../", 3))
+	{
+		// compute absolute path of the location of this script
+		char tdir[PATH_MAX];
+		char scriptdir[PATH_MAX];
+		char progPath[PATH_MAX];
+
+		dirname(argv[0], tdir);
+		getPWD(tdir, scriptdir);
+
+#ifdef __unix__
+		sprintf(progPath, "%s/../%s/%s", scriptdir, dir, prog);
+
+		if(access(progPath, X_OK) == 0)
+		{
+			if(strcmp(fast_install, "yes"))
+			{
+				sprintf(progPath, "%s/../%s/%s", scriptdir, dir, prog);
+				execvp(progPath, argv);
+			}
+			else
+			{
+				// if libtool did everything it needs to do, there's a fast path
+				char lt_prog[1024];
+
+				sprintf(lt_prog, "%s/../%s/%s/lt-%s", scriptdir, dir, objdir, prog);
+
+				if(access(lt_prog, X_OK) == 0)
+				{
+					execvp(lt_prog, argv);
+					_exit(EXIT_FAILURE);   // exec never returns
+				}
+				else
+				{
+					// libtool has not relinked ld-new yet, but we cannot just use the
+					// previous stage (because then the relinking would just never happen!).
+					// So we take extra care to use prev-ld/ld-new *on recursive calls*.
+					char envVar[1024];
+					char *LT_RCU;
+
+					sprintf(envVar, "LT_RCU_%s", id);
+					LT_RCU = getenv(envVar);
+					if(LT_RCU == NULL)
+					{
+						LT_RCU="";
+					}
+
+
+					if(!strcmp(LT_RCU, "1"))
+					{
+						sprintf(progPath, "%s/../prev-%s/%s", scriptdir, dir, prog);
+						execvp(progPath, argv);
+						_exit(EXIT_FAILURE);   // exec never returns
+					}
+					else
+					{
+						pid_t parent;
+						pid_t pid;
+						char envSet[1024];
+						sprintf(envSet, "%s=1", envVar);
+						putenv(envSet);
+						sprintf(progPath, "%s/../%s/%s", scriptdir, dir, prog);
+
+						parent = getpid();
+						pid = fork();
+
+						if (pid == -1)
+						{
+						    // error, failed to fork()
+						} 
+						else if (pid > 0)
+						{
+						    int status;
+						    waitpid(pid, &status, 0);
+						    status=WEXITSTATUS(status);
+
+						    return status;
+						}
+						else 
+						{
+						    // we are the child
+						    execvp(progPath, argv);
+						    _exit(EXIT_FAILURE);   // exec never returns
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			sprintf(progPath, "%s/../prev-%s/%s", scriptdir, dir, prog);
+			execvp(progPath, argv);
+			_exit(EXIT_FAILURE);   // exec never returns
+		}
+#elif defined(__WIN32__) || defined(_WIN32) || defined(__CYGWIN32__) || defined(_MSC_VER)
+		sprintf(progPath, "%s\\..\\%s\\%s", scriptdir, dir, prog);
+
+		if(_access(progPath, 0) == 0)
+		{
+			if(strcmp(fast_install, "yes"))
+			{
+				int status;
+				int i;
+				const char * const * args = alloca(sizeof(char *) * (argc + 1));
+				for(i = 1; i < argc; i++)
+				{
+					((char **)args)[i] = alloca((strlen(argv[i]) + 1) * sizeof(char)); 
+					strcpy(((char**)args)[i], argv[i]);
+				}
+				sprintf(progPath, "%s\\..\\%s\\%s.cmd", scriptdir, dir, prog);
+				((char **)args)[0] = progPath;
+				((char **)args)[argc] = NULL;
+
+				status = _spawnvp(_P_WAIT, progPath, args);
+				return status;
+			}
+			else
+			{
+				// if libtool did everything it needs to do, there's a fast path
+				char lt_prog[1024];
+
+				sprintf(lt_prog, "%s\\..\\%s\\%s\\lt-%s", scriptdir, dir, objdir, prog);
+
+				if(_access(lt_prog, 0) == 0)
+				{
+					int status;
+					int i;
+					const char * const * args = alloca(sizeof(char *) * (argc + 1));
+					for(i = 1; i < argc; i++)
+					{
+						((char **)args)[i] = alloca((strlen(argv[i]) + 1) * sizeof(char)); 
+						strcpy(((char**)args)[i], argv[i]);
+					}
+					((char **)args)[0] = lt_prog;
+					((char **)args)[argc] = NULL;
+
+					status = _spawnvp(_P_WAIT, lt_prog, args);
+					return status;
+				}
+				else
+				{
+					// libtool has not relinked ld-new yet, but we cannot just use the
+					// previous stage (because then the relinking would just never happen!).
+					// So we take extra care to use prev-ld/ld-new *on recursive calls*.
+					char envVar[1024];
+					char *LT_RCU;
+
+					sprintf(envVar, "LT_RCU_%s", id);
+					LT_RCU = getenv(envVar);
+					if(LT_RCU == NULL)
+					{
+						LT_RCU="";
+					}
+
+					if(!strcmp(LT_RCU, "1"))
+					{
+						int status;
+						int i;
+						const char * const * args = alloca(sizeof(char *) * (argc + 1));
+						for(i = 1; i < argc; i++)
+						{
+							((char **)args)[i] = alloca((strlen(argv[i]) + 1) * sizeof(char)); 
+							strcpy(((char**)args)[i], argv[i]);
+						}
+						sprintf(progPath, "%s\\..\\prev-%s\\%s", scriptdir, dir, prog);
+						((char **)args)[0] = progPath;
+						((char **)args)[argc] = NULL;
+
+						status = _spawnvp(_P_WAIT, progPath, args);
+						return status;
+					}
+					else
+					{
+						int i;
+						int status;
+						char envSet[1024];
+						const char * const * args = alloca(sizeof(char *) * (argc + 1));
+						for(i = 1; i < argc; i++)
+						{
+							((char **)args)[i] = alloca((strlen(argv[i]) + 1) * sizeof(char)); 
+							strcpy(((char**)args)[i], argv[i]);
+						}
+						sprintf(progPath, "%s\\..\\%s\\%s", scriptdir, dir, prog);
+						((char **)args)[0] = progPath;
+						((char **)args)[argc] = NULL;
+
+						sprintf(envSet, "%s=1", envVar);
+						_putenv(envSet);
+						status = _spawnvp(_P_WAIT, progPath, args);
+						return status;
+					}
+				}
+			}
+		}
+		else
+		{
+			int status;
+			int i;
+			const char * const * args = alloca(sizeof(char *) * (argc + 1));
+			for(i = 1; i < argc; i++)
+			{
+				((char **)args)[i] = alloca((strlen(argv[i]) + 1) * sizeof(char)); 
+				strcpy(((char**)args)[i], argv[i]);
+			}
+			sprintf(progPath, "%s\\..\\prev-%s\\%s.cmd", scriptdir, dir, prog);
+			((char **)args)[0] = progPath;
+			((char **)args)[argc] = NULL;
+
+			status = _spawnvp(_P_WAIT, progPath, args);
+			return status;
+		}
+#endif
+	}
+	else
+	{
+#ifdef __unix__
+		execvp(original, argv);
+		_exit(EXIT_FAILURE);   // exec never returns
+#elif defined(__WIN32__) || defined(_WIN32) || defined(__CYGWIN32__) || defined(_MSC_VER)
+		int status;
+		int i;
+		const char * const * args = alloca(sizeof(char *) * (argc + 1));
+		for(i = 1; i < argc; i++)
+		{
+			((char **)args)[i] = alloca((strlen(argv[i]) + 1) * sizeof(char)); 
+			strcpy(((char**)args)[i], argv[i]);
+		}
+		((char **)args)[0] = (char *)original;
+		((char **)args)[argc] = NULL;
+
+		status = _spawnvp(_P_WAIT, original, args);
+		return status;
+#endif
+	}
+}
+
