@@ -687,12 +687,16 @@ build_retro86() {
   #rm dosbox.diff*
   do_git_checkout https://github.com/autc04/Retro68.git Retro68
   do_compile $patch_dir/wineFindStrWorkarround.c Retro68/gcc/gcc/wineFindStrWorkarround.exe
+  cp $patch_dir/exec-tool.c.in Retro68/gcc/gcc/exec-tool.c.in
   cp $patch_dir/exec-tool.cmd.in Retro68/gcc/gcc/exec-tool.cmd.in
   #apply_patch file://$patch_dir/dosbox.diff
   cd Retro68
     mkdir -p ~/.wine/drive_c/temp
     patch -p0 < $patch_dir/Retro68-build-toolchain.bash.diff
-    cd gcc/gcc
+    cd gcc
+    patch -p0 < $patch_dir/gcc-Makefile.tpl.diff
+    patch -p0 < $patch_dir/gcc-Makefile.in.diff
+    cd gcc
     patch -p0 < $patch_dir/gcc-exec-tool.in.diff
     patch -p0 < $patch_dir/gcc-configure.ac.diff
     patch -p0 < $patch_dir/gcc-configure.diff
@@ -729,6 +733,7 @@ build_retro86() {
     cd ..
     rm -rf Retro68-build
     mkdir Retro68-build
+    export WINEPATH=`winepath -w Retro68-build/gcc-build/gcc`
     cd Retro68-build
     ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
     unset LDFLAGS

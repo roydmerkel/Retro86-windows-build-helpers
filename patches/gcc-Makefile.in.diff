@@ -1,0 +1,626 @@
+--- Makefile.in.old	2019-05-26 22:35:59.701850244 -0700
++++ Makefile.in	2019-05-26 22:41:46.588080154 -0700
+@@ -37882,6 +37882,7 @@
+ 	echo "Checking multilib configuration for libstdc++-v3..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libstdc++-v3; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+@@ -37926,6 +37927,7 @@
+ 	TFLAGS="$(STAGE1_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libstdc++-v3..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+@@ -37970,6 +37972,7 @@
+ 	TFLAGS="$(STAGE2_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libstdc++-v3..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+@@ -38015,6 +38018,7 @@
+ 	TFLAGS="$(STAGE3_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libstdc++-v3..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+@@ -38060,6 +38064,7 @@
+ 	TFLAGS="$(STAGE4_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libstdc++-v3..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+@@ -38105,6 +38110,7 @@
+ 	TFLAGS="$(STAGEprofile_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libstdc++-v3..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+@@ -38150,6 +38156,7 @@
+ 	TFLAGS="$(STAGEtrain_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libstdc++-v3..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+@@ -38195,6 +38202,7 @@
+ 	TFLAGS="$(STAGEfeedback_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libstdc++-v3..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+@@ -38240,6 +38248,7 @@
+ 	TFLAGS="$(STAGEautoprofile_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libstdc++-v3..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+@@ -38285,6 +38294,7 @@
+ 	TFLAGS="$(STAGEautofeedback_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libstdc++-v3..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp $(TARGET_SUBDIR)/libstdc++-v3/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libstdc++-v3/multilib.tmp; \
+@@ -39125,6 +39135,7 @@
+ 	echo "Checking multilib configuration for libsanitizer..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libsanitizer; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libsanitizer/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libsanitizer/multilib.tmp $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+@@ -39169,6 +39180,7 @@
+ 	TFLAGS="$(STAGE1_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libsanitizer..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libsanitizer/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libsanitizer/multilib.tmp $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+@@ -39213,6 +39225,7 @@
+ 	TFLAGS="$(STAGE2_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libsanitizer..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libsanitizer/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libsanitizer/multilib.tmp $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+@@ -39258,6 +39271,7 @@
+ 	TFLAGS="$(STAGE3_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libsanitizer..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libsanitizer/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libsanitizer/multilib.tmp $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+@@ -39303,6 +39317,7 @@
+ 	TFLAGS="$(STAGE4_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libsanitizer..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libsanitizer/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libsanitizer/multilib.tmp $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+@@ -39348,6 +39363,7 @@
+ 	TFLAGS="$(STAGEprofile_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libsanitizer..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libsanitizer/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libsanitizer/multilib.tmp $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+@@ -39393,6 +39409,7 @@
+ 	TFLAGS="$(STAGEtrain_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libsanitizer..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libsanitizer/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libsanitizer/multilib.tmp $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+@@ -39438,6 +39455,7 @@
+ 	TFLAGS="$(STAGEfeedback_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libsanitizer..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libsanitizer/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libsanitizer/multilib.tmp $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+@@ -39483,6 +39501,7 @@
+ 	TFLAGS="$(STAGEautoprofile_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libsanitizer..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libsanitizer/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libsanitizer/multilib.tmp $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+@@ -39528,6 +39547,7 @@
+ 	TFLAGS="$(STAGEautofeedback_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libsanitizer..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libsanitizer/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libsanitizer/multilib.tmp $(TARGET_SUBDIR)/libsanitizer/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libsanitizer/multilib.tmp; \
+@@ -40368,6 +40388,7 @@
+ 	echo "Checking multilib configuration for libmpx..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libmpx; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libmpx/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libmpx/multilib.tmp $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+@@ -40412,6 +40433,7 @@
+ 	TFLAGS="$(STAGE1_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libmpx..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libmpx/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libmpx/multilib.tmp $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+@@ -40456,6 +40478,7 @@
+ 	TFLAGS="$(STAGE2_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libmpx..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libmpx/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libmpx/multilib.tmp $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+@@ -40501,6 +40524,7 @@
+ 	TFLAGS="$(STAGE3_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libmpx..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libmpx/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libmpx/multilib.tmp $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+@@ -40546,6 +40570,7 @@
+ 	TFLAGS="$(STAGE4_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libmpx..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libmpx/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libmpx/multilib.tmp $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+@@ -40591,6 +40616,7 @@
+ 	TFLAGS="$(STAGEprofile_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libmpx..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libmpx/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libmpx/multilib.tmp $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+@@ -40636,6 +40662,7 @@
+ 	TFLAGS="$(STAGEtrain_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libmpx..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libmpx/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libmpx/multilib.tmp $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+@@ -40681,6 +40708,7 @@
+ 	TFLAGS="$(STAGEfeedback_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libmpx..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libmpx/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libmpx/multilib.tmp $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+@@ -40726,6 +40754,7 @@
+ 	TFLAGS="$(STAGEautoprofile_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libmpx..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libmpx/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libmpx/multilib.tmp $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+@@ -40771,6 +40800,7 @@
+ 	TFLAGS="$(STAGEautofeedback_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libmpx..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libmpx/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libmpx/multilib.tmp $(TARGET_SUBDIR)/libmpx/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libmpx/multilib.tmp; \
+@@ -41611,6 +41641,7 @@
+ 	echo "Checking multilib configuration for libvtv..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+@@ -41655,6 +41686,7 @@
+ 	TFLAGS="$(STAGE1_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libvtv..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+@@ -41699,6 +41731,7 @@
+ 	TFLAGS="$(STAGE2_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libvtv..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+@@ -41744,6 +41777,7 @@
+ 	TFLAGS="$(STAGE3_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libvtv..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+@@ -41789,6 +41823,7 @@
+ 	TFLAGS="$(STAGE4_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libvtv..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+@@ -41834,6 +41869,7 @@
+ 	TFLAGS="$(STAGEprofile_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libvtv..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+@@ -41879,6 +41915,7 @@
+ 	TFLAGS="$(STAGEtrain_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libvtv..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+@@ -41924,6 +41961,7 @@
+ 	TFLAGS="$(STAGEfeedback_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libvtv..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+@@ -41969,6 +42007,7 @@
+ 	TFLAGS="$(STAGEautoprofile_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libvtv..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+@@ -42014,6 +42053,7 @@
+ 	TFLAGS="$(STAGEautofeedback_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libvtv..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+@@ -42855,6 +42895,7 @@
+ 	echo "Checking multilib configuration for liboffloadmic..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/liboffloadmic; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/liboffloadmic/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/liboffloadmic/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/liboffloadmic/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/liboffloadmic/multilib.tmp $(TARGET_SUBDIR)/liboffloadmic/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/liboffloadmic/multilib.tmp; \
+@@ -43313,6 +43354,7 @@
+ 	echo "Checking multilib configuration for libssp..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libssp; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libssp/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libssp/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libssp/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libssp/multilib.tmp $(TARGET_SUBDIR)/libssp/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libssp/multilib.tmp; \
+@@ -43771,6 +43813,7 @@
+ 	echo "Checking multilib configuration for newlib..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/newlib; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/newlib/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/newlib/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/newlib/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/newlib/multilib.tmp $(TARGET_SUBDIR)/newlib/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/newlib/multilib.tmp; \
+@@ -44228,6 +44271,7 @@
+ 	echo "Checking multilib configuration for libgcc..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libgcc; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgcc/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgcc/multilib.tmp $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+@@ -44272,6 +44316,7 @@
+ 	TFLAGS="$(STAGE1_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgcc..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgcc/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgcc/multilib.tmp $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+@@ -44316,6 +44361,7 @@
+ 	TFLAGS="$(STAGE2_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgcc..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgcc/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgcc/multilib.tmp $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+@@ -44361,6 +44407,7 @@
+ 	TFLAGS="$(STAGE3_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgcc..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgcc/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgcc/multilib.tmp $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+@@ -44406,6 +44453,7 @@
+ 	TFLAGS="$(STAGE4_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgcc..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgcc/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgcc/multilib.tmp $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+@@ -44451,6 +44499,7 @@
+ 	TFLAGS="$(STAGEprofile_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgcc..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgcc/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgcc/multilib.tmp $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+@@ -44496,6 +44545,7 @@
+ 	TFLAGS="$(STAGEtrain_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgcc..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgcc/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgcc/multilib.tmp $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+@@ -44541,6 +44591,7 @@
+ 	TFLAGS="$(STAGEfeedback_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgcc..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgcc/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgcc/multilib.tmp $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+@@ -44586,6 +44637,7 @@
+ 	TFLAGS="$(STAGEautoprofile_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgcc..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgcc/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgcc/multilib.tmp $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+@@ -44631,6 +44683,7 @@
+ 	TFLAGS="$(STAGEautofeedback_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgcc..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgcc/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgcc/multilib.tmp $(TARGET_SUBDIR)/libgcc/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgcc/multilib.tmp; \
+@@ -45467,6 +45520,7 @@
+ 	echo "Checking multilib configuration for libbacktrace..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libbacktrace; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libbacktrace/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libbacktrace/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libbacktrace/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libbacktrace/multilib.tmp $(TARGET_SUBDIR)/libbacktrace/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libbacktrace/multilib.tmp; \
+@@ -45925,6 +45979,7 @@
+ 	echo "Checking multilib configuration for libquadmath..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libquadmath; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libquadmath/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libquadmath/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libquadmath/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libquadmath/multilib.tmp $(TARGET_SUBDIR)/libquadmath/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libquadmath/multilib.tmp; \
+@@ -46383,6 +46438,7 @@
+ 	echo "Checking multilib configuration for libgfortran..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libgfortran; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgfortran/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgfortran/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgfortran/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgfortran/multilib.tmp $(TARGET_SUBDIR)/libgfortran/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgfortran/multilib.tmp; \
+@@ -46841,6 +46897,7 @@
+ 	echo "Checking multilib configuration for libobjc..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libobjc; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libobjc/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libobjc/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libobjc/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libobjc/multilib.tmp $(TARGET_SUBDIR)/libobjc/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libobjc/multilib.tmp; \
+@@ -47299,6 +47356,7 @@
+ 	echo "Checking multilib configuration for libgo..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libgo; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgo/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgo/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgo/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgo/multilib.tmp $(TARGET_SUBDIR)/libgo/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgo/multilib.tmp; \
+@@ -47757,6 +47815,7 @@
+ 	echo "Checking multilib configuration for libhsail-rt..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libhsail-rt; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libhsail-rt/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libhsail-rt/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libhsail-rt/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libhsail-rt/multilib.tmp $(TARGET_SUBDIR)/libhsail-rt/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libhsail-rt/multilib.tmp; \
+@@ -48215,6 +48274,7 @@
+ 	echo "Checking multilib configuration for libtermcap..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libtermcap; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libtermcap/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libtermcap/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libtermcap/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libtermcap/multilib.tmp $(TARGET_SUBDIR)/libtermcap/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libtermcap/multilib.tmp; \
+@@ -48608,6 +48668,7 @@
+ 	echo "Checking multilib configuration for winsup..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/winsup; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/winsup/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/winsup/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/winsup/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/winsup/multilib.tmp $(TARGET_SUBDIR)/winsup/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/winsup/multilib.tmp; \
+@@ -49066,6 +49127,7 @@
+ 	echo "Checking multilib configuration for libgloss..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libgloss; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgloss/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgloss/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgloss/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgloss/multilib.tmp $(TARGET_SUBDIR)/libgloss/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgloss/multilib.tmp; \
+@@ -49519,6 +49581,7 @@
+ 	echo "Checking multilib configuration for libffi..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libffi; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libffi/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libffi/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libffi/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libffi/multilib.tmp $(TARGET_SUBDIR)/libffi/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libffi/multilib.tmp; \
+@@ -49967,6 +50030,7 @@
+ 	echo "Checking multilib configuration for zlib..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/zlib; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/zlib/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/zlib/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/zlib/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/zlib/multilib.tmp $(TARGET_SUBDIR)/zlib/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/zlib/multilib.tmp; \
+@@ -50425,6 +50489,7 @@
+ 	echo "Checking multilib configuration for rda..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/rda; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/rda/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/rda/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/rda/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/rda/multilib.tmp $(TARGET_SUBDIR)/rda/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/rda/multilib.tmp; \
+@@ -50883,6 +50948,7 @@
+ 	echo "Checking multilib configuration for libada..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libada; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libada/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libada/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libada/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libada/multilib.tmp $(TARGET_SUBDIR)/libada/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libada/multilib.tmp; \
+@@ -51340,6 +51406,7 @@
+ 	echo "Checking multilib configuration for libgomp..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libgomp; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgomp/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgomp/multilib.tmp $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+@@ -51384,6 +51451,7 @@
+ 	TFLAGS="$(STAGE1_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgomp..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgomp/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgomp/multilib.tmp $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+@@ -51428,6 +51496,7 @@
+ 	TFLAGS="$(STAGE2_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgomp..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgomp/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgomp/multilib.tmp $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+@@ -51473,6 +51542,7 @@
+ 	TFLAGS="$(STAGE3_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgomp..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgomp/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgomp/multilib.tmp $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+@@ -51518,6 +51588,7 @@
+ 	TFLAGS="$(STAGE4_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgomp..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgomp/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgomp/multilib.tmp $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+@@ -51563,6 +51634,7 @@
+ 	TFLAGS="$(STAGEprofile_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgomp..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgomp/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgomp/multilib.tmp $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+@@ -51608,6 +51680,7 @@
+ 	TFLAGS="$(STAGEtrain_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgomp..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgomp/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgomp/multilib.tmp $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+@@ -51653,6 +51726,7 @@
+ 	TFLAGS="$(STAGEfeedback_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgomp..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgomp/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgomp/multilib.tmp $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+@@ -51698,6 +51772,7 @@
+ 	TFLAGS="$(STAGEautoprofile_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgomp..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgomp/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgomp/multilib.tmp $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+@@ -51743,6 +51818,7 @@
+ 	TFLAGS="$(STAGEautofeedback_TFLAGS)"; \
+ 	echo "Checking multilib configuration for libgomp..."; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libgomp/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libgomp/multilib.tmp $(TARGET_SUBDIR)/libgomp/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libgomp/multilib.tmp; \
+@@ -52584,6 +52660,7 @@
+ 	echo "Checking multilib configuration for libitm..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libitm; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libitm/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libitm/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libitm/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libitm/multilib.tmp $(TARGET_SUBDIR)/libitm/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libitm/multilib.tmp; \
+@@ -53042,6 +53119,7 @@
+ 	echo "Checking multilib configuration for libatomic..."; \
+ 	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libatomic; \
+ 	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libatomic/multilib.tmp 2> /dev/null; \
++	dos2unix $(TARGET_SUBDIR)/libatomic/multilib.tmp; \
+ 	if test -r $(TARGET_SUBDIR)/libatomic/multilib.out; then \
+ 	  if cmp -s $(TARGET_SUBDIR)/libatomic/multilib.tmp $(TARGET_SUBDIR)/libatomic/multilib.out; then \
+ 	    rm -f $(TARGET_SUBDIR)/libatomic/multilib.tmp; \
