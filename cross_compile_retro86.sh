@@ -700,6 +700,9 @@ build_retro86() {
     patch -p0 < $patch_dir/gcc-exec-tool.in.diff
     patch -p0 < $patch_dir/gcc-configure.ac.diff
     patch -p0 < $patch_dir/gcc-configure.diff
+    patch -p0 < $patch_dir/gcc-gcc-Makefile.in.diff
+    cd ../libgcc
+    patch -p0 < $patch_dir/gcc-libgcc-configure.diff
     cd ../..
     wine regedit $patch_dir/wine_tmp_path.reg
     sed -i -e 's#SELFTEST_FLAGS = -nostdinc -x c /dev/null -S -o /dev/null \\#SELFTEST_FLAGS = -nostdinc -x c nul -S -o nul \\#g' gcc/gcc/Makefile.in

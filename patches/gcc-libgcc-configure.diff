@@ -1,0 +1,19 @@
+--- configure.old	2019-05-31 17:14:48.202092388 -0700
++++ configure	2019-05-31 22:37:57.099312699 -0700
+@@ -3439,14 +3439,14 @@
+ set X $ac_compile
+ ac_compiler=$2
+ for ac_option in --version -v -V -qversion; do
+-  { { ac_try="$ac_compiler $ac_option >&5"
++  { { ac_try="($ac_compiler $ac_option | $SED -e 's/\r//g')  >&5"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_compiler $ac_option >&5") 2>conftest.err
++  (eval "($ac_compiler $ac_option | $SED -e 's/\r//g') >&5") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     sed '10a\

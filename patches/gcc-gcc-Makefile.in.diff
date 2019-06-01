@@ -1,0 +1,19 @@
+--- Makefile.in.old	2019-05-31 21:35:14.036034462 -0700
++++ Makefile.in	2019-05-31 21:35:11.448070107 -0700
+@@ -1928,7 +1928,7 @@
+ # "nul" instead of "/dev/null" if we're building on a mingw machine.
+ # Specify the path to gcc/testsuite/selftests within the srcdir
+ # as an argument to -fself-test.
+-DEVNULL=$(if $(findstring mingw,$(build)),nul,/dev/null)
++DEVNULL=nul
+ SELFTEST_FLAGS = -nostdinc $(DEVNULL) -S -o $(DEVNULL) \
+ 	-fself-test=$(srcdir)/testsuite/selftests
+ 
+@@ -2036,6 +2036,7 @@
+ # Dump a specs file to make -B./ read these specs over installed ones.
+ $(SPECS): xgcc$(exeext)
+ 	$(GCC_FOR_TARGET) -dumpspecs > tmp-specs
++	dos2unix tmp-specs
+ 	mv tmp-specs $(SPECS)
+ 
+ # We do want to create an executable named `xgcc', so we can use it to
