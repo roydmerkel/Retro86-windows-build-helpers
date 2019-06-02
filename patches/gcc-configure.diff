@@ -1,5 +1,5 @@
---- configure.old	2019-05-26 22:03:59.343579801 -0700
-+++ configure	2019-05-26 22:13:24.145225508 -0700
+--- configure.orig	2019-05-26 21:02:42.378252608 -0700
++++ configure	2019-05-31 22:53:44.991874344 -0700
 @@ -685,13 +685,19 @@
  libgcc_visibility
  gcc_cv_readelf
@@ -30,6 +30,40 @@
  ac_user_opts='
  enable_option_checking
  with_build_libsubdir
+@@ -4077,14 +4084,14 @@
+ set X $ac_compile
+ ac_compiler=$2
+ for ac_option in --version -v -V -qversion; do
+-  { { ac_try="$ac_compiler $ac_option >&5"
++  { { ac_try="($ac_compiler $ac_option | $SED -e 's/\r//g') >&5"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_compiler $ac_option >&5") 2>conftest.err
++  (eval "($ac_compiler $ac_option | $SED -e 's/\r//g') >&5") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     sed '10a\
+@@ -4650,14 +4657,14 @@
+ set X $ac_compile
+ ac_compiler=$2
+ for ac_option in --version -v -V -qversion; do
+-  { { ac_try="$ac_compiler $ac_option >&5"
++  { { ac_try="($ac_compiler $ac_option | $SED -e 's/\r//g') >&5"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_compiler $ac_option >&5") 2>conftest.err
++  (eval "($ac_compiler $ac_option | $SED -e 's/\r//g') >&5") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     sed '10a\
 @@ -18448,7 +18455,7 @@
    lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
    lt_status=$lt_dlunknown

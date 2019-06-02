@@ -696,6 +696,7 @@ build_retro86() {
     cd gcc
     patch -p0 < $patch_dir/gcc-Makefile.tpl.diff
     patch -p0 < $patch_dir/gcc-Makefile.in.diff
+    patch -p0 < $patch_dir/gcc-config-ml.in.diff
     cd gcc
     patch -p0 < $patch_dir/gcc-exec-tool.in.diff
     patch -p0 < $patch_dir/gcc-configure.ac.diff

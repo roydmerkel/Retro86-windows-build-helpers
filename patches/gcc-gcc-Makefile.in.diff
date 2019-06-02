@@ -1,5 +1,5 @@
 --- Makefile.in.old	2019-05-31 21:35:14.036034462 -0700
-+++ Makefile.in	2019-05-31 21:35:11.448070107 -0700
++++ Makefile.in	2019-06-01 10:33:09.694193075 -0700
 @@ -1928,7 +1928,7 @@
  # "nul" instead of "/dev/null" if we're building on a mingw machine.
  # Specify the path to gcc/testsuite/selftests within the srcdir
@@ -17,3 +17,24 @@
  	mv tmp-specs $(SPECS)
  
  # We do want to create an executable named `xgcc', so we can use it to
+@@ -3016,6 +3017,7 @@
+ macro_list: s-macro_list; @true
+ s-macro_list : $(GCC_PASSES) cc1$(exeext)
+ 	echo | $(GCC_FOR_TARGET) -E -dM - | \
++	  sed -e 's/\r//g' | \
+ 	  sed -n -e 's/^#define \([^_][a-zA-Z0-9_]*\).*/\1/p' \
+ 		 -e 's/^#define \(_[^_A-Z][a-zA-Z0-9_]*\).*/\1/p' | \
+ 	  sort -u > tmp-macro_list
+@@ -3027,10 +3029,10 @@
+ # Build up a list of multilib directories and corresponding sysroot
+ # suffixes, in form sysroot;multilib.
+ 	if $(GCC_FOR_TARGET) -print-sysroot-headers-suffix > /dev/null 2>&1; then \
+-	  set -e; for ml in `$(GCC_FOR_TARGET) -print-multi-lib`; do \
++	  set -e; for ml in `$(GCC_FOR_TARGET) -print-multi-lib | sed -e 's/\r//g'`; do \
+ 	    multi_dir=`echo $${ml} | sed -e 's/;.*$$//'`; \
+ 	    flags=`echo $${ml} | sed -e 's/^[^;]*;//' -e 's/@/ -/g'`; \
+-	    sfx=`$(GCC_FOR_TARGET) $${flags} -print-sysroot-headers-suffix`; \
++	    sfx=`$(GCC_FOR_TARGET) $${flags} -print-sysroot-headers-suffix | sed -e 's/\r//g'`; \
+ 	    if [ "$${multi_dir}" = "." ]; \
+ 	      then multi_dir=""; \
+ 	    else \

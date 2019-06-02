@@ -1,6 +1,6 @@
 --- configure.old	2019-05-31 17:14:48.202092388 -0700
-+++ configure	2019-05-31 22:37:57.099312699 -0700
-@@ -3439,14 +3439,14 @@
++++ configure	2019-06-01 09:26:07.811629152 -0700
+@@ -3439,16 +3439,17 @@
  set X $ac_compile
  ac_compiler=$2
  for ac_option in --version -v -V -qversion; do
@@ -16,4 +16,25 @@
 +  (eval "($ac_compiler $ac_option | $SED -e 's/\r//g') >&5") 2>conftest.err
    ac_status=$?
    if test -s conftest.err; then
++    dos2unix conftest.err
      sed '10a\
+ ... rest of stderr output deleted ...
+          10q' conftest.err >conftest.er1
+@@ -4881,7 +4882,7 @@
+   $as_echo_n "(cached) " >&6
+ else
+   # I'd rather use --version here, but apparently some GNU ld's only accept -v.
+-if $LD -v 2>&1 </dev/null | egrep '(GNU|with BFD)' 1>&5; then
++if ($LD -v 2>&1 </dev/null | $SED -e 's/\r//g' | egrep '(GNU|with BFD)') 1>&5; then
+   acl_cv_prog_gnu_ld=yes
+ else
+   acl_cv_prog_gnu_ld=no
+@@ -4894,7 +4895,7 @@
+ 
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread model used by GCC" >&5
+ $as_echo_n "checking for thread model used by GCC... " >&6; }
+-target_thread_file=`$CC -v 2>&1 | sed -n 's/^Thread model: //p'`
++target_thread_file=`$CC -v 2>&1 | $SED -e 's/\r//g' | sed -n 's/^Thread model: //p'`
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $target_thread_file" >&5
+ $as_echo "$target_thread_file" >&6; }
+ 
