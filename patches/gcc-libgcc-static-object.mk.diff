@@ -1,0 +1,41 @@
+--- static-object.mk.old	2019-06-02 20:37:38.126390837 -0700
++++ static-object.mk	2019-06-02 20:40:51.050675742 -0700
+@@ -14,7 +14,12 @@
+ ifeq ($(suffix $o),.c)
+ 
+ $(base)$(objext): $o
+-	$(gcc_compile) $(c_flags-$<) -c $< $(vis_hide)
++	$(gcc_compile) $(c_flags-$<) -c $< $(vis_hide) && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ else
+ 
+@@ -27,12 +32,22 @@
+ as_flags-$o := -xassembler$(if $(filter .S,$(suffix $o)),-with-cpp)
+ 
+ $(base)$(objext): $o $(base).vis
+-	$(gcc_compile) -c $(as_flags-$<) -include $*.vis $<
++	$(gcc_compile) -c $(as_flags-$<) -include $*.vis $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ $(base).vis: $(base)_s$(objext)
+ 	$(gen-hide-list)
+ 
+ $(base)_s$(objext): $o
+-	$(gcc_s_compile) -c $(as_flags-$<) $<
++	$(gcc_s_compile) -c $(as_flags-$<) $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ endif

@@ -1,0 +1,478 @@
+--- Makefile.in.old	2019-06-02 13:36:53.807799840 -0700
++++ Makefile.in	2019-06-02 19:03:26.457681875 -0700
+@@ -311,7 +311,8 @@
+ inst_slibdir = $(slibdir)$(MULTIOSSUBDIR)
+ 
+ gcc_compile_bare = $(CC) $(INTERNAL_CFLAGS)
+-compile_deps = -MT $@ -MD -MP -MF $(basename $@).dep
++dep_filename = $(basename $@).dep
++compile_deps = -MT $@ -MD -MP -MF $(dep_filename)
+ gcc_compile = $(gcc_compile_bare) -o $@ $(compile_deps)
+ gcc_s_compile = $(gcc_compile) -DSHARED
+ 
+@@ -475,14 +476,24 @@
+ 
+ lib1asmfuncs-o = $(patsubst %,%$(objext),$(LIB1ASMFUNCS))
+ $(lib1asmfuncs-o): %$(objext): $(srcdir)/config/$(LIB1ASMSRC) %.vis
+-	$(gcc_compile) -DL$* -xassembler-with-cpp -c $< -include $*.vis
++	$(gcc_compile) -DL$* -xassembler-with-cpp -c $< -include $*.vis && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ $(patsubst %,%.vis,$(LIB1ASMFUNCS)): %.vis: %_s$(objext)
+ 	$(gen-hide-list)
+ libgcc-objects += $(lib1asmfuncs-o)
+ 
+ lib1asmfuncs-s-o = $(patsubst %,%_s$(objext),$(LIB1ASMFUNCS))
+ $(lib1asmfuncs-s-o): %_s$(objext): $(srcdir)/config/$(LIB1ASMSRC)
+-	$(gcc_s_compile) -DL$* -xassembler-with-cpp -c $<
++	$(gcc_s_compile) -DL$* -xassembler-with-cpp -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ ifeq ($(enable_shared),yes)
+ 
+ libgcc-s-objects += $(lib1asmfuncs-s-o)
+@@ -492,13 +503,23 @@
+ # Build lib2funcs.  For the static library also include LIB2FUNCS_ST.
+ lib2funcs-o = $(patsubst %,%$(objext),$(lib2funcs) $(LIB2FUNCS_ST))
+ $(lib2funcs-o): %$(objext): $(srcdir)/libgcc2.c
+-	$(gcc_compile) -DL$* -c $< $(vis_hide)
++	$(gcc_compile) -DL$* -c $< $(vis_hide) && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-objects += $(lib2funcs-o)
+ 
+ ifeq ($(enable_shared),yes)
+ lib2funcs-s-o = $(patsubst %,%_s$(objext),$(lib2funcs))
+ $(lib2funcs-s-o): %_s$(objext): $(srcdir)/libgcc2.c
+-	$(gcc_s_compile) -DL$* -c $<
++	$(gcc_s_compile) -DL$* -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-s-objects += $(lib2funcs-s-o)
+ endif
+ 
+@@ -534,14 +555,24 @@
+ lib2-divmod-o = $(patsubst %,%$(objext),$(LIB2_DIVMOD_FUNCS))
+ $(lib2-divmod-o): %$(objext): $(srcdir)/libgcc2.c
+ 	$(gcc_compile) -DL$* -c $< \
+-	  $(LIB2_DIVMOD_EXCEPTION_FLAGS) $(vis_hide)
++	  $(LIB2_DIVMOD_EXCEPTION_FLAGS) $(vis_hide) && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-objects += $(lib2-divmod-o)
+ 
+ ifeq ($(enable_shared),yes)
+ lib2-divmod-s-o = $(patsubst %,%_s$(objext),$(LIB2_DIVMOD_FUNCS))
+ $(lib2-divmod-s-o): %_s$(objext): $(srcdir)/libgcc2.c
+ 	$(gcc_s_compile) -DL$* -c $< \
+-	  $(LIB2_DIVMOD_EXCEPTION_FLAGS)
++	  $(LIB2_DIVMOD_EXCEPTION_FLAGS) && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-s-objects += $(lib2-divmod-s-o)
+ endif
+ 
+@@ -561,13 +592,23 @@
+ ifneq ($(FPBIT),)
+ fpbit-o = $(patsubst %,%$(objext),$(FPBIT_FUNCS))
+ $(fpbit-o): %$(objext): $(fpbit-src)
+-	$(gcc_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DFLOAT $(FPBIT_CFLAGS) -c $< $(vis_hide)
++	$(gcc_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DFLOAT $(FPBIT_CFLAGS) -c $< $(vis_hide) && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-objects += $(fpbit-o)
+ 
+ ifeq ($(enable_shared),yes)
+ fpbit-s-o = $(patsubst %,%_s$(objext),$(FPBIT_FUNCS))
+ $(fpbit-s-o): %_s$(objext): $(fpbit-src)
+-	$(gcc_s_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DFLOAT $(FPBIT_CFLAGS)  -c $<
++	$(gcc_s_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DFLOAT $(FPBIT_CFLAGS)  -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-s-objects += $(fpbit-s-o)
+ endif
+ endif
+@@ -576,13 +617,23 @@
+ ifneq ($(DPBIT),)
+ dpbit-o = $(patsubst %,%$(objext),$(DPBIT_FUNCS))
+ $(dpbit-o): %$(objext): $(fpbit-src)
+-	$(gcc_compile) -DFINE_GRAINED_LIBRARIES -DL$* $(DPBIT_CFLAGS) -c $< $(vis_hide)
++	$(gcc_compile) -DFINE_GRAINED_LIBRARIES -DL$* $(DPBIT_CFLAGS) -c $< $(vis_hide) && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-objects += $(dpbit-o)
+ 
+ ifeq ($(enable_shared),yes)
+ dpbit-s-o = $(patsubst %,%_s$(objext),$(DPBIT_FUNCS))
+ $(dpbit-s-o): %_s$(objext): $(fpbit-src)
+-	$(gcc_s_compile) -DFINE_GRAINED_LIBRARIES -DL$* $(DPBIT_CFLAGS) -c $<
++	$(gcc_s_compile) -DFINE_GRAINED_LIBRARIES -DL$* $(DPBIT_CFLAGS) -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-s-objects += $(dpbit-s-o)
+ endif
+ endif
+@@ -591,13 +642,23 @@
+ ifneq ($(TPBIT),)
+ tpbit-o = $(patsubst %,%$(objext),$(TPBIT_FUNCS))
+ $(tpbit-o): %$(objext): $(fpbit-src)
+-	$(gcc_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DTFLOAT $(TPBIT_CFLAGS) -c $< $(vis_hide)
++	$(gcc_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DTFLOAT $(TPBIT_CFLAGS) -c $< $(vis_hide) && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-objects += $(tpbit-o)
+ 
+ ifeq ($(enable_shared),yes)
+ tpbit-s-o = $(patsubst %,%_s$(objext),$(TPBIT_FUNCS))
+ $(tpbit-s-o): %_s$(objext): $(fpbit-src)
+-	$(gcc_s_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DTFLOAT $(TPBIT_CFLAGS) -c $<
++	$(gcc_s_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DTFLOAT $(TPBIT_CFLAGS) -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-s-objects += $(tpbit-s-o)
+ endif
+ endif
+@@ -637,7 +698,12 @@
+ else
+ $(dfp-objects): %$(objext): $(srcdir)/../libdecnumber/%.c
+ endif
+-	$(gcc_compile) -c $<
++	$(gcc_compile) -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-objects += $(dfp-objects)
+ 
+ decbits-filenames =
+@@ -661,7 +727,12 @@
+ else
+ $(decbits-objects): %$(objext): $(srcdir)/../libdecnumber/$(enable_decimal_float)/%.c
+ endif
+-	$(gcc_compile) -c $<
++	$(gcc_compile) -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-objects += $(decbits-objects)
+ 
+ # Next build individual support functions.
+@@ -710,7 +781,12 @@
+ else
+ $(d32pbit-o): %$(objext): $(srcdir)/dfp-bit.c
+ endif
+-	$(gcc_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DWIDTH=32 -c $<
++	$(gcc_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DWIDTH=32 -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-objects += $(d32pbit-o)
+ endif
+ 
+@@ -721,7 +797,12 @@
+ else
+ $(d64pbit-o): %$(objext): $(srcdir)/dfp-bit.c
+ endif
+-	$(gcc_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DWIDTH=64 -c $<
++	$(gcc_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DWIDTH=64 -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-objects += $(d64pbit-o)
+ endif
+ 
+@@ -732,7 +813,12 @@
+ else
+ $(d128pbit-o): %$(objext): $(srcdir)/dfp-bit.c
+ endif
+-	$(gcc_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DWIDTH=128 -c $<
++	$(gcc_compile) -DFINE_GRAINED_LIBRARIES -DL$* -DWIDTH=128 -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-objects += $(d128pbit-o)
+ endif
+ 
+@@ -755,7 +841,12 @@
+ 	$(gcc_compile) $(SYNC_CFLAGS) \
+ 	  -DFN=`echo "$*" | sed 's/_[^_]*$$//'` \
+ 	  -DSIZE=`echo "$*" | sed 's/.*_//'` \
+-	  -c $< $(vis_hide)
++	  -c $< $(vis_hide) && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	    | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	      while IFS= read -r line; \
++	      do \
++	        sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	      done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-objects += $(libgcc-sync-size-funcs-o)
+ 
+ libgcc-sync-funcs := sync_synchronize
+@@ -764,7 +855,12 @@
+ $(libgcc-sync-funcs-o): %$(objext): $(srcdir)/sync.c
+ 	$(gcc_compile) $(SYNC_CFLAGS) \
+ 	  -DL$* \
+-	  -c $< $(vis_hide)
++	  -c $< $(vis_hide) && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	    | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	      while IFS= read -r line; \
++	      do \
++	        sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	      done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-objects += $(libgcc-sync-funcs-o)
+ 
+ ifeq ($(enable_shared),yes)
+@@ -774,14 +870,24 @@
+ 	$(gcc_s_compile) $(SYNC_CFLAGS) \
+ 	  -DFN=`echo "$*" | sed 's/_[^_]*$$//'` \
+ 	  -DSIZE=`echo "$*" | sed 's/.*_//'` \
+-	  -c $<
++	  -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	    | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	      while IFS= read -r line; \
++	      do \
++	        sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	      done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-s-objects += $(libgcc-sync-size-funcs-s-o)
+ 
+ libgcc-sync-funcs-s-o = $(patsubst %,%_s$(objext),$(libgcc-sync-funcs))
+ $(libgcc-sync-funcs-s-o): %_s$(objext): $(srcdir)/sync.c
+ 	$(gcc_s_compile) $(SYNC_CFLAGS) \
+ 	  -DL$*	\
+-	  -c $<
++	  -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	    | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	      while IFS= read -r line; \
++	      do \
++	        sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	      done) && mv $(dep_filename).bak $(dep_filename)
+ libgcc-s-objects += $(libgcc-sync-funcs-s-o)
+ endif
+ endif
+@@ -912,14 +1018,34 @@
+                  $(libgcov-interface-objects) $(libgcov-driver-objects)
+ 
+ $(libgcov-merge-objects): %$(objext): $(srcdir)/libgcov-merge.c $(srcdir)/gcov.h $(srcdir)/libgcov.h
+-	$(gcc_compile) -DL$* -c $(srcdir)/libgcov-merge.c
++	$(gcc_compile) -DL$* -c $(srcdir)/libgcov-merge.c && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ $(libgcov-profiler-objects): %$(objext): $(srcdir)/libgcov-profiler.c $(srcdir)/gcov.h $(srcdir)/libgcov.h
+-	$(gcc_compile) -DL$* -c $(srcdir)/libgcov-profiler.c
++	$(gcc_compile) -DL$* -c $(srcdir)/libgcov-profiler.c && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ $(libgcov-interface-objects): %$(objext): $(srcdir)/libgcov-interface.c $(srcdir)/gcov.h $(srcdir)/libgcov.h
+-	$(gcc_compile) -DL$* -c $(srcdir)/libgcov-interface.c
++	$(gcc_compile) -DL$* -c $(srcdir)/libgcov-interface.c && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ $(libgcov-driver-objects): %$(objext): $(srcdir)/libgcov-driver.c \
+   $(srcdir)/libgcov-driver-system.c $(srcdir)/gcov.h $(srcdir)/libgcov.h
+-	$(gcc_compile) -DL$* -c $(srcdir)/libgcov-driver.c
++	$(gcc_compile) -DL$* -c $(srcdir)/libgcov-driver.c && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ 
+ # Static libraries.
+@@ -1014,33 +1140,73 @@
+ # linked using GCC on systems using COFF or ELF, for the sake of C++
+ # constructors.
+ crtbegin$(objext): $(srcdir)/crtstuff.c
+-	$(crt_compile) $(CRTSTUFF_T_CFLAGS) -c $< -DCRT_BEGIN
++	$(crt_compile) $(CRTSTUFF_T_CFLAGS) -c $< -DCRT_BEGIN && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ crtend$(objext): $(srcdir)/crtstuff.c
+-	$(crt_compile) $(CRTSTUFF_T_CFLAGS) -c $< -DCRT_END
++	$(crt_compile) $(CRTSTUFF_T_CFLAGS) -c $< -DCRT_END && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ # These are versions of crtbegin and crtend for shared libraries.
+ crtbeginS$(objext): $(srcdir)/crtstuff.c
+-	$(crt_compile) $(CRTSTUFF_T_CFLAGS_S) -c $< -DCRT_BEGIN -DCRTSTUFFS_O
++	$(crt_compile) $(CRTSTUFF_T_CFLAGS_S) -c $< -DCRT_BEGIN -DCRTSTUFFS_O && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ crtendS$(objext): $(srcdir)/crtstuff.c
+-	$(crt_compile) $(CRTSTUFF_T_CFLAGS_S) -c $< -DCRT_END -DCRTSTUFFS_O
++	$(crt_compile) $(CRTSTUFF_T_CFLAGS_S) -c $< -DCRT_END -DCRTSTUFFS_O && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ # This is a version of crtbegin for -static links.
+ crtbeginT$(objext): $(srcdir)/crtstuff.c
+-	$(crt_compile) $(CRTSTUFF_T_CFLAGS) -c $< -DCRT_BEGIN -DCRTSTUFFT_O
++	$(crt_compile) $(CRTSTUFF_T_CFLAGS) -c $< -DCRT_BEGIN -DCRTSTUFFT_O && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ # crtoffloadbegin and crtoffloadend contain symbols, that mark the begin and
+ # the end of tables with addresses, required for offloading.  crtoffloadtable
+ # contains the array with addresses of those symbols.
+ crtoffloadbegin$(objext): $(srcdir)/offloadstuff.c
+-	$(crt_compile) $(CRTSTUFF_T_CFLAGS) -c $< -DCRT_BEGIN
++	$(crt_compile) $(CRTSTUFF_T_CFLAGS) -c $< -DCRT_BEGIN && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ crtoffloadend$(objext): $(srcdir)/offloadstuff.c
+-	$(crt_compile) $(CRTSTUFF_T_CFLAGS) -c $< -DCRT_END
++	$(crt_compile) $(CRTSTUFF_T_CFLAGS) -c $< -DCRT_END && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ crtoffloadtable$(objext): $(srcdir)/offloadstuff.c
+-	$(crt_compile) $(CRTSTUFF_T_CFLAGS) -c $< -DCRT_TABLE
++	$(crt_compile) $(CRTSTUFF_T_CFLAGS) -c $< -DCRT_TABLE && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ endif
+ 
+ ifeq ($(enable_vtable_verify),yes)
+@@ -1052,25 +1218,55 @@
+ VTV_CFLAGS = $(CRTSTUFF_T_CFLAGS_S) -fno-inhibit-size-directive
+ 
+ vtv_start$(objext): $(srcdir)/vtv_start.c
+-	$(crt_compile) $(VTV_CFLAGS) -c $(srcdir)/vtv_start.c
++	$(crt_compile) $(VTV_CFLAGS) -c $(srcdir)/vtv_start.c && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ vtv_end$(objext): $(srcdir)/vtv_end.c
+-	$(crt_compile) $(VTV_CFLAGS) -c $(srcdir)/vtv_end.c
++	$(crt_compile) $(VTV_CFLAGS) -c $(srcdir)/vtv_end.c && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ vtv_start_preinit$(objext): $(srcdir)/vtv_start_preinit.c
+-	$(crt_compile) $(VTV_CFLAGS) -c $(srcdir)/vtv_start_preinit.c
++	$(crt_compile) $(VTV_CFLAGS) -c $(srcdir)/vtv_start_preinit.c && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ vtv_end_preinit$(objext): $(srcdir)/vtv_end_preinit.c
+-	$(crt_compile) $(VTV_CFLAGS) -c $(srcdir)/vtv_end_preinit.c
++	$(crt_compile) $(VTV_CFLAGS) -c $(srcdir)/vtv_end_preinit.c && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ endif
+ 
+ ifeq ($(CUSTOM_CRTIN),)
+ # -x assembler-with-cpp is only needed on case-insensitive filesystem.
+ crti$(objext): $(srcdir)/config/$(cpu_type)/crti.S
+-	$(crt_compile) -c -x assembler-with-cpp $<
++	$(crt_compile) -c -x assembler-with-cpp $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ 
+ crtn$(objext): $(srcdir)/config/$(cpu_type)/crtn.S
+-	$(crt_compile) -c -x assembler-with-cpp $<
++	$(crt_compile) -c -x assembler-with-cpp $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
+ endif
+ 
+ # Build extra startfiles in the libgcc directory.

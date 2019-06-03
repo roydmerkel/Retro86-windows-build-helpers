@@ -704,6 +704,11 @@ build_retro86() {
     patch -p0 < $patch_dir/gcc-gcc-Makefile.in.diff
     cd ../libgcc
     patch -p0 < $patch_dir/gcc-libgcc-configure.diff
+    patch -p0 < $patch_dir/gcc-libgcc-Makefile.in.diff
+    patch -p0 < $patch_dir/gcc-libgcc-fixed-obj.mk.diff
+    patch -p0 < $patch_dir/gcc-libgcc-shared-object.mk.diff
+    patch -p0 < $patch_dir/gcc-libgcc-siditi-object.mk.diff
+    patch -p0 < $patch_dir/gcc-libgcc-static-object.mk.diff
     cd ../..
     wine regedit $patch_dir/wine_tmp_path.reg
     sed -i -e 's#SELFTEST_FLAGS = -nostdinc -x c /dev/null -S -o /dev/null \\#SELFTEST_FLAGS = -nostdinc -x c nul -S -o nul \\#g' gcc/gcc/Makefile.in
@@ -737,7 +742,8 @@ build_retro86() {
     cd ..
     rm -rf Retro68-build
     mkdir Retro68-build
-    export WINEPATH=`winepath -w Retro68-build/gcc-build/gcc`
+    export WINEPATH="$(winepath -w Retro68-build/gcc-build/gcc);$(winepath -w $mingw_bin_path);$(winepath -w $mingw_w64_x86_64_prefix)"
+    echo "WINEPATH: $WINEPATH"
     cd Retro68-build
     ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
     unset LDFLAGS
