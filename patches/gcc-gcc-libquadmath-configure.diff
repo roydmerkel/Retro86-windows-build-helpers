@@ -1,5 +1,22 @@
 --- configure.old	2019-06-05 20:51:57.510374070 -0700
-+++ configure	2019-06-05 20:54:57.180891549 -0700
++++ configure	2019-06-07 23:16:11.111854714 -0700
+@@ -3287,14 +3287,14 @@
+ set X $ac_compile
+ ac_compiler=$2
+ for ac_option in --version -v -V -qversion; do
+-  { { ac_try="$ac_compiler $ac_option >&5"
++  { { ac_try="($ac_compiler $ac_option | sed -e 's/\r//g') >&5"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_compiler $ac_option >&5") 2>conftest.err
++  (eval "($ac_compiler $ac_option | sed -e 's/\r//g') >&5") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     sed '10a\
 @@ -6042,11 +6042,11 @@
  # Transform an extracted symbol line into a proper C declaration.
  # Some systems (esp. on ia64) link data and code symbols differently,
@@ -24,3 +41,20 @@
    fi
  
    # Check to see that the pipe works correctly.
+@@ -11288,14 +11288,14 @@
+ set X $ac_compile
+ ac_compiler=$2
+ for ac_option in --version -v -V -qversion; do
+-  { { ac_try="$ac_compiler $ac_option >&5"
++  { { ac_try="($ac_compiler $ac_option | sed -e 's/\r//g') >&5"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_compiler $ac_option >&5") 2>conftest.err
++  (eval "($ac_compiler $ac_option | sed -e 's/\r//g') >&5") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     sed '10a\

@@ -1,5 +1,39 @@
 --- configure.old	2019-06-05 21:03:50.612513484 -0700
-+++ configure	2019-06-05 21:03:47.036542760 -0700
++++ configure	2019-06-07 23:10:02.774636987 -0700
+@@ -3943,14 +3943,14 @@
+ set X $ac_compile
+ ac_compiler=$2
+ for ac_option in --version -v -V -qversion; do
+-  { { ac_try="$ac_compiler $ac_option >&5"
++  { { ac_try="($ac_compiler $ac_option | sed -e 's/\r//g') >&5"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_compiler $ac_option >&5") 2>conftest.err
++  (eval "($ac_compiler $ac_option | sed -e 's/\r//g') >&5") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     sed '10a\
+@@ -4545,14 +4545,14 @@
+ set X $ac_compile
+ ac_compiler=$2
+ for ac_option in --version -v -V -qversion; do
+-  { { ac_try="$ac_compiler $ac_option >&5"
++  { { ac_try="($ac_compiler $ac_option | sed -e 's/\r//g') >&5"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_compiler $ac_option >&5") 2>conftest.err
++  (eval "($ac_compiler $ac_option | sed -e 's/\r//g') >&5") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     sed '10a\
 @@ -6944,11 +6944,11 @@
  # Transform an extracted symbol line into a proper C declaration.
  # Some systems (esp. on ia64) link data and code symbols differently,
@@ -24,3 +58,12 @@
    fi
  
    # Check to see that the pipe works correctly.
+@@ -15172,7 +15172,7 @@
+ 
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread model used by GCC" >&5
+ $as_echo_n "checking for thread model used by GCC... " >&6; }
+-  target_thread_file=`$CXX -v 2>&1 | sed -n 's/^Thread model: //p'`
++  target_thread_file=`$CXX -v 2>&1 | sed -e 's/\r//g' | sed -n 's/^Thread model: //p'`
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $target_thread_file" >&5
+ $as_echo "$target_thread_file" >&6; }
+ 
