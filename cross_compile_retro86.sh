@@ -709,6 +709,10 @@ build_retro86() {
     patch -p0 < $patch_dir/gcc-libgcc-shared-object.mk.diff
     patch -p0 < $patch_dir/gcc-libgcc-siditi-object.mk.diff
     patch -p0 < $patch_dir/gcc-libgcc-static-object.mk.diff
+    cd ../libquadmath
+    patch -p0 < $patch_dir/gcc-gcc-libquadmath-configure.diff
+    cd ../libstdc++-v3
+    patch -p0 < $patch_dir/gcc-gcc-libstdc++-v3-configure.diff
     cd ../..
     wine regedit $patch_dir/wine_tmp_path.reg
     sed -i -e 's#SELFTEST_FLAGS = -nostdinc -x c /dev/null -S -o /dev/null \\#SELFTEST_FLAGS = -nostdinc -x c nul -S -o nul \\#g' gcc/gcc/Makefile.in
@@ -722,6 +726,10 @@ build_retro86() {
     #export LIBS="-lspeex -lmodplug -lmikmod -lsmpeg -lFLAC -lvorbisfile -lvorbis -logg -lstdc++"
     export LDFLAGS="-static-libgcc -static-libstdc++ -s"
 
+    if [ ! -d InterfacesAndLibraries/PPCLibraries ]; then
+	    echo cp -r ../../../MPW-GM/Interfaces\&Libraries/Libraries/PPCLibraries InterfacesAndLibraries/PPCLibraries
+	    cp -r ../../../MPW-GM/Interfaces\&Libraries/Libraries/PPCLibraries InterfacesAndLibraries/PPCLibraries
+    fi
     if [ ! -d InterfacesAndLibraries/Libraries ]; then
 	    echo cp -r ../../../MPW-GM/Interfaces\&Libraries/Libraries/Libraries InterfacesAndLibraries/Libraries
 	    cp -r ../../../MPW-GM/Interfaces\&Libraries/Libraries/Libraries InterfacesAndLibraries/Libraries
