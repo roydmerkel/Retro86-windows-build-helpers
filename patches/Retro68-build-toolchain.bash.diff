@@ -1,5 +1,5 @@
 --- build-toolchain.bash.old	2019-06-01 16:38:58.193462080 -0700
-+++ build-toolchain.bash	2019-06-04 21:13:38.118865315 -0700
++++ build-toolchain.bash	2019-06-08 11:37:09.145643541 -0700
 @@ -33,6 +33,10 @@
  HOST_CMAKE_FLAGS=()
  CMAKE_GENERATOR=
@@ -37,7 +37,14 @@
          --ninja)
              CMAKE_GENERATOR=-GNinja
              ;;
-@@ -328,7 +344,16 @@
+@@ -324,11 +340,22 @@
+ 
+ 		export CC=$HOST_C_COMPILER
+ 		export CXX=$HOST_CXX_COMPILER
+-		
++
++		export WINEPATH="$(winepath -w gcc-build/gcc);$WINEPATHPOST"
++
  		# Build binutils for 68K
  		mkdir -p binutils-build
  		cd binutils-build
@@ -55,7 +62,7 @@
  		make -j8
  		make install
  		cd ..
-@@ -337,9 +362,58 @@
+@@ -337,9 +364,58 @@
  		mkdir -p gcc-build
  		cd gcc-build
  		export target_configargs="--disable-nls --enable-libstdcxx-dual-abi=no --disable-libstdcxx-verbose"
@@ -117,7 +124,7 @@
  		# There seems to be a build failure in parallel builds; ignore any errors and try again without -j8.
  		make -j8 || make
  		make install
-@@ -353,10 +427,10 @@
+@@ -353,10 +429,10 @@
  
  		# Move the real linker aside and install symlinks to Elf2Mac
  		# (Elf2Mac is built by cmake below)
@@ -132,7 +139,12 @@
  
  		if [ $CLEAN_AFTER_BUILD != false ]; then
  			rm -rf binutils-build
-@@ -386,7 +460,15 @@
+@@ -383,10 +459,20 @@
+ 		export CC=$HOST_C_COMPILER
+ 		export CXX=$HOST_CXX_COMPILER
+ 		
++		export WINEPATH="$(winepath -w gcc-build-ppc/gcc);$WINEPATHPOST"
++
  		# Build binutils for PPC
  		mkdir -p binutils-build-ppc
  		cd binutils-build-ppc
@@ -149,7 +161,7 @@
  		make -j8
  		make install
  		cd ..
-@@ -395,8 +477,50 @@
+@@ -395,8 +481,51 @@
  		mkdir -p gcc-build-ppc
  		cd gcc-build-ppc
  		export target_configargs="--disable-nls --enable-libstdcxx-dual-abi=no --disable-libstdcxx-verbose"
@@ -188,6 +200,7 @@
 +		sed -i -e 's#CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) powerpc-apple-macos-c[+][+]#CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xg++.exe -B$$r/$(HOST_SUBDIR)/gcc/ -nostdinc++ `if test -f $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags; then $(SHELL) $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags --build-includes; else echo -funconfigured-libstdc++-v3 ; fi` -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs#g' Makefile
 +		sed -i -e 's#CC_FOR_TARGET=$(STAGE_CC_WRAPPER) powerpc-apple-macos-cc#CC_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/#g' Makefile
 +		sed -i -e 's#RAW_CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) powerpc-apple-macos-c[+][+]#RAW_CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xgcc.exe -shared-libgcc -B$$r/$(HOST_SUBDIR)/gcc -nostdinc++ -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs#g' Makefile
++		sed -i -e 's#RAW_CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xg[+][+].exe -B$$r/$(HOST_SUBDIR)/gcc/ -nostdinc[+][+] `if test -f $$r/$(TARGET_SUBDIR)/libstdc[+][+]-v3/scripts/testsuite_flags; then $(SHELL) $$r/$(TARGET_SUBDIR)/libstdc[+][+]-v3/scripts/testsuite_flags --build-includes; else echo -funconfigured-libstdc[+][+]-v3 ; fi` -L$$r/$(TARGET_SUBDIR)/libstdc[+][+]-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc[+][+]-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc[+][+]-v3/libsupc[+][+]/.libs#RAW_CXX_FOR_TARGET=$(STAGE_CC_WRAPPER) $$r/$(HOST_SUBDIR)/gcc/xgcc.exe -shared-libgcc -B$$r/$(HOST_SUBDIR)/gcc -nostdinc++ -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs#g' Makefile
 +
 +		sed -i -e 's#AS_FOR_TARGET=powerpc-apple-macos-as#AS_FOR_TARGET='"$PREFIX"'powerpc-apple-macos/bin/as.exe#g' Makefile
 +		sed -i -e 's#AR_FOR_TARGET=powerpc-apple-macos-ar#AR_FOR_TARGET='"$PREFIX"'powerpc-apple-macos/bin/ar.exe#g' Makefile
@@ -202,7 +215,7 @@
  		make -j8
  		make install
  		unset target_configargs
-@@ -419,7 +543,16 @@
+@@ -419,7 +548,16 @@
  	rm -rf hfsutils
  	cp -r $SRC/hfsutils .
  	cd hfsutils
@@ -220,7 +233,7 @@
  	make
  	make install
  	cd ..
-@@ -439,9 +572,18 @@
+@@ -439,9 +577,18 @@
  
  mkdir -p build-host
  cd build-host

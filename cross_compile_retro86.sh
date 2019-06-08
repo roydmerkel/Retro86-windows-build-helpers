@@ -750,8 +750,8 @@ build_retro86() {
     cd ..
     rm -rf Retro68-build
     mkdir Retro68-build
-    export WINEPATH="$(winepath -w Retro68-build/gcc-build/gcc);$(winepath -w $mingw_bin_path);$(winepath -w $mingw_w64_x86_64_prefix)"
-    echo "WINEPATH: $WINEPATH"
+    export WINEPATHPOST="$(winepath -w $mingw_bin_path);$(winepath -w $mingw_w64_x86_64_prefix)"
+    echo "WINEPATHPOST: $WINEPATHPOST"
     cd Retro68-build
     ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
     unset LDFLAGS
