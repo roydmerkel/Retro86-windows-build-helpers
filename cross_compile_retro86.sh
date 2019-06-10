@@ -693,7 +693,9 @@ build_retro86() {
   cd Retro68
     mkdir -p ~/.wine/drive_c/temp
     patch -p0 < $patch_dir/Retro68-build-toolchain.bash.diff
-    cd gcc
+    cd hfsutils
+    patch -p1 < $patch_dir/hfsutils.diff
+    cd ../gcc
     patch -p0 < $patch_dir/gcc-Makefile.tpl.diff
     patch -p0 < $patch_dir/gcc-Makefile.in.diff
     patch -p0 < $patch_dir/gcc-config-ml.in.diff
