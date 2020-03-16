@@ -1,6 +1,6 @@
---- configure.old	2019-05-31 17:14:48.202092388 -0700
-+++ configure	2019-06-01 09:26:07.811629152 -0700
-@@ -3439,16 +3439,17 @@
+--- configure.old	2020-03-12 14:09:43.299880480 -0700
++++ configure	2020-03-12 14:20:29.027876533 -0700
+@@ -3494,16 +3494,17 @@
  set X $ac_compile
  ac_compiler=$2
  for ac_option in --version -v -V -qversion; do
@@ -20,7 +20,7 @@
      sed '10a\
  ... rest of stderr output deleted ...
           10q' conftest.err >conftest.er1
-@@ -4881,7 +4882,7 @@
+@@ -4959,7 +4960,7 @@
    $as_echo_n "(cached) " >&6
  else
    # I'd rather use --version here, but apparently some GNU ld's only accept -v.
@@ -29,7 +29,7 @@
    acl_cv_prog_gnu_ld=yes
  else
    acl_cv_prog_gnu_ld=no
-@@ -4894,7 +4895,7 @@
+@@ -4972,7 +4973,7 @@
  
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread model used by GCC" >&5
  $as_echo_n "checking for thread model used by GCC... " >&6; }

@@ -1,5 +1,5 @@
---- config-ml.in.old	2019-06-01 20:27:40.466872558 -0700
-+++ config-ml.in	2019-06-01 20:29:00.234326338 -0700
+--- config-ml.in.old	2020-03-12 09:34:54.930114000 -0700
++++ config-ml.in	2020-03-12 09:35:44.010408528 -0700
 @@ -215,7 +215,7 @@
  if [ "${ml_toplevel_p}" = yes ]; then
  
@@ -18,7 +18,7 @@
  	    dir=`echo $$i | sed -e 's/;.*$$//'`; \
  	    if [ "$${dir}" = "." ]; then \
  	      true; \
-@@ -738,7 +738,7 @@
+@@ -739,7 +739,7 @@
      fi
  
      # find compiler flag corresponding to ${ml_dir}

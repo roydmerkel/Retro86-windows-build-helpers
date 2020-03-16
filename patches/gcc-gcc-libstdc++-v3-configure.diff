@@ -1,6 +1,6 @@
---- configure.old	2019-06-05 21:03:50.612513484 -0700
-+++ configure	2019-06-07 23:10:02.774636987 -0700
-@@ -3943,14 +3943,14 @@
+--- configure.old	2020-03-12 11:32:59.083449227 -0700
++++ configure	2020-03-12 11:40:39.787471819 -0700
+@@ -4100,14 +4100,14 @@
  set X $ac_compile
  ac_compiler=$2
  for ac_option in --version -v -V -qversion; do
@@ -17,7 +17,7 @@
    ac_status=$?
    if test -s conftest.err; then
      sed '10a\
-@@ -4545,14 +4545,14 @@
+@@ -4785,14 +4785,14 @@
  set X $ac_compile
  ac_compiler=$2
  for ac_option in --version -v -V -qversion; do
@@ -34,7 +34,7 @@
    ac_status=$?
    if test -s conftest.err; then
      sed '10a\
-@@ -6944,11 +6944,11 @@
+@@ -7184,11 +7184,11 @@
  # Transform an extracted symbol line into a proper C declaration.
  # Some systems (esp. on ia64) link data and code symbols differently,
  # so use this general approach.
@@ -49,7 +49,7 @@
  
  # Handle CRLF in mingw tool chain
  opt_cr=
-@@ -6982,7 +6982,7 @@
+@@ -7222,7 +7222,7 @@
  "     s[1]~prfx {split(s[1],t,\"@\"); print t[1], substr(t[1],length(prfx))}"\
  "     ' prfx=^$ac_symprfx"
    else
@@ -58,7 +58,7 @@
    fi
  
    # Check to see that the pipe works correctly.
-@@ -15172,7 +15172,7 @@
+@@ -15411,7 +15411,7 @@
  
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread model used by GCC" >&5
  $as_echo_n "checking for thread model used by GCC... " >&6; }
@@ -67,3 +67,12 @@
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $target_thread_file" >&5
  $as_echo "$target_thread_file" >&6; }
  
+@@ -80215,7 +80215,7 @@
+   CXXFLAGS="$CXXFLAGS -fno-exceptions \
+ 	-I${toplevel_srcdir}/libgcc -I${toplevel_builddir}/libgcc"
+ 
+-  target_thread_file=`$CXX -v 2>&1 | sed -n 's/^Thread model: //p'`
++  target_thread_file=`$CXX -v 2>&1 | sed -e 's/\r//g' | sed -n 's/^Thread model: //p'`
+   case $target_thread_file in
+     posix)
+       CXXFLAGS="$CXXFLAGS -DSUPPORTS_WEAK -DGTHREAD_USE_WEAK -D_PTHREADS"

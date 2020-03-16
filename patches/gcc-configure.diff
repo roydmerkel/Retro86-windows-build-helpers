@@ -1,7 +1,7 @@
---- configure.orig	2019-05-26 21:02:42.378252608 -0700
-+++ configure	2019-05-31 22:53:44.991874344 -0700
-@@ -685,13 +685,19 @@
- libgcc_visibility
+--- configure.old	2020-03-12 10:47:56.083316683 -0700
++++ configure	2020-03-12 11:13:24.907391650 -0700
+@@ -721,13 +721,19 @@
+ gcc_cv_otool
  gcc_cv_readelf
  gcc_cv_objdump
 +WINE_ORIGINAL_NM_FOR_TARGET
@@ -20,7 +20,7 @@
  ORIGINAL_AS_FOR_TARGET
  gcc_cv_as
  enable_fast_install
-@@ -879,7 +885,8 @@
+@@ -917,7 +923,8 @@
  PATH_SEPARATOR
  SHELL'
  ac_subst_files='option_includes
@@ -30,7 +30,7 @@
  ac_user_opts='
  enable_option_checking
  with_build_libsubdir
-@@ -4077,14 +4084,14 @@
+@@ -4152,14 +4159,14 @@
  set X $ac_compile
  ac_compiler=$2
  for ac_option in --version -v -V -qversion; do
@@ -47,7 +47,7 @@
    ac_status=$?
    if test -s conftest.err; then
      sed '10a\
-@@ -4650,14 +4657,14 @@
+@@ -4749,14 +4756,14 @@
  set X $ac_compile
  ac_compiler=$2
  for ac_option in --version -v -V -qversion; do
@@ -64,25 +64,7 @@
    ac_status=$?
    if test -s conftest.err; then
      sed '10a\
-@@ -18448,7 +18455,7 @@
-   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
-   lt_status=$lt_dlunknown
-   cat > conftest.$ac_ext <<_LT_EOF
--#line 18451 "configure"
-+#line 18458 "configure"
- #include "confdefs.h"
- 
- #if HAVE_DLFCN_H
-@@ -18554,7 +18561,7 @@
-   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
-   lt_status=$lt_dlunknown
-   cat > conftest.$ac_ext <<_LT_EOF
--#line 18557 "configure"
-+#line 18564 "configure"
- #include "confdefs.h"
- 
- #if HAVE_DLFCN_H
-@@ -21882,10 +21889,13 @@
+@@ -22080,10 +22087,13 @@
  
  case "$ORIGINAL_AS_FOR_TARGET" in
    ./as | ./as$build_exeext) ;;
@@ -97,7 +79,7 @@
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking what assembler to use" >&5
  $as_echo_n "checking what assembler to use... " >&6; }
  if test "$gcc_cv_as" = ../gas/as-new$build_exeext; then
-@@ -22042,6 +22052,7 @@
+@@ -22240,6 +22250,7 @@
  fi
  
  ORIGINAL_PLUGIN_LD_FOR_TARGET=$gcc_cv_ld
@@ -105,7 +87,7 @@
  PLUGIN_LD_SUFFIX=`basename $gcc_cv_ld | sed -e "s,$target_alias-,,"`
  # if the PLUGIN_LD is set ld-new, just have it as ld
  # as that is the installed named.
-@@ -22054,12 +22065,14 @@
+@@ -22252,12 +22263,14 @@
  if test "${with_plugin_ld+set}" = set; then :
    withval=$with_plugin_ld; if test x"$withval" != x; then
     ORIGINAL_PLUGIN_LD_FOR_TARGET="$withval"
@@ -120,7 +102,7 @@
  cat >>confdefs.h <<_ACEOF
  #define PLUGIN_LD_SUFFIX "$PLUGIN_LD_SUFFIX"
  _ACEOF
-@@ -22121,10 +22134,13 @@
+@@ -22319,10 +22332,13 @@
  
  case "$ORIGINAL_LD_FOR_TARGET" in
    ./collect-ld | ./collect-ld$build_exeext) ;;
@@ -135,7 +117,7 @@
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking what linker to use" >&5
  $as_echo_n "checking what linker to use... " >&6; }
  if test "$gcc_cv_ld" = ../ld/ld-new$build_exeext \
-@@ -22158,6 +22174,8 @@
+@@ -22356,6 +22372,8 @@
  	gcc_cv_gld_minor_version=`expr "$gcc_cv_gld_version" : "VERSION=[0-9]*\.\([0-9]*\)"`
  	ORIGINAL_LD_BFD_FOR_TARGET=../ld/ld-new$build_exeext
  	ORIGINAL_LD_GOLD_FOR_TARGET=../gold/ld-new$build_exeext
@@ -144,7 +126,7 @@
  else
  	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gcc_cv_ld" >&5
  $as_echo "$gcc_cv_ld" >&6; }
-@@ -22165,11 +22183,15 @@
+@@ -22363,11 +22381,15 @@
  	gcc_cvs_ld_program=`dirname $gcc_cv_ld`/`basename $gcc_cv_ld $host_exeext`
  	ORIGINAL_LD_BFD_FOR_TARGET=${gcc_cvs_ld_program}.bfd$host_exeext
  	ORIGINAL_LD_GOLD_FOR_TARGET=${gcc_cvs_ld_program}.gold$host_exeext
@@ -159,8 +141,8 @@
 +
  # Figure out what nm we will be using.
  gcc_cv_binutils_srcdir=`echo $srcdir | sed -e 's,/gcc$,,'`/binutils
- if test "${gcc_cv_nm+set}" = set; then :
-@@ -22245,9 +22267,11 @@
+ if ${gcc_cv_nm+:} false; then :
+@@ -22443,9 +22465,11 @@
  
  case "$ORIGINAL_NM_FOR_TARGET" in
    ./nm | ./nm$build_exeext) ;;
@@ -173,7 +155,7 @@
  
  
  # Figure out what objdump we will be using.
-@@ -30211,6 +30235,13 @@
+@@ -30268,6 +30292,13 @@
  # Configure the subdirectories
  # AC_CONFIG_SUBDIRS($subdirs)
  
@@ -187,7 +169,7 @@
  # Create the Makefile
  # and configure language subdirectories
  ac_config_files="$ac_config_files $all_outputs"
-@@ -30916,10 +30947,11 @@
+@@ -30984,10 +31015,11 @@
      "auto-host.h") CONFIG_HEADERS="$CONFIG_HEADERS auto-host.h:config.in" ;;
      "depdir") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir" ;;
      "gccdepdir") CONFIG_COMMANDS="$CONFIG_COMMANDS gccdepdir" ;;
@@ -202,7 +184,7 @@
      "$all_outputs") CONFIG_FILES="$CONFIG_FILES $all_outputs" ;;
      "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
  
-@@ -31539,9 +31571,9 @@
+@@ -31618,9 +31650,9 @@
    do
        ${CONFIG_SHELL-/bin/sh} $ac_aux_dir/mkinstalldirs $lang/$DEPDIR
    done ;;

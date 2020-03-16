@@ -1,6 +1,6 @@
---- Makefile.in.old	2019-05-31 21:35:14.036034462 -0700
-+++ Makefile.in	2019-06-01 10:33:09.694193075 -0700
-@@ -1928,7 +1928,7 @@
+--- Makefile.in.old	2020-03-12 11:45:35.259486307 -0700
++++ Makefile.in	2020-03-12 11:48:50.179495865 -0700
+@@ -1945,7 +1945,7 @@
  # "nul" instead of "/dev/null" if we're building on a mingw machine.
  # Specify the path to gcc/testsuite/selftests within the srcdir
  # as an argument to -fself-test.
@@ -9,7 +9,7 @@
  SELFTEST_FLAGS = -nostdinc $(DEVNULL) -S -o $(DEVNULL) \
  	-fself-test=$(srcdir)/testsuite/selftests
  
-@@ -2036,6 +2036,7 @@
+@@ -2011,6 +2011,7 @@
  # Dump a specs file to make -B./ read these specs over installed ones.
  $(SPECS): xgcc$(exeext)
  	$(GCC_FOR_TARGET) -dumpspecs > tmp-specs
@@ -17,7 +17,7 @@
  	mv tmp-specs $(SPECS)
  
  # We do want to create an executable named `xgcc', so we can use it to
-@@ -3016,6 +3017,7 @@
+@@ -3015,6 +3016,7 @@
  macro_list: s-macro_list; @true
  s-macro_list : $(GCC_PASSES) cc1$(exeext)
  	echo | $(GCC_FOR_TARGET) -E -dM - | \
@@ -25,7 +25,7 @@
  	  sed -n -e 's/^#define \([^_][a-zA-Z0-9_]*\).*/\1/p' \
  		 -e 's/^#define \(_[^_A-Z][a-zA-Z0-9_]*\).*/\1/p' | \
  	  sort -u > tmp-macro_list
-@@ -3027,10 +3029,10 @@
+@@ -3026,10 +3028,10 @@
  # Build up a list of multilib directories and corresponding sysroot
  # suffixes, in form sysroot;multilib.
  	if $(GCC_FOR_TARGET) -print-sysroot-headers-suffix > /dev/null 2>&1; then \

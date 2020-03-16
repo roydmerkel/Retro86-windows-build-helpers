@@ -1,6 +1,6 @@
---- Makefile.tpl.old	2019-05-26 22:42:04.243986942 -0700
-+++ Makefile.tpl	2019-05-26 22:43:20.859579853 -0700
-@@ -1025,6 +1025,7 @@
+--- Makefile.tpl.old	2020-03-12 20:37:56.125987249 -0700
++++ Makefile.tpl	2020-03-12 20:38:46.849986939 -0700
+@@ -1063,6 +1063,7 @@
  	+]echo "Checking multilib configuration for [+module+]..."; \
  	$(SHELL) $(srcdir)/mkinstalldirs [+subdir+]/[+module+]; \
  	$(CC_FOR_TARGET) --print-multi-lib > [+subdir+]/[+module+]/multilib.tmp 2> /dev/null; \
@@ -8,7 +8,7 @@
  	if test -r [+subdir+]/[+module+]/multilib.out; then \
  	  if cmp -s [+subdir+]/[+module+]/multilib.tmp [+subdir+]/[+module+]/multilib.out; then \
  	    rm -f [+subdir+]/[+module+]/multilib.tmp; \
-@@ -1070,6 +1071,7 @@
+@@ -1108,6 +1109,7 @@
  	[+ IF check_multilibs
  	+]echo "Checking multilib configuration for [+module+]..."; \
  	$(CC_FOR_TARGET) --print-multi-lib > [+subdir+]/[+module+]/multilib.tmp 2> /dev/null; \

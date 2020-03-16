@@ -1,6 +1,6 @@
---- Makefile.in.old	2019-06-02 13:36:53.807799840 -0700
-+++ Makefile.in	2019-06-02 19:03:26.457681875 -0700
-@@ -311,7 +311,8 @@
+--- Makefile.in.old	2020-03-12 14:28:26.243873616 -0700
++++ Makefile.in	2020-03-12 19:48:03.238005543 -0700
+@@ -313,7 +313,8 @@
  inst_slibdir = $(slibdir)$(MULTIOSSUBDIR)
  
  gcc_compile_bare = $(CC) $(INTERNAL_CFLAGS)
@@ -10,7 +10,7 @@
  gcc_compile = $(gcc_compile_bare) -o $@ $(compile_deps)
  gcc_s_compile = $(gcc_compile) -DSHARED
  
-@@ -475,14 +476,24 @@
+@@ -479,14 +480,24 @@
  
  lib1asmfuncs-o = $(patsubst %,%$(objext),$(LIB1ASMFUNCS))
  $(lib1asmfuncs-o): %$(objext): $(srcdir)/config/$(LIB1ASMSRC) %.vis
@@ -37,7 +37,7 @@
  ifeq ($(enable_shared),yes)
  
  libgcc-s-objects += $(lib1asmfuncs-s-o)
-@@ -492,13 +503,23 @@
+@@ -496,13 +507,23 @@
  # Build lib2funcs.  For the static library also include LIB2FUNCS_ST.
  lib2funcs-o = $(patsubst %,%$(objext),$(lib2funcs) $(LIB2FUNCS_ST))
  $(lib2funcs-o): %$(objext): $(srcdir)/libgcc2.c
@@ -63,7 +63,7 @@
  libgcc-s-objects += $(lib2funcs-s-o)
  endif
  
-@@ -534,14 +555,24 @@
+@@ -538,14 +559,24 @@
  lib2-divmod-o = $(patsubst %,%$(objext),$(LIB2_DIVMOD_FUNCS))
  $(lib2-divmod-o): %$(objext): $(srcdir)/libgcc2.c
  	$(gcc_compile) -DL$* -c $< \
@@ -90,7 +90,7 @@
  libgcc-s-objects += $(lib2-divmod-s-o)
  endif
  
-@@ -561,13 +592,23 @@
+@@ -565,13 +596,23 @@
  ifneq ($(FPBIT),)
  fpbit-o = $(patsubst %,%$(objext),$(FPBIT_FUNCS))
  $(fpbit-o): %$(objext): $(fpbit-src)
@@ -116,7 +116,7 @@
  libgcc-s-objects += $(fpbit-s-o)
  endif
  endif
-@@ -576,13 +617,23 @@
+@@ -580,13 +621,23 @@
  ifneq ($(DPBIT),)
  dpbit-o = $(patsubst %,%$(objext),$(DPBIT_FUNCS))
  $(dpbit-o): %$(objext): $(fpbit-src)
@@ -142,7 +142,7 @@
  libgcc-s-objects += $(dpbit-s-o)
  endif
  endif
-@@ -591,13 +642,23 @@
+@@ -595,13 +646,23 @@
  ifneq ($(TPBIT),)
  tpbit-o = $(patsubst %,%$(objext),$(TPBIT_FUNCS))
  $(tpbit-o): %$(objext): $(fpbit-src)
@@ -168,7 +168,7 @@
  libgcc-s-objects += $(tpbit-s-o)
  endif
  endif
-@@ -637,7 +698,12 @@
+@@ -641,7 +702,12 @@
  else
  $(dfp-objects): %$(objext): $(srcdir)/../libdecnumber/%.c
  endif
@@ -182,7 +182,7 @@
  libgcc-objects += $(dfp-objects)
  
  decbits-filenames =
-@@ -661,7 +727,12 @@
+@@ -665,7 +731,12 @@
  else
  $(decbits-objects): %$(objext): $(srcdir)/../libdecnumber/$(enable_decimal_float)/%.c
  endif
@@ -196,7 +196,7 @@
  libgcc-objects += $(decbits-objects)
  
  # Next build individual support functions.
-@@ -710,7 +781,12 @@
+@@ -714,7 +785,12 @@
  else
  $(d32pbit-o): %$(objext): $(srcdir)/dfp-bit.c
  endif
@@ -210,7 +210,7 @@
  libgcc-objects += $(d32pbit-o)
  endif
  
-@@ -721,7 +797,12 @@
+@@ -725,7 +801,12 @@
  else
  $(d64pbit-o): %$(objext): $(srcdir)/dfp-bit.c
  endif
@@ -224,7 +224,7 @@
  libgcc-objects += $(d64pbit-o)
  endif
  
-@@ -732,7 +813,12 @@
+@@ -736,7 +817,12 @@
  else
  $(d128pbit-o): %$(objext): $(srcdir)/dfp-bit.c
  endif
@@ -238,7 +238,7 @@
  libgcc-objects += $(d128pbit-o)
  endif
  
-@@ -755,7 +841,12 @@
+@@ -759,7 +845,12 @@
  	$(gcc_compile) $(SYNC_CFLAGS) \
  	  -DFN=`echo "$*" | sed 's/_[^_]*$$//'` \
  	  -DSIZE=`echo "$*" | sed 's/.*_//'` \
@@ -252,7 +252,7 @@
  libgcc-objects += $(libgcc-sync-size-funcs-o)
  
  libgcc-sync-funcs := sync_synchronize
-@@ -764,7 +855,12 @@
+@@ -768,7 +859,12 @@
  $(libgcc-sync-funcs-o): %$(objext): $(srcdir)/sync.c
  	$(gcc_compile) $(SYNC_CFLAGS) \
  	  -DL$* \
@@ -266,7 +266,7 @@
  libgcc-objects += $(libgcc-sync-funcs-o)
  
  ifeq ($(enable_shared),yes)
-@@ -774,14 +870,24 @@
+@@ -778,14 +874,24 @@
  	$(gcc_s_compile) $(SYNC_CFLAGS) \
  	  -DFN=`echo "$*" | sed 's/_[^_]*$$//'` \
  	  -DSIZE=`echo "$*" | sed 's/.*_//'` \
@@ -293,7 +293,7 @@
  libgcc-s-objects += $(libgcc-sync-funcs-s-o)
  endif
  endif
-@@ -912,14 +1018,34 @@
+@@ -916,14 +1022,34 @@
                   $(libgcov-interface-objects) $(libgcov-driver-objects)
  
  $(libgcov-merge-objects): %$(objext): $(srcdir)/libgcov-merge.c $(srcdir)/gcov.h $(srcdir)/libgcov.h
@@ -332,7 +332,7 @@
  
  
  # Static libraries.
-@@ -1014,33 +1140,73 @@
+@@ -1021,33 +1147,73 @@
  # linked using GCC on systems using COFF or ELF, for the sake of C++
  # constructors.
  crtbegin$(objext): $(srcdir)/crtstuff.c
@@ -414,7 +414,7 @@
  endif
  
  ifeq ($(enable_vtable_verify),yes)
-@@ -1052,25 +1218,55 @@
+@@ -1059,25 +1225,55 @@
  VTV_CFLAGS = $(CRTSTUFF_T_CFLAGS_S) -fno-inhibit-size-directive
  
  vtv_start$(objext): $(srcdir)/vtv_start.c

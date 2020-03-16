@@ -1,6 +1,6 @@
---- configure.ac.old	2019-05-26 21:50:00.123411031 -0700
-+++ configure.ac	2019-05-26 22:13:14.021275328 -0700
-@@ -2176,9 +2176,12 @@
+--- configure.ac.old	2020-03-12 10:27:44.895257291 -0700
++++ configure.ac	2020-03-12 10:42:35.519300964 -0700
+@@ -2237,9 +2237,12 @@
  AC_SUBST(ORIGINAL_AS_FOR_TARGET)
  case "$ORIGINAL_AS_FOR_TARGET" in
    ./as | ./as$build_exeext) ;;
@@ -14,7 +14,7 @@
  AC_MSG_CHECKING(what assembler to use)
  if test "$gcc_cv_as" = ../gas/as-new$build_exeext; then
    # Single tree build which includes gas.  We want to prefer it
-@@ -2262,6 +2265,7 @@
+@@ -2323,6 +2326,7 @@
  fi])
  
  ORIGINAL_PLUGIN_LD_FOR_TARGET=$gcc_cv_ld
@@ -22,7 +22,7 @@
  PLUGIN_LD_SUFFIX=`basename $gcc_cv_ld | sed -e "s,$target_alias-,,"`
  # if the PLUGIN_LD is set ld-new, just have it as ld
  # as that is the installed named.
-@@ -2273,9 +2277,11 @@
+@@ -2334,9 +2338,11 @@
  [AS_HELP_STRING([[--with-plugin-ld=[ARG]]], [specify the plugin linker])],
  [if test x"$withval" != x; then
     ORIGINAL_PLUGIN_LD_FOR_TARGET="$withval"
@@ -34,7 +34,7 @@
  AC_DEFINE_UNQUOTED(PLUGIN_LD_SUFFIX, "$PLUGIN_LD_SUFFIX", [Specify plugin linker])
  
  # Check to see if we are using gold instead of ld
-@@ -2329,9 +2335,12 @@
+@@ -2390,9 +2396,12 @@
  AC_SUBST(ORIGINAL_LD_FOR_TARGET)
  case "$ORIGINAL_LD_FOR_TARGET" in
    ./collect-ld | ./collect-ld$build_exeext) ;;
@@ -48,7 +48,7 @@
  AC_MSG_CHECKING(what linker to use)
  if test "$gcc_cv_ld" = ../ld/ld-new$build_exeext \
     || test "$gcc_cv_ld" = ../gold/ld-new$build_exeext; then
-@@ -2367,16 +2376,22 @@
+@@ -2428,16 +2437,22 @@
  changequote([,])dnl
  	ORIGINAL_LD_BFD_FOR_TARGET=../ld/ld-new$build_exeext
  	ORIGINAL_LD_GOLD_FOR_TARGET=../gold/ld-new$build_exeext
@@ -71,7 +71,7 @@
  
  # Figure out what nm we will be using.
  gcc_cv_binutils_srcdir=`echo $srcdir | sed -e 's,/gcc$,,'`/binutils
-@@ -2407,8 +2422,10 @@
+@@ -2468,8 +2483,10 @@
  AC_SUBST(ORIGINAL_NM_FOR_TARGET)
  case "$ORIGINAL_NM_FOR_TARGET" in
    ./nm | ./nm$build_exeext) ;;
@@ -83,7 +83,7 @@
  
  
  # Figure out what objdump we will be using.
-@@ -6590,6 +6607,12 @@
+@@ -6649,6 +6666,12 @@
  # Configure the subdirectories
  # AC_CONFIG_SUBDIRS($subdirs)
  

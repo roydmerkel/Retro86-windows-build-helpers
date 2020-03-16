@@ -636,6 +636,27 @@ build_isl() {
   cd ..
 }
 
+build_boost() {
+  download_and_unpack_file https://dl.bintray.com/boostorg/release/1.65.1/source/boost_1_65_1.tar.gz
+  cd boost_1_65_1
+  apply_patch file://$patch_dir/boost_asm.diff "-p1"
+  local touch_name=$(get_small_touchfile_name already_ran_bootstrap "")
+  if [ ! -f $touch_name ]; then
+    echo "using gcc : : ${cross_prefix}g++ ;" > user-config.jam
+    ./bootstrap.sh || exit 1
+    touch $touch_name || exit 1
+  fi
+  local touch_name=$(get_small_touchfile_name already_ran_b2 "")
+  if [ ! -f $touch_name ]; then
+    ./b2 --user-config=user-config.jam toolset=gcc-mingw target-os=windows threading=multi threadapi=win32 link=static --prefix=$mingw_w64_x86_64_prefix --without-mpi --without-python variant=release address-model=$bits_target install || exit 1
+    #CROSSCC=gcc CROSSCXX=g++ CC=${cross_prefix}gcc CXX=${cross_prefix}g++ BOOST_JAM_OS=NT CFLAGS="${CFLAGS} -DNT" ./bootstrap.sh --prefix=$mingw_w64_x86_64_prefix --with-toolset=crosscc
+    #CC=${cross_prefix}gcc CXX=${cross_prefix}g++ BOOST_JAM_OS=NT CFLAGS="${CFLAGS} -DNT" ./bootstrap.sh --prefix=$mingw_w64_x86_64_prefix --with-toolset=cc
+    #CC=${cross_prefix}gcc CXX=${cross_prefix}g++ BOOST_JAM_OS=NT CFLAGS="${CFLAGS} -DNT" ./b2 --prefix=$mingw_w64_x86_64_prefix
+    touch $touch_name || exit 1
+  fi
+  cd ..
+}
+
 build_bash() {
   download_and_unpack_file ftp://ftp.gnu.org/gnu/bash/bash-4.4.18.tar.gz
   cd bash-4.4.18
@@ -679,6 +700,7 @@ build_dependencies() {
   build_mpfr
   build_mpc
   build_isl
+  build_boost
   #build_bash
   #cat mpw-gm.img__0.bin | unbin - || exit 1
 }
@@ -755,7 +777,7 @@ build_retro86() {
     export WINEPATHPOST="$(winepath -w $mingw_bin_path);$(winepath -w $mingw_w64_x86_64_prefix)"
     echo "WINEPATHPOST: $WINEPATHPOST"
     cd Retro68-build
-    ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
+    ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc --boost-rootdir=$mingw_w64_x86_64_prefix --boost-libdir=$mingw_w64_x86_64_prefix/lib || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
     unset LDFLAGS
     unset LIBS
     unset SDL_CONFIG

@@ -1,10 +1,10 @@
---- exec-tool.in.old	2019-05-26 22:19:03.515444589 -0700
-+++ exec-tool.in	2019-05-26 22:21:08.998751720 -0700
+--- exec-tool.in.old	2020-03-12 11:15:19.443397267 -0700
++++ exec-tool.in	2020-03-12 11:18:36.847406947 -0700
 @@ -1,4 +1,4 @@
 -#! /bin/sh
 +#! /bin/bash
  
- # Copyright (C) 2007-2018 Free Software Foundation, Inc.
+ # Copyright (C) 2007-2019 Free Software Foundation, Inc.
  # This file is part of GCC.
 @@ -73,6 +73,14 @@
      ;;
