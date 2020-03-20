@@ -1,5 +1,5 @@
 --- build-toolchain.bash.old	2020-03-12 21:40:37.781964257 -0700
-+++ build-toolchain.bash	2020-03-15 23:00:01.656216737 -0700
++++ build-toolchain.bash	2020-03-18 19:16:25.397732695 -0700
 @@ -44,6 +44,10 @@
  HOST_CMAKE_FLAGS=()
  CMAKE_GENERATOR=
@@ -24,7 +24,7 @@
  }
  
  for ARG in $*; do
-@@ -92,6 +102,25 @@
+@@ -92,6 +102,26 @@
  			HOST_CMAKE_FLAGS[${#HOST_CMAKE_FLAGS[@]}]="-DCMAKE_C_COMPILER=${ARG#*=}"
  			HOST_C_COMPILER="${ARG#*=}"
  			;;
@@ -38,6 +38,7 @@
 +			CROSS_PREFIX="${ARG#*=}"
 +			;;
 +		--boost-rootdir=*)
++			Boost_DIR="${ARG#*=}"
 +			BOOST_ROOT="${ARG#*=}"
 +			;;
 +		--boost-libdir=*)
@@ -50,7 +51,7 @@
  		--ninja)
  			CMAKE_GENERATOR=-GNinja
  			;;
-@@ -121,6 +150,15 @@
+@@ -121,6 +151,15 @@
  	ARCHS="$ARCHS powerpc"
  fi
  
@@ -66,7 +67,7 @@
  
  ##################### Sanity checks
  
-@@ -227,10 +265,21 @@
+@@ -227,10 +266,21 @@
  		export CC=$HOST_C_COMPILER
  		export CXX=$HOST_CXX_COMPILER
  
@@ -89,7 +90,7 @@
  		make -j8
  		make install
  		cd ..
-@@ -239,9 +288,58 @@
+@@ -239,9 +289,58 @@
  		mkdir -p gcc-build
  		cd gcc-build
  		export target_configargs="--disable-nls --enable-libstdcxx-dual-abi=no --disable-libstdcxx-verbose"
@@ -149,7 +150,7 @@
  		# There seems to be a build failure in parallel builds; ignore any errors and try again without -j8.
  		make -j8 || make
  		make install
-@@ -255,10 +353,10 @@
+@@ -255,10 +354,10 @@
  
  		# Move the real linker aside and install symlinks to Elf2Mac
  		# (Elf2Mac is built by cmake below)
@@ -164,7 +165,7 @@
  
  		if [ $CLEAN_AFTER_BUILD != false ]; then
  			rm -rf binutils-build
-@@ -285,10 +383,20 @@
+@@ -285,10 +384,20 @@
  		export CC=$HOST_C_COMPILER
  		export CXX=$HOST_CXX_COMPILER
  
@@ -186,7 +187,7 @@
  		make -j8
  		make install
  		cd ..
-@@ -297,8 +405,54 @@
+@@ -297,8 +406,54 @@
  		mkdir -p gcc-build-ppc
  		cd gcc-build-ppc
  		export target_configargs="--disable-nls --enable-libstdcxx-dual-abi=no --disable-libstdcxx-verbose"
@@ -243,7 +244,7 @@
  		make -j8
  		make install
  		unset target_configargs
-@@ -321,7 +475,16 @@
+@@ -321,7 +476,16 @@
  	rm -rf hfsutils
  	cp -r $SRC/hfsutils .
  	cd hfsutils
@@ -261,30 +262,36 @@
  	make
  	make install
  	cd ..
-@@ -339,9 +502,27 @@
+@@ -339,9 +503,33 @@
  
  mkdir -p build-host
  cd build-host
 -cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
 +if [ "$CROSS_PREFIX" != "" ]; then
 +	if [ "$BOOST_ROOT" != "" ]; then
-+		BOOST_ROOT="$BOOST_ROOT" cmake ${SRC} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR" -DBoost_LIBRARIES="$Boost_LIBRARIES" -DBOOST_INCLUDE_DIRS="$BOOST_INCLUDE_DIRS" -DBoost_INCLUDE_DIRS="$Boost_INCLUDE_DIRS" -DBoost_USE_STATIC_LIBS=ON -DBOOST_ROOT="$BOOST_ROOT" "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
++		echo 'Boost_DIR="'"$Boost_DIR"'" BOOST_DIR="'"$Boost_DIR"'" BOOST_ROOT="'"$BOOST_ROOT"'" cmake '"${SRC}"' -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB='"${CROSS_PREFIX}"'ranlib -DCMAKE_C_COMPILER='"${CROSS_PREFIX}"'gcc -DCMAKE_CXX_COMPILER='"${CROSS_PREFIX}"'g++ -DCMAKE_RC_COMPILER='"${CROSS_PREFIX}"'windres -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS:BOOL=ON -DBOOST_ROOT:PATH="'"$BOOST_ROOT"'" -DBOOST_DIR:PATH="'"$Boost_DIR"'" -DBoost_DIR:PATH="'"$Boost_DIR"'" -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
++		Boost_DIR="$Boost_DIR" BOOST_DIR="$Boost_DIR" BOOST_ROOT="$BOOST_ROOT" cmake ${SRC} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS:BOOL=ON -DBOOST_ROOT:PATH="$BOOST_ROOT" -DBOOST_DIR:PATH="$Boost_DIR" -DBoost_DIR:PATH="$Boost_DIR" -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DBoost_DEBUG:BOOL=ON "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
 +	else
-+		cmake ${SRC} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
++		echo 'cmake '"${SRC}"' -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB='"${CROSS_PREFIX}"'ranlib -DCMAKE_C_COMPILER='"${CROSS_PREFIX}"'gcc -DCMAKE_CXX_COMPILER='"${CROSS_PREFIX}"'g++ -DCMAKE_RC_COMPILER='"${CROSS_PREFIX}"'windres -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DBoost_DEBUG:BOOL=ON "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
++		cmake ${SRC} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DBoost_DEBUG:BOOL=ON "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
 +	fi
 +else
 +	if [ "$BOOST_ROOT" != "" ]; then
-+		BOOST_ROOT="$BOOST_ROOT" cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug -DBOOST_LIBRARYDIR="$BOOST_LIBRARYDIR" -DBoost_LIBRARIES="$Boost_LIBRARIES" -DBOOST_INCLUDE_DIRS="$BOOST_INCLUDE_DIRS" -DBoost_INCLUDE_DIRS="$Boost_INCLUDE_DIRS" -DBoost_USE_STATIC_LIBS=ON -DBOOST_ROOT="$BOOST_ROOT" "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
++		echo 'Boost_DIR="'"$Boost_DIR"'" BOOST_DIR="'"$Boost_DIR"'" BOOST_ROOT="'"$BOOST_ROOT"'" cmake '"${SRC}"' -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS=ON -DBOOST_ROOT="'"$BOOST_ROOT"'" -DBOOST_DIR:PATH="'"$Boost_DIR"'" -DBoost_DIR:PATH="'"$Boost_DIR"'" -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DBoost_DEBUG:BOOL=ON "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
++		Boost_DIR="$Boost_DIR" BOOST_DIR="$Boost_DIR" BOOST_ROOT="$BOOST_ROOT" cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS=ON -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_DIR:PATH="$Boost_DIR" -DBoost_DIR:PATH="$Boost_DIR" -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DBoost_DEBUG:BOOL=ON "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
 +	else
-+		cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
++		echo 'cmake '"${SRC}"' -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DBoost_DEBUG:BOOL=ON "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
++		cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DBoost_DEBUG:BOOL=ON "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
 +	fi
 +fi
  cd ..
 -cmake --build build-host --target install
 +
 +if [ "$CROSS_PREFIX" != "" ]; then
++	echo "cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=$PREFIX --build build-host --target install"
 +	cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=$PREFIX --build build-host --target install
 +else
++	echo "cmake --build build-host --target install"
 +	cmake --build build-host --target install
 +fi
 +CROSS_PREFIX

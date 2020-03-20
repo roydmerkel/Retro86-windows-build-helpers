@@ -649,6 +649,7 @@ build_boost() {
   local touch_name=$(get_small_touchfile_name already_ran_b2 "")
   if [ ! -f $touch_name ]; then
     ./b2 --user-config=user-config.jam toolset=gcc-mingw target-os=windows threading=multi threadapi=win32 link=static --prefix=$mingw_w64_x86_64_prefix --without-mpi --without-python variant=release address-model=$bits_target install || exit 1
+    #./b2 --user-config=user-config.jam toolset=gcc-mingw target-os=windows threading=multi threadapi=win32 link=static --prefix=$mingw_w64_x86_64_prefix --without-mpi --without-python variant=debug address-model=$bits_target install || exit 1
     #CROSSCC=gcc CROSSCXX=g++ CC=${cross_prefix}gcc CXX=${cross_prefix}g++ BOOST_JAM_OS=NT CFLAGS="${CFLAGS} -DNT" ./bootstrap.sh --prefix=$mingw_w64_x86_64_prefix --with-toolset=crosscc
     #CC=${cross_prefix}gcc CXX=${cross_prefix}g++ BOOST_JAM_OS=NT CFLAGS="${CFLAGS} -DNT" ./bootstrap.sh --prefix=$mingw_w64_x86_64_prefix --with-toolset=cc
     #CC=${cross_prefix}gcc CXX=${cross_prefix}g++ BOOST_JAM_OS=NT CFLAGS="${CFLAGS} -DNT" ./b2 --prefix=$mingw_w64_x86_64_prefix
@@ -715,6 +716,7 @@ build_retro86() {
   cd Retro68
     mkdir -p ~/.wine/drive_c/temp
     patch -p0 < $patch_dir/Retro68-build-toolchain.bash.diff
+    patch -p1 < $patch_dir/Retro68-build-host.diff
     cd hfsutils
     patch -p1 < $patch_dir/hfsutils.diff
     cd ../gcc

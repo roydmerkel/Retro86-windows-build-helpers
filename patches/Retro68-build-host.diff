@@ -1,0 +1,12 @@
+diff -Naur Retro68.old/Rez/CMakeLists.txt Retro68/Rez/CMakeLists.txt
+--- Retro68.old/Rez/CMakeLists.txt	2020-03-19 19:23:34.025534447 -0700
++++ Retro68/Rez/CMakeLists.txt	2020-03-19 19:25:57.705531885 -0700
+@@ -15,7 +15,7 @@
+ #   You should have received a copy of the GNU General Public License
+ #   along with Retro68.  If not, see <http://www.gnu.org/licenses/>.
+ 
+-find_package(Boost COMPONENTS wave filesystem system thread regex program_options)
++find_package(Boost COMPONENTS wave filesystem system thread_win32 regex program_options)
+ 
+ # Look for bison.
+     # We need Version 3, and Mac OS X still comes with an outdated version (2.3).
