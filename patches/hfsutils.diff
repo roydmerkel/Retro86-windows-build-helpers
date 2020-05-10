@@ -1,4 +1,4 @@
-diff -u -r hfsutils.old/configure hfsutils/configure
+diff -Naur hfsutils.old/configure hfsutils/configure
 --- hfsutils.old/configure	2020-03-12 20:44:44.753984752 -0700
 +++ hfsutils/configure	2020-03-12 21:23:14.953970631 -0700
 @@ -1,36 +1,688 @@
@@ -6601,7 +6601,7 @@ diff -u -r hfsutils.old/configure hfsutils/configure
 +$as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 +fi
  
-diff -u -r hfsutils.old/libhfs/configure hfsutils/libhfs/configure
+diff -Naur hfsutils.old/libhfs/configure hfsutils/libhfs/configure
 --- hfsutils.old/libhfs/configure	2020-03-12 20:44:45.317984748 -0700
 +++ hfsutils/libhfs/configure	2020-03-12 21:23:02.193970709 -0700
 @@ -1,28 +1,675 @@
@@ -12758,7 +12758,7 @@ diff -u -r hfsutils.old/libhfs/configure hfsutils/libhfs/configure
 +$as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 +fi
  
-diff -u -r hfsutils.old/libhfs/os/unix.c hfsutils/libhfs/os/unix.c
+diff -Naur hfsutils.old/libhfs/os/unix.c hfsutils/libhfs/os/unix.c
 --- hfsutils.old/libhfs/os/unix.c	2020-03-12 20:44:45.373984748 -0700
 +++ hfsutils/libhfs/os/unix.c	2020-03-12 21:31:43.709967521 -0700
 @@ -23,6 +23,17 @@
@@ -12826,75 +12826,7 @@ diff -u -r hfsutils.old/libhfs/os/unix.c hfsutils/libhfs/os/unix.c
  
    *priv = (void *) fd;
  
-diff -u -r hfsutils.old/libhfs/os.c hfsutils/libhfs/os.c
---- hfsutils.old/libhfs/os.c	2020-03-12 20:44:45.373984748 -0700
-+++ hfsutils/libhfs/os.c	2020-03-12 21:31:43.709967521 -0700
-@@ -23,6 +23,17 @@
- #  include "config.h"
- # endif
- 
-+#if (defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__
-+/* LockFileEx */
-+# define WIN32_LEAN_AND_MEAN
-+# include <windows.h>
-+
-+//# include <errno.h>
-+
-+/* _get_osfhandle */
-+//# include "msvc-nothrow.h"
-+# endif
-+
- # ifdef HAVE_FCNTL_H
- #  include <fcntl.h>
- # else
-@@ -54,7 +65,10 @@
- int os_open(void **priv, const char *path, int mode)
- {
-   int fd;
-+#if (defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__
-+# else
-   struct flock lock;
-+# endif
- 
-   switch (mode)
-     {
-@@ -74,6 +88,27 @@
- 
-   /* lock descriptor against concurrent access */
- 
-+#if (defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__
-+  HANDLE h = (HANDLE) _get_osfhandle (fd);
-+  BOOL res;
-+  DWORD size_lower, size_upper;
-+  OVERLAPPED ovlp;
-+  int flags = 0;
-+
-+  if(h == 0)
-+    ERROR(errno, "error opening medium");
-+
-+  /* We're going to lock the whole file, so get the file size. */
-+  size_lower = GetFileSize (h, &size_upper);
-+
-+  /* Start offset is 0, and also zero the remaining members of this struct. */
-+  memset (&ovlp, 0, sizeof ovlp);
-+
-+  flags = (mode == O_RDONLY) ? 0 : LOCKFILE_EXCLUSIVE_LOCK;
-+
-+  if(LockFileEx (h, flags, 0, size_lower, size_upper, &ovlp) == 0)
-+    ERROR(EAGAIN, "unable to obtain lock for medium");
-+# else
-   lock.l_type   = (mode == O_RDONLY) ? F_RDLCK : F_WRLCK;
-   lock.l_start  = 0;
-   lock.l_whence = SEEK_SET;
-@@ -82,6 +117,7 @@
-   if (fcntl(fd, F_SETLK, &lock) == -1 &&
-       (errno == EACCES || errno == EAGAIN))
-     ERROR(EAGAIN, "unable to obtain lock for medium");
-+# endif
- 
-   *priv = (void *) fd;
- 
-diff -u -r hfsutils.old/librsrc/configure hfsutils/librsrc/configure
+diff -Naur hfsutils.old/librsrc/configure hfsutils/librsrc/configure
 --- hfsutils.old/librsrc/configure	2020-03-12 20:44:45.461984747 -0700
 +++ hfsutils/librsrc/configure	2020-03-12 21:29:53.817968193 -0700
 @@ -1,28 +1,675 @@
@@ -18940,7 +18872,23 @@ diff -u -r hfsutils.old/librsrc/configure hfsutils/librsrc/configure
 +$as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 +fi
  
-diff -u -r hfsutils.old/suid.c hfsutils/suid.c
+diff -Naur hfsutils.old/Makefile.in hfsutils/Makefile.in
+--- hfsutils.old/Makefile.in	2020-03-12 20:44:44.725984752 -0700
++++ hfsutils/Makefile.in	2020-03-21 17:59:04.888332687 -0700
+@@ -62,9 +62,9 @@
+ 
+ TARGETS =	$(CLITARGETS) $(TCLTARGETS) $(TKTARGETS)
+ 
+-CLITARGETS =	hattrib hcd hcopy hdel hdir hformat hls hmkdir hmount hpwd  \
+-		hrename hrmdir humount hvol
+-TCLTARGETS =	hfssh hfs
++CLITARGETS =	hattrib.exe hcd.exe hcopy.exe hdel.exe hdir.exe hformat.exe hls.exe hmkdir.exe hmount.exe hpwd.exe  \
++		hrename.exe hrmdir.exe humount.exe hvol.exe
++TCLTARGETS =	hfssh.exe hfs.exe
+ TKTARGETS =	xhfs
+ 
+ LIBHFS =	libhfs/libhfs.a
+diff -Naur hfsutils.old/suid.c hfsutils/suid.c
 --- hfsutils.old/suid.c	2020-03-12 20:44:44.877984751 -0700
 +++ hfsutils/suid.c	2020-03-12 20:53:40.065981480 -0700
 @@ -25,6 +25,8 @@

@@ -1,5 +1,5 @@
 --- build-toolchain.bash.old	2020-03-12 21:40:37.781964257 -0700
-+++ build-toolchain.bash	2020-03-20 16:53:54.698991204 -0700
++++ build-toolchain.bash	2020-03-20 19:49:28.164099254 -0700
 @@ -44,6 +44,10 @@
  HOST_CMAKE_FLAGS=()
  CMAKE_GENERATOR=
@@ -108,12 +108,12 @@
 +		elif [ "$HOST" != "" ]; then 
 +			$SRC/gcc/configure --host=$HOST \
 +				--target=m68k-apple-macos --prefix=$PREFIX \
- 				--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
- 				--disable-libssp MAKEINFO=missing
-+		else
-+			$SRC/gcc/configure --target=m68k-apple-macos --prefix=$PREFIX \
 +				--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
 +				--disable-libssp MAKEINFO=missing
++		else
++			$SRC/gcc/configure --target=m68k-apple-macos --prefix=$PREFIX \
+ 				--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
+ 				--disable-libssp MAKEINFO=missing
 +		fi
 +
 +		sed -i -e 's#S\["GCC_FOR_TARGET"\]="m68k-apple-macos-gcc"#S["GCC_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/"#g' config.status
@@ -262,7 +262,7 @@
  	make
  	make install
  	cd ..
-@@ -339,9 +503,33 @@
+@@ -339,9 +503,37 @@
  
  mkdir -p build-host
  cd build-host
@@ -284,8 +284,8 @@
 +		cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
 +	fi
 +fi
- cd ..
--cmake --build build-host --target install
++make
++cd ..
 +
 +if [ "$CROSS_PREFIX" != "" ]; then
 +	echo "cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=\"$PREFIX\" --target install --build build-host"
@@ -294,6 +294,10 @@
 +	echo "cmake --target install --build build-host"
 +	cmake --target install --build build-host
 +fi
++cd build-host
++make install
+ cd ..
+-cmake --build build-host --target install
 +CROSS_PREFIX
  
  echo 'subdirs("build-host")' > CTestTestfile.cmake
