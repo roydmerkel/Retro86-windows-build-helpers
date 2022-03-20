@@ -1,5 +1,5 @@
---- configure.old	2020-03-12 10:47:56.083316683 -0700
-+++ configure	2020-03-12 11:13:24.907391650 -0700
+--- configure.old	2022-03-03 21:40:36.693897858 -0800
++++ configure	2022-03-15 20:59:33.471165999 -0700
 @@ -721,13 +721,19 @@
  gcc_cv_otool
  gcc_cv_readelf
@@ -64,7 +64,11 @@
    ac_status=$?
    if test -s conftest.err; then
      sed '10a\
-@@ -22080,10 +22087,13 @@
+@@ -22077,10 +22084,11 @@
+ fi
+ 
+ ORIGINAL_AS_FOR_TARGET=$gcc_cv_as
++WINE_ORIGINAL_AS_FOR_TARGET=`winepath -w $gcc_cv_as`
  
  case "$ORIGINAL_AS_FOR_TARGET" in
    ./as | ./as$build_exeext) ;;
@@ -73,13 +77,7 @@
   ;;
  esac
  
-+WINE_ORIGINAL_AS_FOR_TARGET=`winepath -w $gcc_cv_as`
-+
-+
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking what assembler to use" >&5
- $as_echo_n "checking what assembler to use... " >&6; }
- if test "$gcc_cv_as" = ../gas/as-new$build_exeext; then
-@@ -22240,6 +22250,7 @@
+@@ -22240,6 +22248,7 @@
  fi
  
  ORIGINAL_PLUGIN_LD_FOR_TARGET=$gcc_cv_ld
@@ -87,7 +85,7 @@
  PLUGIN_LD_SUFFIX=`basename $gcc_cv_ld | sed -e "s,$target_alias-,,"`
  # if the PLUGIN_LD is set ld-new, just have it as ld
  # as that is the installed named.
-@@ -22252,12 +22263,14 @@
+@@ -22252,6 +22261,7 @@
  if test "${with_plugin_ld+set}" = set; then :
    withval=$with_plugin_ld; if test x"$withval" != x; then
     ORIGINAL_PLUGIN_LD_FOR_TARGET="$withval"
@@ -95,14 +93,11 @@
     PLUGIN_LD_SUFFIX="$withval"
   fi
  fi
+@@ -22316,10 +22326,11 @@
+ $as_echo "$gold_non_default" >&6; }
  
- 
- 
-+
- cat >>confdefs.h <<_ACEOF
- #define PLUGIN_LD_SUFFIX "$PLUGIN_LD_SUFFIX"
- _ACEOF
-@@ -22319,10 +22332,13 @@
+ ORIGINAL_LD_FOR_TARGET=$gcc_cv_ld
++WINE_ORIGINAL_LD_FOR_TARGET=`winepath -w $gcc_cv_ld`
  
  case "$ORIGINAL_LD_FOR_TARGET" in
    ./collect-ld | ./collect-ld$build_exeext) ;;
@@ -111,13 +106,7 @@
   ;;
  esac
  
-+WINE_ORIGINAL_LD_FOR_TARGET=`winepath -w $gcc_cv_ld`
-+
-+
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking what linker to use" >&5
- $as_echo_n "checking what linker to use... " >&6; }
- if test "$gcc_cv_ld" = ../ld/ld-new$build_exeext \
-@@ -22356,6 +22372,8 @@
+@@ -22356,6 +22367,8 @@
  	gcc_cv_gld_minor_version=`expr "$gcc_cv_gld_version" : "VERSION=[0-9]*\.\([0-9]*\)"`
  	ORIGINAL_LD_BFD_FOR_TARGET=../ld/ld-new$build_exeext
  	ORIGINAL_LD_GOLD_FOR_TARGET=../gold/ld-new$build_exeext
@@ -126,7 +115,7 @@
  else
  	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gcc_cv_ld" >&5
  $as_echo "$gcc_cv_ld" >&6; }
-@@ -22363,11 +22381,15 @@
+@@ -22363,6 +22376,8 @@
  	gcc_cvs_ld_program=`dirname $gcc_cv_ld`/`basename $gcc_cv_ld $host_exeext`
  	ORIGINAL_LD_BFD_FOR_TARGET=${gcc_cvs_ld_program}.bfd$host_exeext
  	ORIGINAL_LD_GOLD_FOR_TARGET=${gcc_cvs_ld_program}.gold$host_exeext
@@ -135,14 +124,11 @@
  fi
  
  
+@@ -22440,10 +22455,11 @@
+ fi
  
- 
-+
-+
- # Figure out what nm we will be using.
- gcc_cv_binutils_srcdir=`echo $srcdir | sed -e 's,/gcc$,,'`/binutils
- if ${gcc_cv_nm+:} false; then :
-@@ -22443,9 +22465,11 @@
+ ORIGINAL_NM_FOR_TARGET=$gcc_cv_nm
++WINE_ORIGINAL_NM_FOR_TARGET=`winepath -w $gcc_cv_nm`
  
  case "$ORIGINAL_NM_FOR_TARGET" in
    ./nm | ./nm$build_exeext) ;;
@@ -150,12 +136,8 @@
 +  *) ac_config_files="$ac_config_files nm.cmd:exec-tool.cmd.in"
   ;;
  esac
-+WINE_ORIGINAL_NM_FOR_TARGET=`winepath -w $gcc_cv_nm`
-+
  
- 
- # Figure out what objdump we will be using.
-@@ -30268,6 +30292,13 @@
+@@ -30268,6 +30284,13 @@
  # Configure the subdirectories
  # AC_CONFIG_SUBDIRS($subdirs)
  
@@ -169,7 +151,7 @@
  # Create the Makefile
  # and configure language subdirectories
  ac_config_files="$ac_config_files $all_outputs"
-@@ -30984,10 +31015,11 @@
+@@ -30984,10 +31007,11 @@
      "auto-host.h") CONFIG_HEADERS="$CONFIG_HEADERS auto-host.h:config.in" ;;
      "depdir") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir" ;;
      "gccdepdir") CONFIG_COMMANDS="$CONFIG_COMMANDS gccdepdir" ;;
@@ -184,7 +166,7 @@
      "$all_outputs") CONFIG_FILES="$CONFIG_FILES $all_outputs" ;;
      "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
  
-@@ -31618,9 +31650,9 @@
+@@ -31618,9 +31642,9 @@
    do
        ${CONFIG_SHELL-/bin/sh} $ac_aux_dir/mkinstalldirs $lang/$DEPDIR
    done ;;

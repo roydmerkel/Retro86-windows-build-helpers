@@ -15,6 +15,10 @@ SET exeext=@host_exeext@
 SET fast_install=@enable_fast_install@
 SET objdir=@objdir@
 
+echo exec-tool.cmd: PATH: "%PATH%"
+echo "environment: "
+set
+
 SET invoked=%arg0%
 SET invokeddir=%arg0%
 for /F %%i in ("%invoked%") do SET invoked=%%~ni
@@ -37,11 +41,11 @@ goto endselect
 :invcollectld
 REM Check -fuse-ld=bfd and -fuse-ld=gold
 
-echo %args% | wineFindStrWorkarround "-fuse-ld=bfd"
+echo exec-tool.cmd: %args% | wineFindStrWorkarround "-fuse-ld=bfd"
 
 IF %ERRORLEVEL% EQU 0 goto bfdld
 
-echo %args% | wineFindStrWorkarround "-fuse-ld=gold"
+echo exec-tool.cmd: %args% | wineFindStrWorkarround "-fuse-ld=gold"
 
 if %ERRORLEVEL% EQU 0 goto goldld
 
@@ -68,7 +72,9 @@ goto choseld
 SET prog=ld-new%exeext%
 
 if x%original% == x../gold/ld-new%exeext% goto golddir
+if x%original% == x../gold\ld-new%exeext% goto golddir
 if x%original% == x..\gold\ld-new%exeext% goto golddir
+if x%original% == x..\gold/ld-new%exeext% goto golddir
 
 SET dir=ld
 goto chosedir
@@ -96,6 +102,7 @@ goto endselect
 
 if x%original:~0,3%==x../ goto origdotdot
 if x%original:~0,3%==x..\ goto origdotdot
+echo exec-tool.cmd: call %original% %args%
 call %original% %args%
 goto end
 
@@ -109,19 +116,23 @@ popd
 if exist %scriptdir%\..\%dir%\%prog%.exe goto testxscrdirprg
 if exist %scriptdir%\..\%dir%\%prog%.cmd goto testxscrdirprg
 
+echo exec-tool.cmd: call %scriptdir%\..\prev-%dir%\%prog% %args%
 call %scriptdir%\..\prev-%dir%\%prog% %args%
 goto end
 
 :testxscrdirprg
 
+if NOT x%fast_install%==xyes echo exec-tool.cmd: call %scriptdir%\..\%dir%\%prog% %args%
 if NOT x%fast_install%==xyes call %scriptdir%\..\%dir%\%prog% %args%
 if NOT x%fast_install%==xyes goto end
 
 REM if libtool did everything it needs to do, there's a fast path
 SET lt_prog=%scriptdir%\..\%dir%\%objdir%\lt-%prog%
 
+if exist %lt_prog%.exe echo exec-tool.cmd: %lt_prog%.exe %args%
 if exist %lt_prog%.exe %lt_prog%.exe %args%
 if exist %lt_prog%.exe goto end
+if exist %lt_prog%.cmd echo exec-tool.cmd: call %lt_prog%.cmd %args%
 if exist %lt_prog%.cmd call %lt_prog%.cmd %args%
 if exist %lt_prog%.cmd goto end
 
@@ -129,10 +140,12 @@ REM libtool has not relinked ld-new yet, but we cannot just use the
 REM previous stage (because then the relinking would just never happen!).
 REM So we take extra care to use prev-ld/ld-new *on recursive calls*.
 CALL SET LT_RCU=%%LT_RCU_%id%%%
+if x%LT_RCU%==x1 echo exec-tool.cmd: call %scriptdir%\..\prev-%dir%\%prog% %args%
 if x%LT_RCU%==x1 call %scriptdir%\..\prev-%dir%\%prog% %args%
 if x%LT_RCU%==x1 goto end
 
 CALL SET LT_RCU_%id%=1
+echo exec-tool.cmd: call %scriptdir%\..\%dir%\%prog% %args%
 call %scriptdir%\..\%dir%\%prog% %args%
 exit /b %errorlevel%
 

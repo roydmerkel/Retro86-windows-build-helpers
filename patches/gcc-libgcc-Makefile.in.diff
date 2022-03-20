@@ -1,5 +1,5 @@
---- Makefile.in.old	2020-03-12 14:28:26.243873616 -0700
-+++ Makefile.in	2020-03-12 19:48:03.238005543 -0700
+--- Makefile.in.old	2022-03-12 15:55:03.520249399 -0800
++++ Makefile.in	2022-03-12 16:35:29.085900881 -0800
 @@ -313,7 +313,8 @@
  inst_slibdir = $(slibdir)$(MULTIOSSUBDIR)
  
@@ -244,11 +244,11 @@
  	  -DSIZE=`echo "$*" | sed 's/.*_//'` \
 -	  -c $< $(vis_hide)
 +	  -c $< $(vis_hide) && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
-+	    | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
-+	      while IFS= read -r line; \
-+	      do \
-+	        sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
-+	      done) && mv $(dep_filename).bak $(dep_filename)
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
  libgcc-objects += $(libgcc-sync-size-funcs-o)
  
  libgcc-sync-funcs := sync_synchronize
@@ -258,11 +258,11 @@
  	  -DL$* \
 -	  -c $< $(vis_hide)
 +	  -c $< $(vis_hide) && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
-+	    | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
-+	      while IFS= read -r line; \
-+	      do \
-+	        sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
-+	      done) && mv $(dep_filename).bak $(dep_filename)
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
  libgcc-objects += $(libgcc-sync-funcs-o)
  
  ifeq ($(enable_shared),yes)
@@ -272,11 +272,11 @@
  	  -DSIZE=`echo "$*" | sed 's/.*_//'` \
 -	  -c $<
 +	  -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
-+	    | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
-+	      while IFS= read -r line; \
-+	      do \
-+	        sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
-+	      done) && mv $(dep_filename).bak $(dep_filename)
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
  libgcc-s-objects += $(libgcc-sync-size-funcs-s-o)
  
  libgcc-sync-funcs-s-o = $(patsubst %,%_s$(objext),$(libgcc-sync-funcs))
@@ -285,11 +285,11 @@
  	  -DL$*	\
 -	  -c $<
 +	  -c $< && cp $(dep_filename) $(dep_filename).bak && (cat $(dep_filename) \
-+	    | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
-+	      while IFS= read -r line; \
-+	      do \
-+	        sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
-+	      done) && mv $(dep_filename).bak $(dep_filename)
++	  | egrep '^\s*[A-Za-z]:' | sed -e 's/^\s*//g' -e 's/:\s*$$//g' -e 's/\s*\\\s*$$//g' | sort -u | sed -e 's/\\/\\\\/g' | \
++	    while IFS= read -r line; \
++	    do \
++	      sed -ie 's#'"$$line"'#'$$(winepath -u "$$line" | sed -e 's#:#\\\\:#g')'#g' $(dep_filename).bak; \
++	    done) && mv $(dep_filename).bak $(dep_filename)
  libgcc-s-objects += $(libgcc-sync-funcs-s-o)
  endif
  endif

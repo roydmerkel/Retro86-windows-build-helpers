@@ -1,0 +1,19 @@
+--- random.h.old	2022-03-17 12:25:29.842503606 -0700
++++ random.h	2022-03-17 12:26:02.029484787 -0700
+@@ -97,11 +97,11 @@
+       struct _Select_uint_least_t<__s, 2>
+       { typedef unsigned long long type; };
+ 
+-#ifdef _GLIBCXX_USE_INT128
+-    template<int __s>
+-      struct _Select_uint_least_t<__s, 1>
+-      { typedef unsigned __int128 type; };
+-#endif
++//#ifdef _GLIBCXX_USE_INT128
++//    template<int __s>
++//      struct _Select_uint_least_t<__s, 1>
++//      { typedef unsigned __int128 type; };
++//#endif
+ 
+     // Assume a != 0, a < m, c < m, x < m.
+     template<typename _Tp, _Tp __m, _Tp __a, _Tp __c,

@@ -1,6 +1,14 @@
---- build-toolchain.bash.old	2020-03-12 21:40:37.781964257 -0700
-+++ build-toolchain.bash	2020-03-20 19:49:28.164099254 -0700
-@@ -44,6 +44,10 @@
+--- build-toolchain.bash.old	2022-03-01 21:50:31.615525645 -0800
++++ build-toolchain.bash	2022-03-19 10:32:11.059203654 -0700
+@@ -41,9 +41,18 @@
+ BUILD_PPC=true
+ BUILD_CARBON=true
+ CLEAN_AFTER_BUILD=false
++STOP_AFTER_68K_GCC=false
++STOP_AFTER_PPC_GCC=false
++SKIP_68K_GCC=false
++SKIP_PPC_GCC=false
++
  HOST_CMAKE_FLAGS=()
  CMAKE_GENERATOR=
  
@@ -11,7 +19,7 @@
  function usage()
  {
  	echo "Usage: $0 [options]"
-@@ -61,6 +65,12 @@
+@@ -61,6 +70,16 @@
      echo "    --universal               use Apple's universal interfaces (default: autodetect)"
      echo "    --multiversal             use the open-source multiversal interfaces (default: autodetect)"
  	echo "    --help                    show this help message"
@@ -19,12 +27,35 @@
 +	echo "    --host                    cross-compile to build programs to run on HOST [BUILD]"
 +	echo "    --cross-prefix            cross compiler prefix for cmake"
 +	echo "    --boost-rootdir           boost root dir for hfsutils"
-+	echo "    --boost-libdir           boost root dir for hfsutils"
-+	echo "    --boost-incdir           boost root dir for hfsutils"
++	echo "    --boost-libdir            boost root dir for hfsutils"
++	echo "    --boost-incdir            boost root dir for hfsutils"
++	echo "    --stop-after-68k-gcc      stop build after 68k gcc."
++	echo "    --stop-after-ppc-gcc      stop build after ppc gcc."
++	echo "    --skip-68k-gcc-build      skip 68k gcc build."
++	echo "    --skip-ppc-gcc-build      skip ppc gcc build."
  }
  
  for ARG in $*; do
-@@ -92,6 +102,26 @@
+@@ -78,6 +97,18 @@
+ 			BUILD_PPC=false
+ 			BUILD_CARBON=false
+ 			;;
++		--stop-after-68k-gcc)
++			STOP_AFTER_68K_GCC=true
++			;;
++		--stop-after-ppc-gcc)
++			STOP_AFTER_PPC_GCC=true
++			;;
++		--skip-68k-gcc-build)
++			SKIP_68K_GCC=true
++			;;
++		--skip-ppc-gcc-build)
++			SKIP_PPC_GCC=true
++			;;
+ 		--no-carbon)
+ 			BUILD_CARBON=false
+ 			;;
+@@ -92,6 +123,26 @@
  			HOST_CMAKE_FLAGS[${#HOST_CMAKE_FLAGS[@]}]="-DCMAKE_C_COMPILER=${ARG#*=}"
  			HOST_C_COMPILER="${ARG#*=}"
  			;;
@@ -51,9 +82,9 @@
  		--ninja)
  			CMAKE_GENERATOR=-GNinja
  			;;
-@@ -121,6 +151,15 @@
- 	ARCHS="$ARCHS powerpc"
- fi
+@@ -113,6 +164,16 @@
+ 	esac
+ done
  
 +if [ "$BOOST_ROOT" != "" -a "$BOOST_LIBRARYDIR" = "" ]; then
 +	BOOST_LIBRARYDIR="$BOOST_ROOT/lib"
@@ -64,10 +95,16 @@
 +	BOOST_INCLUDE_DIRS="$BOOST_ROOT/include"
 +	Boost_INCLUDE_DIRS="$BOOST_ROOT/include"
 +fi
- 
++
  ##################### Sanity checks
  
-@@ -227,10 +266,21 @@
+ if [ `pwd -P` == "$SRC" ]; then
+@@ -220,25 +281,87 @@
+ 	fi
+ 		
+ 	# Components needed for targeting 68K: binutils, gcc
+-	if [ $BUILD_68K != false ]; then
++	if [ $BUILD_68K != false -a $SKIP_68K_GCC != true ]; then
  		export CC=$HOST_C_COMPILER
  		export CXX=$HOST_CXX_COMPILER
  
@@ -79,47 +116,52 @@
 -		$SRC/binutils/configure --target=m68k-apple-macos --prefix=$PREFIX --disable-doc
 +		if [ "$BUILD" != "" -a "$HOST" != "" ]; then
 +			$SRC/binutils/configure --host=$HOST --build=$BUILD --target=m68k-apple-macos --prefix=$PREFIX --disable-doc
-+		elif [ "$BUILD" != "" ]; then 
++		elif [ "$BUILD" != "" ]; then
 +			$SRC/binutils/configure --build=$BUILD --target=m68k-apple-macos --prefix=$PREFIX --disable-doc
-+		elif [ "$HOST" != "" ]; then 
++		elif [ "$HOST" != "" ]; then
 +			$SRC/binutils/configure --host=$HOST --target=m68k-apple-macos --prefix=$PREFIX --disable-doc
 +		else
 +			$SRC/binutils/configure --target=m68k-apple-macos --prefix=$PREFIX --disable-doc
 +		fi
-+
  		make -j8
  		make install
  		cd ..
-@@ -239,9 +289,58 @@
+ 
+ 		# Build gcc for 68K
  		mkdir -p gcc-build
++		mkdir -p gcc-build/gcc
  		cd gcc-build
++		cp ../toolchain/m68k-apple-macos/bin/*.exe gcc
  		export target_configargs="--disable-nls --enable-libstdcxx-dual-abi=no --disable-libstdcxx-verbose"
 -		$SRC/gcc/configure --target=m68k-apple-macos --prefix=$PREFIX \
+-				--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
+-				--disable-libssp MAKEINFO=missing
++		set
 +		if [ "$BUILD" != "" -a "$HOST" != "" ]; then
 +			$SRC/gcc/configure --host=$HOST --build=$BUILD \
-+				--target=m68k-apple-macos --prefix=$PREFIX \
-+				--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
-+				--disable-libssp MAKEINFO=missing
-+		elif [ "$BUILD" != "" ]; then 
++					--target=m68k-apple-macos --prefix=$PREFIX \
++					--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
++					--disable-libssp MAKEINFO=missing
++		elif [ "$BUILD" != "" ]; then
 +			$SRC/gcc/configure --build=$BUILD \
-+				--target=m68k-apple-macos --prefix=$PREFIX \
-+				--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
-+				--disable-libssp MAKEINFO=missing
-+		elif [ "$HOST" != "" ]; then 
++					--target=m68k-apple-macos --prefix=$PREFIX \
++					--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
++					--disable-libssp MAKEINFO=missing
++		elif [ "$HOST" != "" ]; then
 +			$SRC/gcc/configure --host=$HOST \
-+				--target=m68k-apple-macos --prefix=$PREFIX \
-+				--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
-+				--disable-libssp MAKEINFO=missing
++					--target=m68k-apple-macos --prefix=$PREFIX \
++					--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
++					--disable-libssp MAKEINFO=missing
 +		else
 +			$SRC/gcc/configure --target=m68k-apple-macos --prefix=$PREFIX \
- 				--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
- 				--disable-libssp MAKEINFO=missing
++					--enable-languages=c,c++ --with-arch=m68k --with-cpu=m68000 \
++					--disable-libssp MAKEINFO=missing
 +		fi
 +
-+		sed -i -e 's#S\["GCC_FOR_TARGET"\]="m68k-apple-macos-gcc"#S["GCC_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/"#g' config.status
-+		sed -i -e 's#S\["CXX_FOR_TARGET"\]="m68k-apple-macos-c[+][+]"#S["CXX_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xg++.exe -B$$r/$(HOST_SUBDIR)/gcc/ -nostdinc++ `if test -f $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags; then $(SHEL"\\\n"L) $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags --build-includes; else echo -funconfigured-libstdc++-v3 ; fi` -L$$r/$(TARGET_SUBDIR)/li"\\\n"bstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs"#g' config.status
-+		sed -i -e 's#S\["CC_FOR_TARGET"\]="m68k-apple-macos-cc"#S["CC_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/"#g' config.status
-+		sed -i -e 's#S\["RAW_CXX_FOR_TARGET"\]="m68k-apple-macos-c[+][+]"#S["RAW_CXX_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -shared-libgcc -B$$r/$(HOST_SUBDIR)/gcc -nostdinc++ -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libst"\\\n"dc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs"#g' config.status
++                sed -i -e 's#S\["GCC_FOR_TARGET"\]="m68k-apple-macos-gcc"#S["GCC_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/"#g' config.status
++                sed -i -e 's#S\["CXX_FOR_TARGET"\]="m68k-apple-macos-c[+][+]"#S["CXX_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xg++.exe -B$$r/$(HOST_SUBDIR)/gcc/ -nostdinc++ `if test -f $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags; then $(SHEL"\\\n"L) $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags --build-includes; else echo -funconfigured-libstdc++-v3 ; fi` -L$$r/$(TARGET_SUBDIR)/li"\\\n"bstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs"#g' config.status
++                sed -i -e 's#S\["CC_FOR_TARGET"\]="m68k-apple-macos-cc"#S["CC_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -B$$r/$(HOST_SUBDIR)/gcc/"#g' config.status
++                sed -i -e 's#S\["RAW_CXX_FOR_TARGET"\]="m68k-apple-macos-c[+][+]"#S["RAW_CXX_FOR_TARGET"]="$$r/$(HOST_SUBDIR)/gcc/xgcc.exe -shared-libgcc -B$$r/$(HOST_SUBDIR)/gcc -nostdinc++ -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libst"\\\n"dc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs"#g' config.status
 +
 +		sed -i -e 's#S\["AS_FOR_TARGET"\]="m68k-apple-macos-as"#S["AS_FOR_TARGET"]="'"$PREFIX"'m68k-apple-macos/bin/as.exe"#g' config.status
 +		sed -i -e 's#S\["AR_FOR_TARGET"\]="m68k-apple-macos-ar"#S["AR_FOR_TARGET"]="'"$PREFIX"'m68k-apple-macos/bin/ar.exe"#g' config.status
@@ -150,22 +192,34 @@
  		# There seems to be a build failure in parallel builds; ignore any errors and try again without -j8.
  		make -j8 || make
  		make install
-@@ -255,10 +354,10 @@
+@@ -250,10 +373,10 @@
  
  		# Move the real linker aside and install symlinks to Elf2Mac
  		# (Elf2Mac is built by cmake below)
 -		mv $PREFIX/bin/m68k-apple-macos-ld $PREFIX/bin/m68k-apple-macos-ld.real
 -		mv $PREFIX/m68k-apple-macos/bin/ld $PREFIX/m68k-apple-macos/bin/ld.real
--		ln -s $PREFIX/bin/Elf2Mac $PREFIX/bin/m68k-apple-macos-ld
--		ln -s $PREFIX/bin/Elf2Mac $PREFIX/m68k-apple-macos/bin/ld
+-		ln -s Elf2Mac $PREFIX/bin/m68k-apple-macos-ld
+-		ln -s ../../bin/Elf2Mac $PREFIX/m68k-apple-macos/bin/ld
 +		mv $PREFIX/bin/m68k-apple-macos-ld.exe $PREFIX/bin/m68k-apple-macos-ld.exe.real
 +		mv $PREFIX/m68k-apple-macos/bin/ld.exe $PREFIX/m68k-apple-macos/bin/ld.exe.real
-+		ln -s $PREFIX/bin/Elf2Mac.exe $PREFIX/bin/m68k-apple-macos-ld.exe
-+		ln -s $PREFIX/bin/Elf2Mac.exe $PREFIX/m68k-apple-macos/bin/ld.exe
++		ln -s Elf2Mac.exe $PREFIX/bin/m68k-apple-macos-ld.exe
++		ln -s ../../bin/Elf2Mac.exe $PREFIX/m68k-apple-macos/bin/ld.exe
  
  		if [ $CLEAN_AFTER_BUILD != false ]; then
  			rm -rf binutils-build
-@@ -285,10 +384,20 @@
+@@ -261,26 +384,89 @@
+ 		fi
+ 
+ 	fi
++	if [ $STOP_AFTER_68K_GCC != false ]; then
++		unset CPPFLAGS
++		unset LDFLAGS
++		exit 0
++	fi
+ 
+ 	# Components needed for targeting PPC (including Carbon): binutils, gcc
+-	if [ $BUILD_PPC != false ]; then
++	if [ $BUILD_PPC != false -a $SKIP_PPC_GCC != true ]; then
  		export CC=$HOST_C_COMPILER
  		export CXX=$HOST_CXX_COMPILER
  
@@ -177,9 +231,9 @@
 -		$SRC/binutils/configure --disable-plugins --target=powerpc-apple-macos --prefix=$PREFIX --disable-doc
 +		if [ "$BUILD" != "" -a "$HOST" != "" ]; then
 +			$SRC/binutils/configure --host=$HOST --build=$BUILD --disable-plugins --target=powerpc-apple-macos --prefix=$PREFIX --disable-doc
-+		elif [ "$BUILD" != "" ]; then 
++		elif [ "$BUILD" != "" ]; then
 +			$SRC/binutils/configure --build=$BUILD --disable-plugins --target=powerpc-apple-macos --prefix=$PREFIX --disable-doc
-+		elif [ "$HOST" != "" ]; then 
++		elif [ "$HOST" != "" ]; then
 +			$SRC/binutils/configure --host=$HOST --disable-plugins --target=powerpc-apple-macos --prefix=$PREFIX --disable-doc
 +		else
 +			$SRC/binutils/configure --disable-plugins --target=powerpc-apple-macos --prefix=$PREFIX --disable-doc
@@ -187,9 +241,12 @@
  		make -j8
  		make install
  		cd ..
-@@ -297,8 +406,54 @@
+ 
+ 		# Build gcc for PPC
  		mkdir -p gcc-build-ppc
++		mkdir -p gcc-build-ppc/gcc
  		cd gcc-build-ppc
++		cp ../toolchain/powerpc-apple-macos/bin/*.exe gcc
  		export target_configargs="--disable-nls --enable-libstdcxx-dual-abi=no --disable-libstdcxx-verbose"
 -		$SRC/gcc/configure --target=powerpc-apple-macos --prefix=$PREFIX \
 -			--enable-languages=c,c++ --disable-libssp --disable-lto MAKEINFO=missing
@@ -197,11 +254,11 @@
 +			$SRC/gcc/configure --host=$HOST --build=$BUILD \
 +				--target=powerpc-apple-macos --prefix=$PREFIX \
 +				--enable-languages=c,c++ --disable-libssp --disable-lto MAKEINFO=missing
-+		elif [ "$BUILD" != "" ]; then 
++		elif [ "$BUILD" != "" ]; then
 +			$SRC/gcc/configure --build=$BUILD \
 +				--target=powerpc-apple-macos --prefix=$PREFIX \
 +				--enable-languages=c,c++ --disable-libssp --disable-lto MAKEINFO=missing
-+		elif [ "$HOST" != "" ]; then 
++		elif [ "$HOST" != "" ]; then
 +			$SRC/gcc/configure --host=$HOST \
 +				--target=powerpc-apple-macos --prefix=$PREFIX \
 +				--enable-languages=c,c++ --disable-libssp --disable-lto MAKEINFO=missing
@@ -244,25 +301,36 @@
  		make -j8
  		make install
  		unset target_configargs
-@@ -321,7 +476,16 @@
- 	rm -rf hfsutils
- 	cp -r $SRC/hfsutils .
- 	cd hfsutils
--	./configure --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
-+	if [ "$BUILD" != "" -a "$HOST" != "" ]; then
-+		./configure --host=$HOST --build=$BUILD --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
-+	elif [ "$BUILD" != "" ]; then
-+		./configure --build=$BUILD --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
-+	elif [ "$HOST" != "" ]; then
-+		./configure --host=$HOST --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
-+	else
-+		./configure --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
+@@ -294,6 +480,11 @@
+ 			rm -rf gcc-build-ppc
+ 		fi
+ 	fi
++	if [ $STOP_AFTER_PPC_GCC != false ]; then
++		unset CPPFLAGS
++		unset LDFLAGS
++		exit 0
 +	fi
-+
+ 
+ 	unset CPPFLAGS
+ 	unset LDFLAGS
+@@ -304,7 +495,15 @@
+ 	mkdir -p $PREFIX/share/man/man1
+ 	mkdir -p hfsutils
+ 	cd hfsutils
+-	$SRC/hfsutils/configure --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
++	if [ "$BUILD" != "" -a "$HOST" != "" ]; then
++		$SRC/hfsutils/configure --host=$HOST --build=$BUILD --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
++	elif [ "$BUILD" != "" ]; then
++		$SRC/hfsutils/configure --build=$BUILD --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
++	elif [ "$HOST" != "" ]; then
++		$SRC/hfsutils/configure --host=$HOST --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
++	else
++		$SRC/hfsutils/configure --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
++	fi
  	make
  	make install
  	cd ..
-@@ -339,9 +503,37 @@
+@@ -322,9 +521,38 @@
  
  mkdir -p build-host
  cd build-host
@@ -277,8 +345,8 @@
 +	fi
 +else
 +	if [ "$BOOST_ROOT" != "" ]; then
-+		echo 'Boost_DIR="'"$Boost_DIR"'" BOOST_DIR="'"$Boost_DIR"'" BOOST_ROOT="'"$BOOST_ROOT"'" cmake '"${SRC}"' -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS=ON -DBOOST_ROOT="'"$BOOST_ROOT"'" -DBOOST_DIR:PATH="'"$Boost_DIR"'" -DBoost_DIR:PATH="'"$Boost_DIR"'" "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
-+		Boost_DIR="$Boost_DIR" BOOST_DIR="$Boost_DIR" BOOST_ROOT="$BOOST_ROOT" cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS=ON -DBOOST_ROOT="$BOOST_ROOT" -DBOOST_DIR:PATH="$Boost_DIR" -DBoost_DIR:PATH="$Boost_DIR" "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
++		echo 'Boost_DIR="'"$Boost_DIR"'" BOOST_DIR="'"$Boost_DIR"'" BOOST_ROOT="'"$BOOST_ROOT"'" cmake '"${SRC}"' -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS:BOOL=ON -DBOOST_ROOT:PATH="'"$BOOST_ROOT"'" -DBOOST_DIR:PATH="'"$Boost_DIR"'" -DBoost_DIR:PATH="'"$Boost_DIR"'" "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
++		Boost_DIR="$Boost_DIR" BOOST_DIR="$Boost_DIR" BOOST_ROOT="$BOOST_ROOT" cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS:BOOL=ON -DBOOST_ROOT:PATH="$BOOST_ROOT" -DBOOST_DIR:PATH="$Boost_DIR" -DBoost_DIR:PATH="$Boost_DIR" "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
 +	else
 +		echo 'cmake '"${SRC}"' -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
 +		cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
@@ -287,14 +355,15 @@
 +make
 +cd ..
 +
-+if [ "$CROSS_PREFIX" != "" ]; then
-+	echo "cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=\"$PREFIX\" --target install --build build-host"
-+	cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX="$PREFIX" --target install --build build-host
-+else
-+	echo "cmake --target install --build build-host"
-+	cmake --target install --build build-host
-+fi
 +cd build-host
++mkdir -p install
++if [ "$CROSS_PREFIX" != "" ]; then
++	echo "cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=\"$PREFIX\" --build build-host --target install"
++	cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX="$PREFIX" --build build-host --target install
++else
++	echo "cmake --build build-host --target install"
++	cmake --build build-host --target install
++fi
 +make install
  cd ..
 -cmake --build build-host --target install

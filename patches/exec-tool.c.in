@@ -120,6 +120,43 @@ void dirname(const char *path, char *out)
 	}
 }
 
+#ifdef __unix__
+int execvp_print(const char *file, char *const argv[])
+{
+	int i;
+
+	fprintf(stderr, "exec-tool: exec: \"%s\"", ((file != NULL) ? file : "null"));
+	for(i = 0; argv && argv[i]; i++)
+	{
+		fprintf(stderr, " \"%s\"", argv[i]);
+	}
+	fprintf(stderr, "\n");
+
+	return execvp(file, argv);
+}
+
+#define EXECVP(FILE, ARGV) execvp_print(FILE, ARGV)
+//#define EXECVP(FILE, ARGV) execvp(FILE, ARGV)
+
+#elif defined(__WIN32__) || defined(_WIN32) || defined(__CYGWIN32__) || defined(_MSC_VER)
+intptr_t _spawnvp_printf(int mode, const char *cmdname, const char *const *argv)
+{
+	int i;
+
+	fprintf(stderr, "exec-tool: spawn: %x \"%s\"", mode, ((cmdname != NULL) ? cmdname : "null"));
+	for(i = 0; argv && argv[i]; i++)
+	{
+		fprintf(stderr, " \"%s\"", argv[i]);
+	}
+
+	return _spawnvp(mode, cmdname, argv);
+}
+
+#define _SPAWNVP(MODE, FILE, ARGV) _spawnvp_printf(MODE, FILE, ARGV)
+//#define SPAWNVP(MODE, FILE, ARGV) _spawnvp(MODE, FILE, ARGV)
+
+#endif
+
 int main(int argc, char **argv)
 {
 	const char *strrchrFSlash = strrchr(argv[0], '/');
@@ -130,8 +167,15 @@ int main(int argc, char **argv)
 	const char *prog;
 	const char *dir;
 	const char *fast_install;
+	int i;
 
 	fast_install = FAST_INSTALL;
+
+	fprintf(stderr, "PATH: \"%s\"\n", getenv("PATH"));
+	for(i = 0; _environ[i]; i++)
+	{
+		fprintf(stderr, "environment[%d]: \"%s\"\n", i, _environ[i]);
+	}
 
 	basename(argv[0], invoked);
 	strcpy(id, invoked);
@@ -247,7 +291,7 @@ int main(int argc, char **argv)
 			if(strcmp(fast_install, "yes"))
 			{
 				sprintf(progPath, "%s/../%s/%s", scriptdir, dir, prog);
-				execvp(progPath, argv);
+				EXECVP(progPath, argv);
 			}
 			else
 			{
@@ -258,7 +302,7 @@ int main(int argc, char **argv)
 
 				if(access(lt_prog, X_OK) == 0)
 				{
-					execvp(lt_prog, argv);
+					EXECVP(lt_prog, argv);
 					_exit(EXIT_FAILURE);   // exec never returns
 				}
 				else
@@ -280,7 +324,7 @@ int main(int argc, char **argv)
 					if(!strcmp(LT_RCU, "1"))
 					{
 						sprintf(progPath, "%s/../prev-%s/%s", scriptdir, dir, prog);
-						execvp(progPath, argv);
+						EXECVP(progPath, argv);
 						_exit(EXIT_FAILURE);   // exec never returns
 					}
 					else
@@ -310,7 +354,7 @@ int main(int argc, char **argv)
 						else 
 						{
 						    // we are the child
-						    execvp(progPath, argv);
+						    EXECVP(progPath, argv);
 						    _exit(EXIT_FAILURE);   // exec never returns
 						}
 					}
@@ -320,7 +364,7 @@ int main(int argc, char **argv)
 		else
 		{
 			sprintf(progPath, "%s/../prev-%s/%s", scriptdir, dir, prog);
-			execvp(progPath, argv);
+			EXECVP(progPath, argv);
 			_exit(EXIT_FAILURE);   // exec never returns
 		}
 #elif defined(__WIN32__) || defined(_WIN32) || defined(__CYGWIN32__) || defined(_MSC_VER)
@@ -342,7 +386,7 @@ int main(int argc, char **argv)
 				((char **)args)[0] = progPath;
 				((char **)args)[argc] = NULL;
 
-				status = _spawnvp(_P_WAIT, progPath, args);
+				status = _SPAWNVP(_P_WAIT, progPath, args);
 				return status;
 			}
 			else
@@ -365,7 +409,7 @@ int main(int argc, char **argv)
 					((char **)args)[0] = lt_prog;
 					((char **)args)[argc] = NULL;
 
-					status = _spawnvp(_P_WAIT, lt_prog, args);
+					status = _SPAWNVP(_P_WAIT, lt_prog, args);
 					return status;
 				}
 				else
@@ -397,7 +441,7 @@ int main(int argc, char **argv)
 						((char **)args)[0] = progPath;
 						((char **)args)[argc] = NULL;
 
-						status = _spawnvp(_P_WAIT, progPath, args);
+						status = _SPAWNVP(_P_WAIT, progPath, args);
 						return status;
 					}
 					else
@@ -417,7 +461,7 @@ int main(int argc, char **argv)
 
 						sprintf(envSet, "%s=1", envVar);
 						_putenv(envSet);
-						status = _spawnvp(_P_WAIT, progPath, args);
+						status = _SPAWNVP(_P_WAIT, progPath, args);
 						return status;
 					}
 				}
@@ -437,7 +481,7 @@ int main(int argc, char **argv)
 			((char **)args)[0] = progPath;
 			((char **)args)[argc] = NULL;
 
-			status = _spawnvp(_P_WAIT, progPath, args);
+			status = _SPAWNVP(_P_WAIT, progPath, args);
 			return status;
 		}
 #endif
@@ -445,7 +489,7 @@ int main(int argc, char **argv)
 	else
 	{
 #ifdef __unix__
-		execvp(original, argv);
+		EXECVP(original, argv);
 		_exit(EXIT_FAILURE);   // exec never returns
 #elif defined(__WIN32__) || defined(_WIN32) || defined(__CYGWIN32__) || defined(_MSC_VER)
 		int status;
@@ -459,7 +503,7 @@ int main(int argc, char **argv)
 		((char **)args)[0] = (char *)original;
 		((char **)args)[argc] = NULL;
 
-		status = _spawnvp(_P_WAIT, original, args);
+		status = _SPAWNVP(_P_WAIT, original, args);
 		return status;
 #endif
 	}

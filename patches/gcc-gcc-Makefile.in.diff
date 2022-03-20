@@ -1,5 +1,5 @@
---- Makefile.in.old	2020-03-12 11:45:35.259486307 -0700
-+++ Makefile.in	2020-03-12 11:48:50.179495865 -0700
+--- Makefile.in.old	2022-03-03 22:11:39.931794578 -0800
++++ Makefile.in	2022-03-14 15:53:22.595610460 -0700
 @@ -1945,7 +1945,7 @@
  # "nul" instead of "/dev/null" if we're building on a mingw machine.
  # Specify the path to gcc/testsuite/selftests within the srcdir

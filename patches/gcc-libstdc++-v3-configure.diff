@@ -1,0 +1,1039 @@
+--- configure.old	2022-03-03 22:22:00.857930250 -0800
++++ configure	2022-03-17 09:25:30.238403483 -0700
+@@ -1786,14 +1786,14 @@
+ {
+   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+   rm -f conftest.$ac_objext
+-  if { { ac_try="$ac_compile"
++  if { { ac_try="($ac_compile -nostdlib | sed -e 's/\r//g')"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_compile") 2>conftest.err
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     grep -v '^ *+' conftest.err >conftest.er1
+@@ -1824,14 +1824,14 @@
+ {
+   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+   rm -f conftest.$ac_objext
+-  if { { ac_try="$ac_compile"
++  if { { ac_try="($ac_compile -nostdlib | sed -e 's/\r//g')"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_compile") 2>conftest.err
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     grep -v '^ *+' conftest.err >conftest.er1
+@@ -1899,14 +1899,14 @@
+ {
+   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+   rm -f conftest.$ac_objext conftest$ac_exeext
+-  if { { ac_try="$ac_link"
++  if { { ac_try="($ac_link -nostdlib | sed -e 's/\r//g')"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_link") 2>conftest.err
++  (eval "($ac_link -nostdlib | sed -e 's/\r//g')") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     grep -v '^ *+' conftest.err >conftest.er1
+@@ -1976,14 +1976,14 @@
+ ac_fn_c_try_run ()
+ {
+   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+-  if { { ac_try="$ac_link"
++  if { { ac_try="($ac_link -nostdlib | sed -e 's/\r//g')"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_link") 2>&5
++  (eval "($ac_link -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; } && { ac_try='./conftest$ac_exeext'
+@@ -2125,14 +2125,14 @@
+ {
+   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+   rm -f conftest.$ac_objext conftest$ac_exeext
+-  if { { ac_try="$ac_link"
++  if { { ac_try="($ac_link -nostdlib | sed -e 's/\r//g')"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_link") 2>conftest.err
++  (eval "($ac_link -nostdlib | sed -e 's/\r//g')") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     grep -v '^ *+' conftest.err >conftest.er1
+@@ -4109,14 +4109,14 @@
+ set X $ac_compile
+ ac_compiler=$2
+ for ac_option in --version -v -V -qversion; do
+-  { { ac_try="$ac_compiler $ac_option >&5"
++  { { ac_try="($ac_compiler $ac_option -nostdlib | sed -e 's/\r//g') >&5"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_compiler $ac_option >&5") 2>conftest.err
++  (eval "($ac_compiler $ac_option -nostdlib | sed -e 's/\r//g') >&5") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     sed '10a\
+@@ -4142,7 +4142,7 @@
+ _ACEOF
+ # FIXME: Cleanup?
+ if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_link\""; } >&5
+-  (eval $ac_link) 2>&5
++  (eval "($ac_link -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then :
+@@ -4190,14 +4190,14 @@
+ done
+ rm -f $ac_rmfiles
+ 
+-if { { ac_try="$ac_link_default"
++if { { ac_try="($ac_link_default -nostdlib | sed -e 's/\r//g')"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_link_default") 2>&5
++  (eval "($ac_link_default -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then :
+@@ -4260,14 +4260,14 @@
+ ac_clean_files=$ac_clean_files_save
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for suffix of executables" >&5
+ $as_echo_n "checking for suffix of executables... " >&6; }
+-if { { ac_try="$ac_link"
++if { { ac_try="($ac_link -nostdlib | sed -e 's/\r//g')"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_link") 2>&5
++  (eval "($ac_link -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then :
+@@ -4316,14 +4316,14 @@
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are cross compiling" >&5
+ $as_echo_n "checking whether we are cross compiling... " >&6; }
+ if test "$cross_compiling" != yes; then
+-  { { ac_try="$ac_link"
++  { { ac_try="($ac_link -nostdlib | sed -e 's/\r//g')"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_link") 2>&5
++  (eval "($ac_link -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }
+@@ -4374,14 +4374,14 @@
+ }
+ _ACEOF
+ rm -f conftest.o conftest.obj
+-if { { ac_try="$ac_compile"
++if { { ac_try="($ac_compile -nostdlib | sed -e 's/\r//g')"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_compile") 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then :
+@@ -4794,14 +4794,14 @@
+ set X $ac_compile
+ ac_compiler=$2
+ for ac_option in --version -v -V -qversion; do
+-  { { ac_try="$ac_compiler $ac_option >&5"
++  { { ac_try="($ac_compiler $ac_option -nostdlib | sed -e 's/\r//g') >&5"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+ $as_echo "$ac_try_echo"; } >&5
+-  (eval "$ac_compiler $ac_option >&5") 2>conftest.err
++  (eval "($ac_compiler $ac_option -nostdlib | sed -e 's/\r//g') >&5") 2>conftest.err
+   ac_status=$?
+   if test -s conftest.err; then
+     sed '10a\
+@@ -5952,7 +5952,7 @@
+       # Check to see if the program is GNU ld.  I'd rather use --version,
+       # but apparently some variants of GNU ld only accept -v.
+       # Break only if it was the GNU/non-GNU ld that we prefer.
+-      case `"$lt_cv_path_LD" -v 2>&1 </dev/null` in
++      case `("$lt_cv_path_LD" -v 2>&1 </dev/null) | sed -e 's/\r//g'` in
+       *GNU* | *'with BFD'*)
+ 	test no != "$with_gnu_ld" && break
+ 	;;
+@@ -5983,7 +5983,7 @@
+   $as_echo_n "(cached) " >&6
+ else
+   # I'd rather use --version here, but apparently some GNU lds only accept -v.
+-case `$LD -v 2>&1 </dev/null` in
++case `($LD -v 2>&1 </dev/null) | sed -e 's/\r//g'` in
+ *GNU* | *'with BFD'*)
+   lt_cv_prog_gnu_ld=yes
+   ;;
+@@ -6196,7 +6196,7 @@
+   lt_cv_nm_interface="BSD nm"
+   echo "int some_variable = 0;" > conftest.$ac_ext
+   (eval echo "\"\$as_me:$LINENO: $ac_compile\"" >&5)
+-  (eval "$ac_compile" 2>conftest.err)
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')" 2>conftest.err)
+   cat conftest.err >&5
+   (eval echo "\"\$as_me:$LINENO: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
+@@ -7491,9 +7491,10 @@
+   # Gets list of data symbols to import.
+   lt_cv_sys_global_symbol_to_import="sed -n -e 's/^I .* \(.*\)$/\1/p'"
+   # Adjust the below global symbol transforms to fixup imported variables.
+-  lt_cdecl_hook=" -e 's/^I .* \(.*\)$/extern __declspec(dllimport) char \1;/p'"
+-  lt_c_name_hook=" -e 's/^I .* \(.*\)$/  {\"\1\", (void *) 0},/p'"
++  lt_cdecl_hook=" -e 's/\r//g' -e 's/^I .* \(.*\)$/extern __declspec(dllimport) char \1;/p'"
++  lt_c_name_hook=" -e 's/\r//g' -e 's/^I .* \(.*\)$/  {\"\1\", (void *) 0},/p'"
+   lt_c_name_lib_hook="\
++  -e 's/\r//g'\
+   -e 's/^I .* \(lib.*\)$/  {\"\1\", (void *) 0},/p'\
+   -e 's/^I .* \(.*\)$/  {\"lib\1\", (void *) 0},/p'"
+ else
+@@ -7509,12 +7510,14 @@
+ # so use this general approach.
+ lt_cv_sys_global_symbol_to_cdecl="sed -n"\
+ $lt_cdecl_hook\
++" -e 's/\r//g'"\
+ " -e 's/^T .* \(.*\)$/extern int \1();/p'"\
+ " -e 's/^$symcode$symcode* .* \(.*\)$/extern char \1;/p'"
+ 
+ # Transform an extracted symbol line into symbol name and symbol address
+ lt_cv_sys_global_symbol_to_c_name_address="sed -n"\
+ $lt_c_name_hook\
++" -e 's/\r//g'"\
+ " -e 's/^: \(.*\) .*$/  {\"\1\", (void *) 0},/p'"\
+ " -e 's/^$symcode$symcode* .* \(.*\)$/  {\"\1\", (void *) \&\1},/p'"
+ 
+@@ -7522,6 +7525,7 @@
+ # symbol address.
+ lt_cv_sys_global_symbol_to_c_name_address_lib_prefix="sed -n"\
+ $lt_c_name_lib_hook\
++" -e 's/\r//g'"\
+ " -e 's/^: \(.*\) .*$/  {\"\1\", (void *) 0},/p'"\
+ " -e 's/^$symcode$symcode* .* \(lib.*\)$/  {\"\1\", (void *) \&\1},/p'"\
+ " -e 's/^$symcode$symcode* .* \(.*\)$/  {\"lib\1\", (void *) \&\1},/p'"
+@@ -7562,7 +7566,7 @@
+ "     s[1]~prfx {split(s[1],t,\"@\"); print f,t[1],substr(t[1],length(prfx))}"\
+ "     ' prfx=^$ac_symprfx"
+   else
+-    lt_cv_sys_global_symbol_pipe="sed -n -e 's/^.*[	 ]\($symcode$symcode*\)[	 ][	 ]*$ac_symprfx$sympat$opt_cr$/$symxfrm/p'"
++    lt_cv_sys_global_symbol_pipe="sed -n -e 's/\r//g' -e 's/^.*[	 ]\($symcode$symcode*\)[	 ][	 ]*$ac_symprfx$sympat$opt_cr$/$symxfrm/p'"
+   fi
+   lt_cv_sys_global_symbol_pipe="$lt_cv_sys_global_symbol_pipe | sed '/ __gnu_lto/d'"
+ 
+@@ -7584,7 +7588,7 @@
+ _LT_EOF
+ 
+   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -7660,7 +7664,7 @@
+ 	  LIBS=conftstm.$ac_objext
+ 	  CFLAGS="$CFLAGS$lt_prog_compiler_no_builtin_flag"
+ 	  if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_link\""; } >&5
+-  (eval $ac_link) 2>&5
++  (eval "($ac_link -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; } && test -s conftest$ac_exeext; then
+@@ -7879,7 +7883,7 @@
+   # options accordingly.
+   echo 'int i;' > conftest.$ac_ext
+   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -7899,7 +7903,7 @@
+   # options accordingly.
+   echo '#line '$LINENO' "configure"' > conftest.$ac_ext
+   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -7937,7 +7941,7 @@
+   # options accordingly.
+   echo '#line '$LINENO' "configure"' > conftest.$ac_ext
+   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -7978,7 +7982,7 @@
+   # not appear in the list.
+   echo 'int i;' > conftest.$ac_ext
+   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -8094,7 +8098,7 @@
+   # options accordingly.
+   echo 'int i;' > conftest.$ac_ext
+   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -9555,13 +9559,13 @@
+ # save warnings/boilerplate of simple test code
+ ac_outfile=conftest.$ac_objext
+ echo "$lt_simple_compile_test_code" >conftest.$ac_ext
+-eval "$ac_compile" 2>&1 >/dev/null | $SED '/^$/d; /^ *+/d' >conftest.err
++eval "$ac_compile" 2>&1 >/dev/null | sed -e 's/\r//g' | $SED '/^$/d; /^ *+/d' >conftest.err
+ _lt_compiler_boilerplate=`cat conftest.err`
+ $RM conftest*
+ 
+ ac_outfile=conftest.$ac_objext
+ echo "$lt_simple_link_test_code" >conftest.$ac_ext
+-eval "$ac_link" 2>&1 >/dev/null | $SED '/^$/d; /^ *+/d' >conftest.err
++eval "$ac_link" 2>&1 >/dev/null | sed -e 's/\r//g' | $SED '/^$/d; /^ *+/d' >conftest.err
+ _lt_linker_boilerplate=`cat conftest.err`
+ $RM -r conftest*
+ 
+@@ -9597,6 +9601,7 @@
+    # with a dollar sign (not a hyphen), so the echo should work correctly.
+    # The option is referenced via a variable to avoid confusing sed.
+    lt_compile=`echo "$ac_compile" | $SED \
++   -e 's/\r//g' \
+    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+    -e 's:$: $lt_compiler_flag:'`
+@@ -10005,6 +10010,7 @@
+    # with a dollar sign (not a hyphen), so the echo should work correctly.
+    # The option is referenced via a variable to avoid confusing sed.
+    lt_compile=`echo "$ac_compile" | $SED \
++   -e 's/\r//g' \
+    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+    -e 's:$: $lt_compiler_flag:'`
+@@ -10063,7 +10069,7 @@
+    save_LDFLAGS=$LDFLAGS
+    LDFLAGS="$LDFLAGS $lt_tmp_static_flag"
+    echo "$lt_simple_link_test_code" > conftest.$ac_ext
+-   if (eval $ac_link 2>conftest.err) && test -s conftest$ac_exeext; then
++   if (eval "($ac_link -nostdlib | sed -e 's/\r//g')" 2>conftest.err) && test -s conftest$ac_exeext; then
+      # The linker can only warn and ignore the option if not recognized
+      # So say no if there are warnings
+      if test -s conftest.err; then
+@@ -10115,6 +10121,7 @@
+    # Note that $ac_compile itself does not contain backslashes and begins
+    # with a dollar sign (not a hyphen), so the echo should work correctly.
+    lt_compile=`echo "$ac_compile" | $SED \
++   -e 's/\r//g' \
+    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+    -e 's:$: $lt_compiler_flag:'`
+@@ -10170,6 +10177,7 @@
+    # Note that $ac_compile itself does not contain backslashes and begins
+    # with a dollar sign (not a hyphen), so the echo should work correctly.
+    lt_compile=`echo "$ac_compile" | $SED \
++   -e 's/\r//g' \
+    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+    -e 's:$: $lt_compiler_flag:'`
+@@ -10305,7 +10313,7 @@
+ 	# with the native linker.  However, as the warning in the GNU ld
+ 	# block says, versions before 2.19.5* couldn't really create working
+ 	# shared libraries, regardless of the interface used.
+-	case `$LD -v 2>&1` in
++	case `($LD -v 2>&1 | sed -e 's/\r//g')` in
+ 	  *\ \(GNU\ Binutils\)\ 2.19.5*) ;;
+ 	  *\ \(GNU\ Binutils\)\ 2.[2-9]*) ;;
+ 	  *\ \(GNU\ Binutils\)\ [3-9]*) ;;
+@@ -10337,7 +10345,7 @@
+       whole_archive_flag_spec=
+     fi
+     supports_anon_versioning=no
+-    case `$LD -v | $SED -e 's/(^)\+)\s\+//' 2>&1` in
++    case `$LD -v | sed -e 's/\r//g' | $SED -e 's/(^)\+)\s\+//' 2>&1` in
+       *GNU\ gold*) supports_anon_versioning=yes ;;
+       *\ [01].* | *\ 2.[0-9].* | *\ 2.10.*) ;; # catch versions < 2.11
+       *\ 2.11.93.0.2\ *) supports_anon_versioning=yes ;; # RH7.3 ...
+@@ -10556,7 +10564,7 @@
+       ;;
+ 
+     solaris*)
+-      if $LD -v 2>&1 | $GREP 'BFD 2\.8' > /dev/null; then
++      if $LD -v 2>&1 | sed -e 's/\r//g' | $GREP 'BFD 2\.8' > /dev/null; then
+ 	ld_shlibs=no
+ 	cat <<_LT_EOF 1>&2
+ 
+@@ -10577,7 +10585,7 @@
+       ;;
+ 
+     sysv5* | sco3.2v5* | sco5v6* | unixware* | OpenUNIX*)
+-      case `$LD -v 2>&1` in
++      case `$LD -v 2>&1 | sed -e 's/\r//g'` in
+         *\ [01].* | *\ 2.[0-9].* | *\ 2.1[0-5].*)
+ 	ld_shlibs=no
+ 	cat <<_LT_EOF 1>&2
+@@ -11136,7 +11144,7 @@
+    save_LDFLAGS=$LDFLAGS
+    LDFLAGS="$LDFLAGS -b"
+    echo "$lt_simple_link_test_code" > conftest.$ac_ext
+-   if (eval $ac_link 2>conftest.err) && test -s conftest$ac_exeext; then
++   if (eval "($ac_link -nostdlib | sed -e 's/\r//g')" 2>conftest.err) && test -s conftest$ac_exeext; then
+      # The linker can only warn and ignore the option if not recognized
+      # So say no if there are warnings
+      if test -s conftest.err; then
+@@ -11546,7 +11554,7 @@
+ 	echo "$lt_simple_compile_test_code" > conftest.$ac_ext
+ 
+ 	if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; } 2>conftest.err; then
+@@ -13106,7 +13114,7 @@
+ }
+ _LT_EOF
+   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_link\""; } >&5
+-  (eval $ac_link) 2>&5
++  (eval "($ac_link -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; } && test -s "conftest$ac_exeext" 2>/dev/null; then
+@@ -13212,7 +13220,7 @@
+ }
+ _LT_EOF
+   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_link\""; } >&5
+-  (eval $ac_link) 2>&5
++  (eval "($ac_link -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; } && test -s "conftest$ac_exeext" 2>/dev/null; then
+@@ -13571,13 +13579,13 @@
+   # save warnings/boilerplate of simple test code
+   ac_outfile=conftest.$ac_objext
+ echo "$lt_simple_compile_test_code" >conftest.$ac_ext
+-eval "$ac_compile" 2>&1 >/dev/null | $SED '/^$/d; /^ *+/d' >conftest.err
++eval "$ac_compile" 2>&1 >/dev/null | sed -e 's/\r//g' | $SED '/^$/d; /^ *+/d' >conftest.err
+ _lt_compiler_boilerplate=`cat conftest.err`
+ $RM conftest*
+ 
+   ac_outfile=conftest.$ac_objext
+ echo "$lt_simple_link_test_code" >conftest.$ac_ext
+-eval "$ac_link" 2>&1 >/dev/null | $SED '/^$/d; /^ *+/d' >conftest.err
++eval "$ac_link" 2>&1 >/dev/null | sed -e 's/\r//g' | $SED '/^$/d; /^ *+/d' >conftest.err
+ _lt_linker_boilerplate=`cat conftest.err`
+ $RM -r conftest*
+ 
+@@ -13682,7 +13690,7 @@
+       # Check to see if the program is GNU ld.  I'd rather use --version,
+       # but apparently some variants of GNU ld only accept -v.
+       # Break only if it was the GNU/non-GNU ld that we prefer.
+-      case `"$lt_cv_path_LD" -v 2>&1 </dev/null` in
++      case `("$lt_cv_path_LD" -v 2>&1 </dev/null) | sed -e 's/\r//g'` in
+       *GNU* | *'with BFD'*)
+ 	test no != "$with_gnu_ld" && break
+ 	;;
+@@ -13713,7 +13721,7 @@
+   $as_echo_n "(cached) " >&6
+ else
+   # I'd rather use --version here, but apparently some GNU lds only accept -v.
+-case `$LD -v 2>&1 </dev/null` in
++case `($LD -v 2>&1 </dev/null) | sed -e 's/\r//g'` in
+ *GNU* | *'with BFD'*)
+   lt_cv_prog_gnu_ld=yes
+   ;;
+@@ -13768,7 +13776,7 @@
+       # Commands to make compiler produce verbose output that lists
+       # what "hidden" libraries, object files and flags are used when
+       # linking a shared library.
+-      output_verbose_link_cmd='$CC -shared $CFLAGS -v conftest.$objext 2>&1 | $GREP -v "^Configured with:" | $GREP "\-L"'
++      output_verbose_link_cmd='$CC -shared $CFLAGS -v conftest.$objext 2>&1 | sed -e '"'"'s/\r//g'"'"' | $GREP -v "^Configured with:" | $GREP "\-L"'
+ 
+     else
+       GXX=no
+@@ -14266,7 +14274,7 @@
+             # explicitly linking system object files so we need to strip them
+             # from the output so that they don't get included in the library
+             # dependencies.
+-            output_verbose_link_cmd='templist=`($CC -b $CFLAGS -v conftest.$objext 2>&1) | $EGREP "\-L"`; list= ; for z in $templist; do case $z in conftest.$objext) list="$list $z";; *.$objext);; *) list="$list $z";;esac; done; func_echo_all "$list"'
++            output_verbose_link_cmd='templist=`($CC -b $CFLAGS -v conftest.$objext 2>&1) | sed -e '"'"'s/\r//g'"'"' | $EGREP "\-L"`; list= ; for z in $templist; do case $z in conftest.$objext) list="$list $z";; *.$objext);; *) list="$list $z";;esac; done; func_echo_all "$list"'
+             ;;
+           *)
+             if test yes = "$GXX"; then
+@@ -14331,7 +14339,7 @@
+ 	    # explicitly linking system object files so we need to strip them
+ 	    # from the output so that they don't get included in the library
+ 	    # dependencies.
+-	    output_verbose_link_cmd='templist=`($CC -b $CFLAGS -v conftest.$objext 2>&1) | $GREP "\-L"`; list= ; for z in $templist; do case $z in conftest.$objext) list="$list $z";; *.$objext);; *) list="$list $z";;esac; done; func_echo_all "$list"'
++	    output_verbose_link_cmd='templist=`($CC -b $CFLAGS -v conftest.$objext 2>&1) | sed -e '"'"'s/\r//g'"'"' | $GREP "\-L"`; list= ; for z in $templist; do case $z in conftest.$objext) list="$list $z";; *.$objext);; *) list="$list $z";;esac; done; func_echo_all "$list"'
+ 	    ;;
+           *)
+ 	    if test yes = "$GXX"; then
+@@ -14416,7 +14424,7 @@
+ 	    # explicitly linking system object files so we need to strip them
+ 	    # from the output so that they don't get included in the library
+ 	    # dependencies.
+-	    output_verbose_link_cmd='templist=`$CC $CFLAGS -v conftest.$objext -o libconftest$shared_ext 2>&1 | $GREP "ld"`; rm -f libconftest$shared_ext; list= ; for z in $templist; do case $z in conftest.$objext) list="$list $z";; *.$objext);; *) list="$list $z";;esac; done; func_echo_all "$list"'
++	    output_verbose_link_cmd='templist=`$CC $CFLAGS -v conftest.$objext -o libconftest$shared_ext 2>&1 | sed -e '"'"'s/\r//g'"'"' | $GREP "ld"`; rm -f libconftest$shared_ext; list= ; for z in $templist; do case $z in conftest.$objext) list="$list $z";; *.$objext);; *) list="$list $z";;esac; done; func_echo_all "$list"'
+ 
+ 	    hardcode_libdir_flag_spec_CXX='$wl-rpath,$libdir'
+ 	    export_dynamic_flag_spec_CXX='$wl--export-dynamic'
+@@ -14499,7 +14507,7 @@
+ 	    # explicitly linking system object files so we need to strip them
+ 	    # from the output so that they don't get included in the library
+ 	    # dependencies.
+-	    output_verbose_link_cmd='templist=`$CC -shared $CFLAGS -v conftest.$objext 2>&1 | $GREP "ld"`; templist=`func_echo_all "$templist" | $SED "s/\(^.*ld.*\)\( .*ld .*$\)/\1/"`; list= ; for z in $templist; do case $z in conftest.$objext) list="$list $z";; *.$objext);; *) list="$list $z";;esac; done; func_echo_all "X$list" | $Xsed'
++	    output_verbose_link_cmd='templist=`$CC -shared $CFLAGS -v conftest.$objext 2>&1 | sed -e '"'"'s/\r//g'"'"' | $GREP "ld"`; templist=`func_echo_all "$templist" | $SED "s/\(^.*ld.*\)\( .*ld .*$\)/\1/"`; list= ; for z in $templist; do case $z in conftest.$objext) list="$list $z";; *.$objext);; *) list="$list $z";;esac; done; func_echo_all "X$list" | $Xsed'
+ 	    ;;
+ 	  xl* | mpixl* | bgxl*)
+ 	    # IBM XL 8.0 on PPC, with GNU ld
+@@ -14572,7 +14580,7 @@
+ 	  hardcode_shlibpath_var_CXX=no
+ 	fi
+ 	# Workaround some broken pre-1.5 toolchains
+-	output_verbose_link_cmd='$CC -shared $CFLAGS -v conftest.$objext 2>&1 | $GREP conftest.$objext | $SED -e "s:-lgcc -lc -lgcc::"'
++	output_verbose_link_cmd='$CC -shared $CFLAGS -v conftest.$objext 2>&1 | sed -e '"'"'s/\r//g'"'"' | $GREP conftest.$objext | $SED -e "s:-lgcc -lc -lgcc::"'
+ 	;;
+ 
+       *nto* | *qnx*)
+@@ -14650,7 +14658,7 @@
+ 	    # explicitly linking system object files so we need to strip them
+ 	    # from the output so that they don't get included in the library
+ 	    # dependencies.
+-	    output_verbose_link_cmd='templist=`$CC -shared $CFLAGS -v conftest.$objext 2>&1 | $GREP "ld" | $GREP -v "ld:"`; templist=`func_echo_all "$templist" | $SED "s/\(^.*ld.*\)\( .*ld.*$\)/\1/"`; list= ; for z in $templist; do case $z in conftest.$objext) list="$list $z";; *.$objext);; *) list="$list $z";;esac; done; func_echo_all "$list"'
++	    output_verbose_link_cmd='templist=`$CC -shared $CFLAGS -v conftest.$objext 2>&1 | sed -e '"'"'s/\r//g'"'"' | $GREP "ld" | $GREP -v "ld:"`; templist=`func_echo_all "$templist" | $SED "s/\(^.*ld.*\)\( .*ld.*$\)/\1/"`; list= ; for z in $templist; do case $z in conftest.$objext) list="$list $z";; *.$objext);; *) list="$list $z";;esac; done; func_echo_all "$list"'
+ 	    ;;
+ 	  *)
+ 	    if test yes,no = "$GXX,$with_gnu_ld"; then
+@@ -14670,7 +14678,7 @@
+ 	      # Commands to make compiler produce verbose output that lists
+ 	      # what "hidden" libraries, object files and flags are used when
+ 	      # linking a shared library.
+-	      output_verbose_link_cmd='$CC -shared $CFLAGS -v conftest.$objext 2>&1 | $GREP -v "^Configured with:" | $GREP "\-L"'
++	      output_verbose_link_cmd='$CC -shared $CFLAGS -v conftest.$objext 2>&1 | sed -e '"'"'s/\r//g'"'"' | $GREP -v "^Configured with:" | $GREP "\-L"'
+ 
+ 	    else
+ 	      # FIXME: insert proper C++ library support
+@@ -14746,7 +14754,7 @@
+ 	    # GNU C++ compiler with Solaris linker
+ 	    if test yes,no = "$GXX,$with_gnu_ld"; then
+ 	      no_undefined_flag_CXX=' $wl-z ${wl}defs'
+-	      if $CC --version | $GREP -v '^2\.7' > /dev/null; then
++	      if $CC --version | sed -e 's/\r//g' | $GREP -v '^2\.7' > /dev/null; then
+ 	        archive_cmds_CXX='$CC -shared $pic_flag -nostdlib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags $wl-h $wl$soname -o $lib'
+ 	        archive_expsym_cmds_CXX='echo "{ global:" > $lib.exp~cat $export_symbols | $SED -e "s/\(.*\)/\1;/" >> $lib.exp~echo "local: *; };" >> $lib.exp~
+                   $CC -shared $pic_flag -nostdlib $wl-M $wl$lib.exp $wl-h $wl$soname -o $lib $predep_objects $libobjs $deplibs $postdep_objects $compiler_flags~$RM $lib.exp'
+@@ -14754,7 +14762,7 @@
+ 	        # Commands to make compiler produce verbose output that lists
+ 	        # what "hidden" libraries, object files and flags are used when
+ 	        # linking a shared library.
+-	        output_verbose_link_cmd='$CC -shared $CFLAGS -v conftest.$objext 2>&1 | $GREP -v "^Configured with:" | $GREP "\-L"'
++	        output_verbose_link_cmd='$CC -shared $CFLAGS -v conftest.$objext 2>&1 | sed -e '"'"'s/\r//g'"'"' | $GREP -v "^Configured with:" | $GREP "\-L"'
+ 	      else
+ 	        # g++ 2.7 appears to require '-G' NOT '-shared' on this
+ 	        # platform.
+@@ -14765,7 +14773,7 @@
+ 	        # Commands to make compiler produce verbose output that lists
+ 	        # what "hidden" libraries, object files and flags are used when
+ 	        # linking a shared library.
+-	        output_verbose_link_cmd='$CC -G $CFLAGS -v conftest.$objext 2>&1 | $GREP -v "^Configured with:" | $GREP "\-L"'
++	        output_verbose_link_cmd='$CC -G $CFLAGS -v conftest.$objext 2>&1 | sed -e '"'"'s/\r//g'"'"' | $GREP -v "^Configured with:" | $GREP "\-L"'
+ 	      fi
+ 
+ 	      hardcode_libdir_flag_spec_CXX='$wl-R $wl$libdir'
+@@ -14893,7 +14901,7 @@
+ esac
+ 
+ if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -15406,6 +15414,7 @@
+    # with a dollar sign (not a hyphen), so the echo should work correctly.
+    # The option is referenced via a variable to avoid confusing sed.
+    lt_compile=`echo "$ac_compile" | $SED \
++   -e 's/\r//g' \
+    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+    -e 's:$: $lt_compiler_flag:'`
+@@ -15458,7 +15467,7 @@
+    save_LDFLAGS=$LDFLAGS
+    LDFLAGS="$LDFLAGS $lt_tmp_static_flag"
+    echo "$lt_simple_link_test_code" > conftest.$ac_ext
+-   if (eval $ac_link 2>conftest.err) && test -s conftest$ac_exeext; then
++   if (eval "($ac_link -nostdlib | sed -e 's/\r//g')" 2>conftest.err) && test -s conftest$ac_exeext; then
+      # The linker can only warn and ignore the option if not recognized
+      # So say no if there are warnings
+      if test -s conftest.err; then
+@@ -15507,6 +15516,7 @@
+    # Note that $ac_compile itself does not contain backslashes and begins
+    # with a dollar sign (not a hyphen), so the echo should work correctly.
+    lt_compile=`echo "$ac_compile" | $SED \
++   -e 's/\r//g' \
+    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+    -e 's:$: $lt_compiler_flag:'`
+@@ -15559,6 +15569,7 @@
+    # Note that $ac_compile itself does not contain backslashes and begins
+    # with a dollar sign (not a hyphen), so the echo should work correctly.
+    lt_compile=`echo "$ac_compile" | $SED \
++   -e 's/\r//g' \
+    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
+    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
+    -e 's:$: $lt_compiler_flag:'`
+@@ -15695,7 +15706,7 @@
+ 	echo "$lt_simple_compile_test_code" > conftest.$ac_ext
+ 
+ 	if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; } 2>conftest.err; then
+@@ -16896,7 +16907,7 @@
+ 
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread model used by GCC" >&5
+ $as_echo_n "checking for thread model used by GCC... " >&6; }
+-  target_thread_file=`$CXX -v 2>&1 | sed -n 's/^Thread model: //p'`
++  target_thread_file=`$CXX -v 2>&1 | sed -e 's/\r//g' | sed -n 's/^Thread model: //p'`
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $target_thread_file" >&5
+ $as_echo "$target_thread_file" >&6; }
+ 
+@@ -17142,7 +17153,7 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for atomic builtins for bool" >&5
+ $as_echo_n "checking for atomic builtins for bool... " >&6; }
+     if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -17177,7 +17188,7 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for atomic builtins for short" >&5
+ $as_echo_n "checking for atomic builtins for short... " >&6; }
+     if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -17213,7 +17224,7 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for atomic builtins for int" >&5
+ $as_echo_n "checking for atomic builtins for int... " >&6; }
+     if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -17248,7 +17259,7 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for atomic builtins for long long" >&5
+ $as_echo_n "checking for atomic builtins for long long... " >&6; }
+     if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -17394,7 +17405,7 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ISO/IEC TR 24733 " >&5
+ $as_echo_n "checking for ISO/IEC TR 24733 ... " >&6; }
+     if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -17441,7 +17452,7 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __int128" >&5
+ $as_echo_n "checking for __int128... " >&6; }
+     if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -17475,7 +17486,7 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __float128" >&5
+ $as_echo_n "checking for __float128... " >&6; }
+     if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+-  (eval $ac_compile) 2>&5
++  (eval "($ac_compile -nostdlib | sed -e 's/\r//g')") 2>&5
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+@@ -23682,7 +23693,7 @@
+       # Check to see if the program is GNU ld.  I'd rather use --version,
+       # but apparently some variants of GNU ld only accept -v.
+       # Break only if it was the GNU/non-GNU ld that we prefer.
+-      case `"$lt_cv_path_LD" -v 2>&1 </dev/null` in
++      case `("$lt_cv_path_LD" -v 2>&1 </dev/null) | sed -e 's/\r//g'` in
+       *GNU* | *'with BFD'*)
+ 	test no != "$with_gnu_ld" && break
+ 	;;
+@@ -23713,7 +23724,7 @@
+   $as_echo_n "(cached) " >&6
+ else
+   # I'd rather use --version here, but apparently some GNU lds only accept -v.
+-case `$LD -v 2>&1 </dev/null` in
++case `($LD -v 2>&1 </dev/null) | sed -e 's/\r//g'` in
+ *GNU* | *'with BFD'*)
+   lt_cv_prog_gnu_ld=yes
+   ;;
+@@ -23762,10 +23773,11 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld version" >&5
+ $as_echo_n "checking for ld version... " >&6; }
+ 
+-    if $LD --version 2>/dev/null | grep 'GNU gold' >/dev/null 2>&1; then
++    if $LD --version 2>/dev/null | sed -e 's/\r//g' | grep 'GNU gold' >/dev/null 2>&1; then
+       glibcxx_ld_is_gold=yes
+     fi
+     ldver=`$LD --version 2>/dev/null |
++	   sed -e 's/\r//g' |
+ 	   sed -e 's/GNU gold /GNU ld /;s/GNU ld version /GNU ld /;s/GNU ld ([^)]*) /GNU ld /;s/GNU ld \([0-9.][0-9.]*\).*/\1/; q'`
+ 
+     glibcxx_gnu_ld_version=`echo $ldver | \
+@@ -23853,7 +23865,7 @@
+   if test x"$with_gnu_ld" = x"yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,-z,relro" >&5
+ $as_echo_n "checking for ld that supports -Wl,-z,relro... " >&6; }
+-    cxx_z_relo=`$LD -v --help 2>/dev/null | grep "z relro"`
++    cxx_z_relo=`$LD -v --help 2>/dev/null | sed -e 's/\r//g' | grep "z relro"`
+     if test -n "$cxx_z_relo"; then
+       OPT_LDFLAGS="-Wl,-z,relro"
+       ac_ld_relro=yes
+@@ -30033,7 +30045,7 @@
+       # Check to see if the program is GNU ld.  I'd rather use --version,
+       # but apparently some GNU ld's only accept -v.
+       # Break only if it was the GNU/non-GNU ld that we prefer.
+-      if "$acl_cv_path_LD" -v 2>&1 < /dev/null | egrep '(GNU|with BFD)' > /dev/null; then
++      if "$acl_cv_path_LD" -v 2>&1 < /dev/null | sed -e 's/\r//g' | egrep '(GNU|with BFD)' > /dev/null; then
+ 	test "$with_gnu_ld" != no && break
+       else
+ 	test "$with_gnu_ld" != yes && break
+@@ -30061,7 +30073,7 @@
+   $as_echo_n "(cached) " >&6
+ else
+   # I'd rather use --version here, but apparently some GNU ld's only accept -v.
+-if $LD -v 2>&1 </dev/null | egrep '(GNU|with BFD)' 1>&5; then
++if $LD -v 2>&1 </dev/null | sed -e 's/\r//g' | egrep '(GNU|with BFD)' 1>&5; then
+   acl_cv_prog_gnu_ld=yes
+ else
+   acl_cv_prog_gnu_ld=no
+@@ -30929,10 +30941,11 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld version" >&5
+ $as_echo_n "checking for ld version... " >&6; }
+ 
+-    if $LD --version 2>/dev/null | grep 'GNU gold' >/dev/null 2>&1; then
++    if $LD --version 2>/dev/null | sed -e 's/\r//g' | grep 'GNU gold' >/dev/null 2>&1; then
+       glibcxx_ld_is_gold=yes
+     fi
+     ldver=`$LD --version 2>/dev/null |
++	   sed -e 's/\r//g' |
+ 	   sed -e 's/GNU gold /GNU ld /;s/GNU ld version /GNU ld /;s/GNU ld ([^)]*) /GNU ld /;s/GNU ld \([0-9.][0-9.]*\).*/\1/; q'`
+ 
+     glibcxx_gnu_ld_version=`echo $ldver | \
+@@ -31020,7 +31033,7 @@
+   if test x"$with_gnu_ld" = x"yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,-z,relro" >&5
+ $as_echo_n "checking for ld that supports -Wl,-z,relro... " >&6; }
+-    cxx_z_relo=`$LD -v --help 2>/dev/null | grep "z relro"`
++    cxx_z_relo=`$LD -v --help 2>/dev/null | sed -e 's/\r//g' | grep "z relro"`
+     if test -n "$cxx_z_relo"; then
+       OPT_LDFLAGS="-Wl,-z,relro"
+       ac_ld_relro=yes
+@@ -36907,10 +36920,11 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld version" >&5
+ $as_echo_n "checking for ld version... " >&6; }
+ 
+-    if $LD --version 2>/dev/null | grep 'GNU gold' >/dev/null 2>&1; then
++    if $LD --version 2>/dev/null | sed -e 's/\r//g' | grep 'GNU gold' >/dev/null 2>&1; then
+       glibcxx_ld_is_gold=yes
+     fi
+     ldver=`$LD --version 2>/dev/null |
++	   sed -e 's/\r//g' |
+ 	   sed -e 's/GNU gold /GNU ld /;s/GNU ld version /GNU ld /;s/GNU ld ([^)]*) /GNU ld /;s/GNU ld \([0-9.][0-9.]*\).*/\1/; q'`
+ 
+     glibcxx_gnu_ld_version=`echo $ldver | \
+@@ -36998,7 +37012,7 @@
+   if test x"$with_gnu_ld" = x"yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,-z,relro" >&5
+ $as_echo_n "checking for ld that supports -Wl,-z,relro... " >&6; }
+-    cxx_z_relo=`$LD -v --help 2>/dev/null | grep "z relro"`
++    cxx_z_relo=`$LD -v --help 2>/dev/null | sed -e 's/\r//g' | grep "z relro"`
+     if test -n "$cxx_z_relo"; then
+       OPT_LDFLAGS="-Wl,-z,relro"
+       ac_ld_relro=yes
+@@ -43019,10 +43033,11 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld version" >&5
+ $as_echo_n "checking for ld version... " >&6; }
+ 
+-    if $LD --version 2>/dev/null | grep 'GNU gold' >/dev/null 2>&1; then
++    if $LD --version 2>/dev/null | sed -e 's/\r//g' | grep 'GNU gold' >/dev/null 2>&1; then
+       glibcxx_ld_is_gold=yes
+     fi
+     ldver=`$LD --version 2>/dev/null |
++	   sed -e 's/\r//g' |
+ 	   sed -e 's/GNU gold /GNU ld /;s/GNU ld version /GNU ld /;s/GNU ld ([^)]*) /GNU ld /;s/GNU ld \([0-9.][0-9.]*\).*/\1/; q'`
+ 
+     glibcxx_gnu_ld_version=`echo $ldver | \
+@@ -43110,7 +43125,7 @@
+   if test x"$with_gnu_ld" = x"yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,-z,relro" >&5
+ $as_echo_n "checking for ld that supports -Wl,-z,relro... " >&6; }
+-    cxx_z_relo=`$LD -v --help 2>/dev/null | grep "z relro"`
++    cxx_z_relo=`$LD -v --help 2>/dev/null | sed -e 's/\r//g' | grep "z relro"`
+     if test -n "$cxx_z_relo"; then
+       OPT_LDFLAGS="-Wl,-z,relro"
+       ac_ld_relro=yes
+@@ -54926,10 +54941,11 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld version" >&5
+ $as_echo_n "checking for ld version... " >&6; }
+ 
+-    if $LD --version 2>/dev/null | grep 'GNU gold' >/dev/null 2>&1; then
++    if $LD --version 2>/dev/null | sed -e 's/\r//g' | grep 'GNU gold' >/dev/null 2>&1; then
+       glibcxx_ld_is_gold=yes
+     fi
+     ldver=`$LD --version 2>/dev/null |
++	   sed -e 's/\r//g' |
+ 	   sed -e 's/GNU gold /GNU ld /;s/GNU ld version /GNU ld /;s/GNU ld ([^)]*) /GNU ld /;s/GNU ld \([0-9.][0-9.]*\).*/\1/; q'`
+ 
+     glibcxx_gnu_ld_version=`echo $ldver | \
+@@ -55017,7 +55033,7 @@
+   if test x"$with_gnu_ld" = x"yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,-z,relro" >&5
+ $as_echo_n "checking for ld that supports -Wl,-z,relro... " >&6; }
+-    cxx_z_relo=`$LD -v --help 2>/dev/null | grep "z relro"`
++    cxx_z_relo=`$LD -v --help 2>/dev/null | sed -e 's/\r//g' | grep "z relro"`
+     if test -n "$cxx_z_relo"; then
+       OPT_LDFLAGS="-Wl,-z,relro"
+       ac_ld_relro=yes
+@@ -55191,10 +55207,11 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld version" >&5
+ $as_echo_n "checking for ld version... " >&6; }
+ 
+-    if $LD --version 2>/dev/null | grep 'GNU gold' >/dev/null 2>&1; then
++    if $LD --version 2>/dev/null | sed -e 's/\r//g' | grep 'GNU gold' >/dev/null 2>&1; then
+       glibcxx_ld_is_gold=yes
+     fi
+     ldver=`$LD --version 2>/dev/null |
++	   sed -e 's/\r//g' |
+ 	   sed -e 's/GNU gold /GNU ld /;s/GNU ld version /GNU ld /;s/GNU ld ([^)]*) /GNU ld /;s/GNU ld \([0-9.][0-9.]*\).*/\1/; q'`
+ 
+     glibcxx_gnu_ld_version=`echo $ldver | \
+@@ -55282,7 +55299,7 @@
+   if test x"$with_gnu_ld" = x"yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,-z,relro" >&5
+ $as_echo_n "checking for ld that supports -Wl,-z,relro... " >&6; }
+-    cxx_z_relo=`$LD -v --help 2>/dev/null | grep "z relro"`
++    cxx_z_relo=`$LD -v --help 2>/dev/null | sed -e 's/\r//g' | grep "z relro"`
+     if test -n "$cxx_z_relo"; then
+       OPT_LDFLAGS="-Wl,-z,relro"
+       ac_ld_relro=yes
+@@ -55658,10 +55675,11 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld version" >&5
+ $as_echo_n "checking for ld version... " >&6; }
+ 
+-    if $LD --version 2>/dev/null | grep 'GNU gold' >/dev/null 2>&1; then
++    if $LD --version 2>/dev/null | sed -e 's/\r//g' | grep 'GNU gold' >/dev/null 2>&1; then
+       glibcxx_ld_is_gold=yes
+     fi
+     ldver=`$LD --version 2>/dev/null |
++	   sed -e 's/\r//g' |
+ 	   sed -e 's/GNU gold /GNU ld /;s/GNU ld version /GNU ld /;s/GNU ld ([^)]*) /GNU ld /;s/GNU ld \([0-9.][0-9.]*\).*/\1/; q'`
+ 
+     glibcxx_gnu_ld_version=`echo $ldver | \
+@@ -55749,7 +55767,7 @@
+   if test x"$with_gnu_ld" = x"yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,-z,relro" >&5
+ $as_echo_n "checking for ld that supports -Wl,-z,relro... " >&6; }
+-    cxx_z_relo=`$LD -v --help 2>/dev/null | grep "z relro"`
++    cxx_z_relo=`$LD -v --help 2>/dev/null | sed -e 's/\r//g' | grep "z relro"`
+     if test -n "$cxx_z_relo"; then
+       OPT_LDFLAGS="-Wl,-z,relro"
+       ac_ld_relro=yes
+@@ -62026,10 +62044,11 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld version" >&5
+ $as_echo_n "checking for ld version... " >&6; }
+ 
+-    if $LD --version 2>/dev/null | grep 'GNU gold' >/dev/null 2>&1; then
++    if $LD --version 2>/dev/null | sed -e 's/\r//g' | grep 'GNU gold' >/dev/null 2>&1; then
+       glibcxx_ld_is_gold=yes
+     fi
+     ldver=`$LD --version 2>/dev/null |
++	   sed -e 's/\r//g' |
+ 	   sed -e 's/GNU gold /GNU ld /;s/GNU ld version /GNU ld /;s/GNU ld ([^)]*) /GNU ld /;s/GNU ld \([0-9.][0-9.]*\).*/\1/; q'`
+ 
+     glibcxx_gnu_ld_version=`echo $ldver | \
+@@ -62117,7 +62136,7 @@
+   if test x"$with_gnu_ld" = x"yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,-z,relro" >&5
+ $as_echo_n "checking for ld that supports -Wl,-z,relro... " >&6; }
+-    cxx_z_relo=`$LD -v --help 2>/dev/null | grep "z relro"`
++    cxx_z_relo=`$LD -v --help 2>/dev/null | sed -e 's/\r//g' | grep "z relro"`
+     if test -n "$cxx_z_relo"; then
+       OPT_LDFLAGS="-Wl,-z,relro"
+       ac_ld_relro=yes
+@@ -67957,10 +67976,11 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld version" >&5
+ $as_echo_n "checking for ld version... " >&6; }
+ 
+-    if $LD --version 2>/dev/null | grep 'GNU gold' >/dev/null 2>&1; then
++    if $LD --version 2>/dev/null | sed -e 's/\r//g' | grep 'GNU gold' >/dev/null 2>&1; then
+       glibcxx_ld_is_gold=yes
+     fi
+     ldver=`$LD --version 2>/dev/null |
++	   sed -e 's/\r//g' |
+ 	   sed -e 's/GNU gold /GNU ld /;s/GNU ld version /GNU ld /;s/GNU ld ([^)]*) /GNU ld /;s/GNU ld \([0-9.][0-9.]*\).*/\1/; q'`
+ 
+     glibcxx_gnu_ld_version=`echo $ldver | \
+@@ -68048,7 +68068,7 @@
+   if test x"$with_gnu_ld" = x"yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,-z,relro" >&5
+ $as_echo_n "checking for ld that supports -Wl,-z,relro... " >&6; }
+-    cxx_z_relo=`$LD -v --help 2>/dev/null | grep "z relro"`
++    cxx_z_relo=`$LD -v --help 2>/dev/null | sed -e 's/\r//g' | grep "z relro"`
+     if test -n "$cxx_z_relo"; then
+       OPT_LDFLAGS="-Wl,-z,relro"
+       ac_ld_relro=yes
+@@ -68158,10 +68178,11 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld version" >&5
+ $as_echo_n "checking for ld version... " >&6; }
+ 
+-    if $LD --version 2>/dev/null | grep 'GNU gold' >/dev/null 2>&1; then
++    if $LD --version 2>/dev/null | sed -e 's/\r//g' | grep 'GNU gold' >/dev/null 2>&1; then
+       glibcxx_ld_is_gold=yes
+     fi
+     ldver=`$LD --version 2>/dev/null |
++	   sed -e 's/\r//g' |
+ 	   sed -e 's/GNU gold /GNU ld /;s/GNU ld version /GNU ld /;s/GNU ld ([^)]*) /GNU ld /;s/GNU ld \([0-9.][0-9.]*\).*/\1/; q'`
+ 
+     glibcxx_gnu_ld_version=`echo $ldver | \
+@@ -68249,7 +68270,7 @@
+   if test x"$with_gnu_ld" = x"yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,-z,relro" >&5
+ $as_echo_n "checking for ld that supports -Wl,-z,relro... " >&6; }
+-    cxx_z_relo=`$LD -v --help 2>/dev/null | grep "z relro"`
++    cxx_z_relo=`$LD -v --help 2>/dev/null | sed -e 's/\r//g' | grep "z relro"`
+     if test -n "$cxx_z_relo"; then
+       OPT_LDFLAGS="-Wl,-z,relro"
+       ac_ld_relro=yes
+@@ -68378,10 +68399,11 @@
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld version" >&5
+ $as_echo_n "checking for ld version... " >&6; }
+ 
+-    if $LD --version 2>/dev/null | grep 'GNU gold' >/dev/null 2>&1; then
++    if $LD --version 2>/dev/null | sed -e 's/\r//g' | grep 'GNU gold' >/dev/null 2>&1; then
+       glibcxx_ld_is_gold=yes
+     fi
+     ldver=`$LD --version 2>/dev/null |
++	   sed -e 's/\r//g' |
+ 	   sed -e 's/GNU gold /GNU ld /;s/GNU ld version /GNU ld /;s/GNU ld ([^)]*) /GNU ld /;s/GNU ld \([0-9.][0-9.]*\).*/\1/; q'`
+ 
+     glibcxx_gnu_ld_version=`echo $ldver | \
+@@ -68469,7 +68491,7 @@
+   if test x"$with_gnu_ld" = x"yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ld that supports -Wl,-z,relro" >&5
+ $as_echo_n "checking for ld that supports -Wl,-z,relro... " >&6; }
+-    cxx_z_relo=`$LD -v --help 2>/dev/null | grep "z relro"`
++    cxx_z_relo=`$LD -v --help 2>/dev/null | sed -e 's/\r//g' | grep "z relro"`
+     if test -n "$cxx_z_relo"; then
+       OPT_LDFLAGS="-Wl,-z,relro"
+       ac_ld_relro=yes
+@@ -80735,7 +80757,7 @@
+       ac_path_CXXFILT="$as_dir/$ac_prog$ac_exec_ext"
+       as_fn_executable_p "$ac_path_CXXFILT" || continue
+ # Check for GNU $ac_path_CXXFILT
+-case `"$ac_path_CXXFILT" --version 2>&1` in
++case `"$ac_path_CXXFILT" --version 2>&1 | sed -e 's/\r//g'` in
+ *GNU*)
+   ac_cv_path_CXXFILT=$ac_path_CXXFILT && ac_path_CXXFILT_found=:;;
+ esac
+@@ -80882,6 +80904,7 @@
+     glibcxx_libgcc_s_suffix=`${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS \
+ 			     -shared -shared-libgcc -o conftest.so \
+ 			     conftest.c -v 2>&1 >/dev/null \
++			     | sed -e 's/\r//g' \
+ 			     | sed -n 's/^.* -lgcc_s\([^ ]*\) .*$/\1/p'`
+     rm -f conftest.c conftest.so
+     if test x${glibcxx_libgcc_s_suffix+set} = xset; then
+@@ -81700,7 +81723,7 @@
+   CXXFLAGS="$CXXFLAGS -fno-exceptions \
+ 	-I${toplevel_srcdir}/libgcc -I${toplevel_builddir}/libgcc"
+ 
+-  target_thread_file=`$CXX -v 2>&1 | sed -n 's/^Thread model: //p'`
++  target_thread_file=`$CXX -v 2>&1 | sed -e 's/\r//g' | sed -n 's/^Thread model: //p'`
+   case $target_thread_file in
+     posix)
+       CXXFLAGS="$CXXFLAGS -DSUPPORTS_WEAK -DGTHREAD_USE_WEAK -D_PTHREADS"
+@@ -82907,6 +82930,7 @@
+   $as_echo_n "(cached) " >&6
+ else
+   ac_prog_version=`eval $MAKEINFO --version 2>&1 |
++	  			     sed -e 's/\r//g' |
+                                      sed -n 's/^.*GNU texinfo.* \([0-9][0-9.]*\).*$/\1/p'`
+ 
+                     case $ac_prog_version in
+@@ -86502,7 +86526,7 @@
+  ;;
+     "include/gstdint.h":C)
+ if test "$GCC" = yes; then
+-  echo "/* generated for " `$CC --version | sed 1q` "*/" > tmp-stdint.h
++  echo "/* generated for " `$CC --version | sed -e 's/\r//g' | sed 1q` "*/" > tmp-stdint.h
+ else
+   echo "/* generated for $CC */" > tmp-stdint.h
+ fi

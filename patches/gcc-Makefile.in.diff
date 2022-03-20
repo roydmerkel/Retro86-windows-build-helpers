@@ -1,5 +1,5 @@
---- Makefile.in.old	2020-03-12 20:22:25.949992935 -0700
-+++ Makefile.in	2020-03-12 20:31:30.473989607 -0700
+--- Makefile.in.old	2022-03-03 19:49:02.516208351 -0800
++++ Makefile.in	2022-03-03 20:03:11.229602686 -0800
 @@ -38128,6 +38128,7 @@
  	echo "Checking multilib configuration for libstdc++-v3..."; \
  	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libstdc++-v3; \

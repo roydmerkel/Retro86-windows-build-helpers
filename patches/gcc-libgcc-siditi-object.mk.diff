@@ -1,5 +1,5 @@
---- siditi-object.mk.old	2020-03-12 19:54:51.438003048 -0700
-+++ siditi-object.mk	2020-03-12 19:57:02.346002248 -0700
+--- siditi-object.mk.old	2022-03-12 17:28:25.094847553 -0800
++++ siditi-object.mk	2022-03-12 17:31:16.358803187 -0800
 @@ -13,10 +13,20 @@
  
  $o$(objext): %$(objext): $(srcdir)/libgcc2.c

@@ -1,0 +1,18 @@
+[submodule "externals/sys_wait_h"]
+	path = externals/sys_wait_h
+	url = https://github.com/win32ports/sys_wait_h.git
+[submodule "externals/mman-win32"]
+	path = externals/mman-win32
+	url = https://github.com/alitrack/mman-win32.git
+[submodule "externals/fcntl_windows"]
+	path = externals/fcntl_windows
+	url = https://github.com/roydmerkel/fcntl_windows.git
+[submodule "externals/fchmod_windows"]
+	path = externals/fchmod_windows
+	url = https://github.com/roydmerkel/fchmod_windows.git
+[submodule "externals/posix_fallocate_windows"]
+	path = externals/posix_fallocate_windows
+	url = https://github.com/roydmerkel/posix_fallocate_windows.git
+[submodule "externals/sysconf_windows"]
+	path = externals/sysconf_windows
+	url = https://github.com/roydmerkel/sysconf_windows.git

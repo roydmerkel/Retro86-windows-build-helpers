@@ -28,7 +28,7 @@ check_missing_packages () {
   fi
   # zeranoe's build scripts use wget, though we don't here...
   # other things we might need: cmake libgmp-dev libmpfr-dev libmpc-dev libboost-all-dev texinfo
-  local check_packages=('curl' 'pkg-config' 'make' 'git' 'svn' 'gcc' 'autoconf' 'automake' 'yasm' 'cvs' 'flex' 'bison' 'makeinfo' 'g++' 'ed' 'hg' 'pax' 'unzip' 'patch' 'wget' 'xz' 'nasm' 'gperf' 'autogen' 'bzip2' 'cargo' 'wine')  
+  local check_packages=('curl' 'pkg-config' 'make' 'git' 'svn' 'gcc' 'autoconf' 'automake' 'yasm' 'cvs' 'flex' 'bison' 'makeinfo' 'g++' 'ed' 'hg' 'pax' 'unzip' 'patch' 'wget' 'xz' 'nasm' 'gperf' 'autogen' 'bzip2' 'cargo' 'wine' 'node' 'npm')  
   # autoconf-archive is just for leptonica FWIW
   # I'm not actually sure if VENDOR being set to centos is a thing or not. On all the centos boxes I can test on it's not been set at all.
   # that being said, if it where set I would imagine it would be set to centos... And this contition will satisfy the "Is not initially set"
@@ -110,6 +110,21 @@ check_missing_packages () {
   yasm_version="$( "${yasm_binary}" --version |sed -e "s#${yasm_binary}##g" | head -n 1 | tr -dc '[0-9.\n]' )"
   if ! ver_comp "${REQUIRED_YASM_VERSION}" "${yasm_version}"; then
     echo "your yasm version is too old $yasm_version wanted ${REQUIRED_YASM_VERSION}"
+    exit 1
+  fi
+}
+
+check_missing_node_packages () {
+  local check_node_packages=('apple-data-compression@v0.4.1')  
+  # Use hash to check if the packages exist or not. Type is a bash builtin which I'm told behaves differently between different versions of bash.
+  for package in "${check_node_packages[@]}"; do
+    npm list --depth 1 --global "$package" > /dev/null 2>&1 || missing_node_packages=("$package" "${missing_node_packages[@]}")
+  done
+  if [[ -n "${missing_node_packages[@]}" ]]; then
+    clear
+    echo "Could not find the following node packages installed globally: ${missing_node_packages[*]}"
+    echo 'Install the missing packages before running this script.'
+    echo "$ sudo npm install -g ${check_node_packages[@]}"
     exit 1
   fi
 }
@@ -198,7 +213,7 @@ install_cross_compiler() {
 
     # --disable-shared allows c++ to be distributed at all...which seemed necessary for some random dependency which happens to use/require c++...
     local zeranoe_script_name=mingw-w64-build-r22.local
-    local zeranoe_script_options="--gcc-ver=7.1.0 --default-configure --cpu-count=$gcc_cpu_count --pthreads-w32-ver=2-9-1 --disable-shared --clean-build --verbose --allow-overwrite" # allow-overwrite to avoid some crufty prompts if I do rebuilds [or maybe should just nuke everything...]
+    local zeranoe_script_options="--gcc-ver=8.3.0 --default-configure --cpu-count=$gcc_cpu_count --pthreads-w32-ver=2-9-1 --disable-shared --clean-build --verbose --allow-overwrite" # allow-overwrite to avoid some crufty prompts if I do rebuilds [or maybe should just nuke everything...]
     if [[ ($compiler_flavors == "win32" || $compiler_flavors == "multi") && ! -f ../$win32_gcc ]]; then
       echo "Building win32 cross compiler..."
       download_gcc_build_script $zeranoe_script_name
@@ -257,47 +272,52 @@ do_git_checkout() {
   if [[ -z $to_dir ]]; then
     to_dir=$(basename $repo_url | sed s/\.git/_git/) # http://y/abc.git -> abc_git
   fi
-  local desired_branch="$3"
-  if [ ! -d $to_dir ]; then
-    echo "Downloading (via git clone) $to_dir from $repo_url"
-    rm -rf $to_dir.tmp # just in case it was interrupted previously...
-    git clone $repo_url $to_dir.tmp || exit 1
-    # prevent partial checkouts by renaming it only after success
-    mv $to_dir.tmp $to_dir
-    echo "done git cloning to $to_dir"
-    cd $to_dir
-  else
-    cd $to_dir
-    if [[ $git_get_latest = "y" ]]; then
-      git fetch # need this no matter what
+  local to_dir_done_name="$to_dir.done"
+  echo "to_dir_done_name: $to_dir_done_name"
+  if [[ ! -e $to_dir_done_name ]]; then
+    local desired_branch="$3"
+    if [ ! -d $to_dir ]; then
+      echo "Downloading (via git clone) $to_dir from $repo_url"
+      rm -rf $to_dir.tmp # just in case it was interrupted previously...
+      git clone $repo_url $to_dir.tmp || exit 1
+      # prevent partial checkouts by renaming it only after success
+      mv $to_dir.tmp $to_dir
+      echo "done git cloning to $to_dir"
+      cd $to_dir
     else
-      echo "not doing git get latest pull for latest code $to_dir"
+      cd $to_dir
+      if [[ $git_get_latest = "y" ]]; then
+        git fetch # need this no matter what
+      else
+        echo "not doing git get latest pull for latest code $to_dir"
+      fi
     fi
-  fi
 
-  old_git_version=`git rev-parse HEAD`
+    old_git_version=`git rev-parse HEAD`
 
-  if [[ -z $desired_branch ]]; then
-    echo "doing git checkout master"
-    git checkout -f master || exit 1 # in case they were on some other branch before [ex: going between ffmpeg release tags]. # -f: checkout even if the working tree differs from HEAD.
-    if [[ $git_get_latest = "y" ]]; then
-      echo "Updating to latest $to_dir git version [origin/master]..."
-      git merge origin/master || exit 1
+    if [[ -z $desired_branch ]]; then
+      echo "doing git checkout master"
+      git checkout -f master || exit 1 # in case they were on some other branch before [ex: going between ffmpeg release tags]. # -f: checkout even if the working tree differs from HEAD.
+      if [[ $git_get_latest = "y" ]]; then
+        echo "Updating to latest $to_dir git version [origin/master]..."
+        git merge origin/master || exit 1
+      fi
+    else
+      echo "doing git checkout $desired_branch"
+      git checkout -f "$desired_branch" || exit 1
+      git merge "$desired_branch" || exit 1 # get incoming changes to a branch
     fi
-  else
-    echo "doing git checkout $desired_branch"
-    git checkout -f "$desired_branch" || exit 1
-    git merge "$desired_branch" || exit 1 # get incoming changes to a branch
-  fi
 
-  new_git_version=`git rev-parse HEAD`
-  if [[ "$old_git_version" != "$new_git_version" ]]; then
-    echo "got upstream changes, forcing re-configure."
-    git clean -f # Throw away local changes; 'already_*' and bak-files for instance.
-  else
-    echo "fetched no code changes, not forcing reconfigure for that..."
+    new_git_version=`git rev-parse HEAD`
+    if [[ "$old_git_version" != "$new_git_version" ]]; then
+      echo "got upstream changes, forcing re-configure."
+      git clean -f # Throw away local changes; 'already_*' and bak-files for instance.
+    else
+      echo "fetched no code changes, not forcing reconfigure for that..."
+    fi
+    cd ..
+    touch $to_dir_done_name || exit 1
   fi
-  cd ..
 }
 
 get_small_touchfile_name() { # have to call with assignment like a=$(get_small...)
@@ -365,11 +385,19 @@ do_compile() {
   local compile_dest="$2"
   local cur_dir2=$(pwd)
 
-  echo
-  echo "building $compile_source as $compile_dest"
-  echo
-  echo ${cross_prefix}g++ $compile_source -o $cur_dir2/$compile_dest 
-  nice ${cross_prefix}g++ $compile_source -o $cur_dir2/$compile_dest || exit 1
+  local compile_source_dir=$(dirname $compile_source)
+  local compile_source_name=$(basename $compile_source)
+  local compile_source_done="$compile_source_dir/$compile_source_name.done"
+  echo "compile_source_done: $compile_source_done"
+
+  if [[ ! -e $compile_source_done ]]; then
+    echo
+    echo "building $compile_source as $compile_dest"
+    echo
+    echo ${cross_prefix}g++ $compile_source -o $cur_dir2/$compile_dest 
+    nice ${cross_prefix}g++ $compile_source -o $cur_dir2/$compile_dest || exit 1
+    touch $compile_source_done || exit 1
+  fi
 }
 
 do_make() {
@@ -591,12 +619,14 @@ reset_cflags() {
 build_gmp() {
   download_and_unpack_file https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
   cd gmp-6.1.2
+    sudo update-binfmts --disable wine || exit 1
     #export CC_FOR_BUILD=/usr/bin/gcc # Are these needed?
     #export CPP_FOR_BUILD=usr/bin/cpp
     generic_configure "ABI=$bits_target"
     #unset CC_FOR_BUILD
     #unset CPP_FOR_BUILD
     do_make_and_make_install
+    sudo update-binfmts --enable wine || exit 1 
   cd ..
 }
 
@@ -625,7 +655,7 @@ build_mpc() {
 }
 
 build_isl() {
-  download_and_unpack_file http://isl.gforge.inria.fr/isl-0.18.tar.xz
+  download_and_unpack_file http://libisl.sourceforge.io/isl-0.18.tar.xz
   cd isl-0.18
     #export CC_FOR_BUILD=/usr/bin/gcc # Are these needed?
     #export CPP_FOR_BUILD=usr/bin/cpp
@@ -637,7 +667,7 @@ build_isl() {
 }
 
 build_boost() {
-  download_and_unpack_file https://dl.bintray.com/boostorg/release/1.65.1/source/boost_1_65_1.tar.gz
+  download_and_unpack_file https://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.gz
   cd boost_1_65_1
   apply_patch file://$patch_dir/boost_asm.diff "-p1"
   local touch_name=$(get_small_touchfile_name already_ran_bootstrap "")
@@ -655,6 +685,25 @@ build_boost() {
     #CC=${cross_prefix}gcc CXX=${cross_prefix}g++ BOOST_JAM_OS=NT CFLAGS="${CFLAGS} -DNT" ./b2 --prefix=$mingw_w64_x86_64_prefix
     touch $touch_name || exit 1
   fi
+  cd ..
+}
+
+build_zlib() {
+  download_and_unpack_file https://github.com/madler/zlib/archive/v1.2.11.tar.gz zlib-1.2.11
+  cd zlib-1.2.11
+    local make_options
+    if [[ $compiler_flavors == "native" ]]; then
+      export CFLAGS="$CFLAGS -fPIC" # For some reason glib needs this even though we build a static library
+    else
+      export ARFLAGS=rcs # Native can't take ARFLAGS; https://stackoverflow.com/questions/21396988/zlib-build-not-configuring-properly-with-cross-compiler-ignores-ar
+    fi
+    do_configure "--prefix=$mingw_w64_x86_64_prefix --static"
+    do_make_and_make_install "$make_prefix_options ARFLAGS=rcs"
+    if [[ $compiler_flavors == "native" ]]; then
+      reset_cflags
+    else
+      unset ARFLAGS
+    fi
   cd ..
 }
 
@@ -686,7 +735,7 @@ build_dependencies() {
   if [ ! -d ../../MPW-GM ]; then
 	  if [ -f ../../mpw-gm.img__0.bin ]; then
 		  mkdir -p tmp || exit 1
-		  node ../../ndif_research/decompress.js ../../mpw-gm.img__0.bin ../../mpw-gm.ro.img || exit 1
+		  NODE_PATH=$(npm root -g) node ../../ndif_research/decompress.js ../../mpw-gm.img__0.bin ../../mpw-gm.ro.img || exit 1
                   sudo mount -t hfs -o loop ../../mpw-gm.ro.img tmp || exit 1
 		  cp -r tmp/MPW-GM ../../MPW-GM || exit 1
 		  sudo umount tmp || exit 1
@@ -702,46 +751,135 @@ build_dependencies() {
   build_mpc
   build_isl
   build_boost
+  build_zlib
   #build_bash
   #cat mpw-gm.img__0.bin | unbin - || exit 1
 }
 
 build_retro86() {
   #rm dosbox.diff*
-  do_git_checkout https://github.com/autc04/Retro68.git Retro68
+  if [[ ! -e Retro68.done ]]; then
+    rm -rf Retro68-build
+  fi
+  do_git_checkout https://github.com/autc04/Retro68.git Retro68 6e00994e45cb09231d6fff08d9c2680a1834002c
   do_compile $patch_dir/wineFindStrWorkarround.c Retro68/gcc/gcc/wineFindStrWorkarround.exe
   cp $patch_dir/exec-tool.c.in Retro68/gcc/gcc/exec-tool.c.in
   cp $patch_dir/exec-tool.cmd.in Retro68/gcc/gcc/exec-tool.cmd.in
   #apply_patch file://$patch_dir/dosbox.diff
   cd Retro68
     mkdir -p ~/.wine/drive_c/temp
-    patch -p0 < $patch_dir/Retro68-build-toolchain.bash.diff
-    patch -p1 < $patch_dir/Retro68-build-host.diff
+    apply_patch file://$patch_dir/Retro68-build-toolchain.bash.diff "-p0"
+    apply_patch file://$patch_dir/Retro68-build-host.diff "-p1"
     cd hfsutils
-    patch -p1 < $patch_dir/hfsutils.diff
+    apply_patch file://$patch_dir/hfsutils.diff "-p1"
     cd ../gcc
-    patch -p0 < $patch_dir/gcc-Makefile.tpl.diff
-    patch -p0 < $patch_dir/gcc-Makefile.in.diff
-    patch -p0 < $patch_dir/gcc-config-ml.in.diff
+    apply_patch file://$patch_dir/gcc-Makefile.tpl.diff "-p0"
+    apply_patch file://$patch_dir/gcc-Makefile.in.diff "-p0"
+    apply_patch file://$patch_dir/gcc-config-ml.in.diff "-p0"
     cd gcc
-    patch -p0 < $patch_dir/gcc-exec-tool.in.diff
-    patch -p0 < $patch_dir/gcc-configure.ac.diff
-    patch -p0 < $patch_dir/gcc-configure.diff
-    patch -p0 < $patch_dir/gcc-gcc-Makefile.in.diff
+    apply_patch file://$patch_dir/gcc-gcc-exec-tool.in.diff "-p0"
+    apply_patch file://$patch_dir/gcc-gcc-configure.ac.diff "-p0"
+    apply_patch file://$patch_dir/gcc-gcc-configure.diff "-p0"
+    apply_patch file://$patch_dir/gcc-gcc-Makefile.in.diff "-p0"
     cd ../libgcc
-    patch -p0 < $patch_dir/gcc-libgcc-configure.diff
-    patch -p0 < $patch_dir/gcc-libgcc-Makefile.in.diff
-    patch -p0 < $patch_dir/gcc-libgcc-fixed-obj.mk.diff
-    patch -p0 < $patch_dir/gcc-libgcc-shared-object.mk.diff
-    patch -p0 < $patch_dir/gcc-libgcc-siditi-object.mk.diff
-    patch -p0 < $patch_dir/gcc-libgcc-static-object.mk.diff
+    apply_patch file://$patch_dir/gcc-libgcc-configure.diff "-p0"
+    apply_patch file://$patch_dir/gcc-libgcc-Makefile.in.diff "-p0"
+    apply_patch file://$patch_dir/gcc-libgcc-fixed-obj.mk.diff "-p0"
+    apply_patch file://$patch_dir/gcc-libgcc-shared-object.mk.diff "-p0"
+    apply_patch file://$patch_dir/gcc-libgcc-siditi-object.mk.diff "-p0"
+    apply_patch file://$patch_dir/gcc-libgcc-static-object.mk.diff "-p0"
+    cd ../libatomic
+    apply_patch file://$patch_dir/gcc-libatomic-configure.diff "-p0"
+    cd ../libitm
+    apply_patch file://$patch_dir/gcc-libitm-configure.diff "-p0"
+    cd ../libgomp
+    apply_patch file://$patch_dir/gcc-libgomp-configure.diff "-p0"
+    cd ../libada
+    apply_patch file://$patch_dir/gcc-libada-configure.diff "-p0"
+    cd ../zlib
+    apply_patch file://$patch_dir/gcc-zlib-configure.diff "-p0"
+    cd ../libffi
+    apply_patch file://$patch_dir/gcc-libffi-configure.diff "-p0"
+    cd ../libphobos
+    apply_patch file://$patch_dir/gcc-libphobos-configure.diff "-p0"
+    cd ../libhsail-rt
+    apply_patch file://$patch_dir/gcc-libhsail-rt-configure.diff "-p0"
+    cd ../libgo
+    apply_patch file://$patch_dir/gcc-libgo-configure.diff "-p0"
+    cd ../libobjc
+    apply_patch file://$patch_dir/gcc-libobjc-configure.diff "-p0"
+    cd ../libgfortran
+    apply_patch file://$patch_dir/gcc-libgfortran-configure.diff "-p0"
     cd ../libquadmath
-    patch -p0 < $patch_dir/gcc-gcc-libquadmath-configure.diff
+    apply_patch file://$patch_dir/gcc-libquadmath-configure.diff "-p0"
+    cd ../libbacktrace
+    apply_patch file://$patch_dir/gcc-libbacktrace-configure.diff "-p0"
+    cd ../newlib
+    apply_patch file://$patch_dir/gcc-newlib-configure.diff "-p0"
+    cd ../libssp
+    apply_patch file://$patch_dir/gcc-libssp-configure.diff "-p0"
+    cd ../liboffloadmic
+    apply_patch file://$patch_dir/gcc-liboffloadmic-configure.diff "-p0"
+    cd ../libvtv
+    apply_patch file://$patch_dir/gcc-libvtv-configure.diff "-p0"
+    cd ../libsanitizer
+    apply_patch file://$patch_dir/gcc-libsanitizer-configure.diff "-p0"
     cd ../libstdc++-v3
-    patch -p0 < $patch_dir/gcc-gcc-libstdc++-v3-configure.diff
+    apply_patch file://$patch_dir/gcc-libstdc++-v3-configure.diff "-p0"
+    cd include/bits
+    apply_patch file://$patch_dir/gcc-libstdc++-v3-include-bits-random.diff "-p0"
     cd ../..
-    wine regedit $patch_dir/wine_tmp_path.reg
-    sed -i -e 's#SELFTEST_FLAGS = -nostdinc -x c /dev/null -S -o /dev/null \\#SELFTEST_FLAGS = -nostdinc -x c nul -S -o nul \\#g' gcc/gcc/Makefile.in
+    cd ../..
+    if [[ ! -e PEFTools/wait.h ]]; then
+      cp $externals_dir/sys_wait_h/sys/wait.h PEFTools/wait.h || exit 1
+    fi
+    if [[ ! -e PEFTools/mman.h ]]; then
+      cp $externals_dir/mman-win32/mman.h PEFTools/mman.h || exit 1
+    fi
+    if [[ ! -e PEFTools/mman.c ]]; then
+      cp $externals_dir/mman-win32/mman.c PEFTools/mman.c || exit 1
+    fi
+    if [[ ! -e libelf/src/mman.h ]]; then
+      cp $externals_dir/mman-win32/mman.h libelf/src/mman.h || exit 1
+    fi
+    if [[ ! -e libelf/src/mman.c ]]; then
+      cp $externals_dir/mman-win32/mman.c libelf/src/mman.c || exit 1
+    fi
+    if [[ ! -e libelf/src/fcntl.h ]]; then
+      cp $externals_dir/fcntl_windows/fcntl.h libelf/src/fcntl.h || exit 1
+    fi
+    if [[ ! -e libelf/src/fcntl.c ]]; then
+      cp $externals_dir/fcntl_windows/fcntl.c libelf/src/fcntl.c || exit 1
+    fi
+    if [[ ! -e libelf/src/ioinfo.h ]]; then
+      cp $externals_dir/fcntl_windows/IOINFO.H libelf/src/ioinfo.h || exit 1
+    fi
+    if [[ ! -e libelf/src/fchmod.h ]]; then
+      cp $externals_dir/fchmod_windows/fchmod.h libelf/src/fchmod.h || exit 1
+    fi
+    if [[ ! -e libelf/src/fchmod.cpp ]]; then
+      cp $externals_dir/fchmod_windows/fchmod.cpp libelf/src/fchmod.cpp || exit 1
+    fi
+    if [[ ! -e libelf/src/fallocate.h ]]; then
+      cp $externals_dir/posix_fallocate_windows/fallocate.h libelf/src/fallocate.h || exit 1
+    fi
+    if [[ ! -e libelf/src/fallocate.cpp ]]; then
+      cp $externals_dir/posix_fallocate_windows/fallocate.cpp libelf/src/fallocate.cpp || exit 1
+    fi
+    if [[ ! -e libelf/src/sysconf.h ]]; then
+      cp $externals_dir/sysconf_windows/sysconf.h libelf/src/sysconf.h || exit 1
+    fi
+    if [[ ! -e libelf/src/sysconf.cpp ]]; then
+      cp $externals_dir/sysconf_windows/sysconf.cpp libelf/src/sysconf.cpp || exit 1
+    fi
+    if [[ ! -e $patch_dir/wine_tmp_path.reg.done ]]; then
+      wine regedit $patch_dir/wine_tmp_path.reg || exit 1
+      touch $patch_dir/wine_tmp_path.reg.done || exit 1
+    fi
+    if [[ ! -e gcc/gcc/Makefile.in.SELFTEST.done ]]; then
+      sed -i -e 's#SELFTEST_FLAGS = -nostdinc -x c /dev/null -S -o /dev/null \\#SELFTEST_FLAGS = -nostdinc -x c nul -S -o nul \\#g' gcc/gcc/Makefile.in || exit 1
+      touch gcc/gcc/Makefile.in.SELFTEST.done || exit 1
+    fi
     export SDL_CONFIG="${cross_prefix}sdl-config"
     export CC=${cross_prefix}gcc
     export CXX=${cross_prefix}g++
@@ -772,14 +910,24 @@ build_retro86() {
 	    echo cp -r ../../../MPW-GM/Interfaces\&Libraries/Interfaces/RIncludes InterfacesAndLibraries/RIncludes
 	    cp -r ../../../MPW-GM/Interfaces\&Libraries/Interfaces/RIncludes InterfacesAndLibraries/RIncludes
     fi
-    chmod a+x ./build-toolchain.bash
+    chmod a+x ./build-toolchain.bash || exit 1
     cd ..
-    rm -rf Retro68-build
-    mkdir Retro68-build
+    mkdir -p Retro68-build
     export WINEPATHPOST="$(winepath -w $mingw_bin_path);$(winepath -w $mingw_w64_x86_64_prefix)"
     echo "WINEPATHPOST: $WINEPATHPOST"
     cd Retro68-build
-    ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc --boost-rootdir=$mingw_w64_x86_64_prefix --boost-libdir=$mingw_w64_x86_64_prefix/lib || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
+    if [[ ! -e build-toolchain.bash.m68k ]]; then
+      ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc --boost-rootdir=$mingw_w64_x86_64_prefix --boost-libdir=$mingw_w64_x86_64_prefix/lib --stop-after-68k-gcc || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
+      touch build-toolchain.bash.m68k
+    fi
+    if [[ ! -e build-toolchain.bash.ppc ]]; then
+      ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc --boost-rootdir=$mingw_w64_x86_64_prefix --boost-libdir=$mingw_w64_x86_64_prefix/lib --skip-68k-gcc-build --stop-after-ppc-gcc || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
+      touch build-toolchain.bash.ppc
+    fi
+    if [[ ! -e build-toolchain.bash.tools ]]; then
+      ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc --boost-rootdir=$mingw_w64_x86_64_prefix --boost-libdir=$mingw_w64_x86_64_prefix/lib --skip-68k-gcc-build --skip-ppc-gcc-build || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
+      touch build-toolchain.bash.tools
+    fi
     unset LDFLAGS
     unset LIBS
     unset SDL_CONFIG
@@ -798,6 +946,7 @@ build_apps() {
 # set some parameters initial values
 cur_dir="$(pwd)/sandbox"
 patch_dir="$(pwd)/patches"
+externals_dir="$(pwd)/externals"
 cpu_count="$(grep -c processor /proc/cpuinfo 2>/dev/null)" # linux cpu count
 if [ -z "$cpu_count" ]; then
   cpu_count=`sysctl -n hw.ncpu | tr -d '\n'` # OS X
@@ -855,6 +1004,7 @@ done
 
 reset_cflags # also overrides any "native" CFLAGS, which we may need if there are some 'linux only' settings in there
 check_missing_packages # do this first since it's annoying to go through prompts then be rejected
+check_missing_node_packages # do this next since it's annoying to go through prompts then be rejected
 intro # remember to always run the intro, since it adjust pwd
 install_cross_compiler
 
@@ -889,8 +1039,11 @@ if [[ $compiler_flavors == "multi" || $compiler_flavors == "win32" ]]; then
   make_prefix_options="CC=${cross_prefix}gcc AR=${cross_prefix}ar PREFIX=$mingw_w64_x86_64_prefix RANLIB=${cross_prefix}ranlib LD=${cross_prefix}ld LINK=${cross_prefix}gcc STRIP=${cross_prefix}strip CXX=${cross_prefix}g++ AS=${cross_prefix}as CPP=${cross_prefix}cpp"
   mkdir -p win32
   cd win32
-    build_dependencies 
-    build_apps
+    {
+      build_dependencies 
+      build_apps
+    }
+    sudo update-binfmts --enable wine || exit 1
   cd ..
 fi
 
@@ -907,8 +1060,11 @@ if [[ $compiler_flavors == "multi" || $compiler_flavors == "win64" ]]; then
   make_prefix_options="CC=${cross_prefix}gcc AR=${cross_prefix}ar PREFIX=$mingw_w64_x86_64_prefix RANLIB=${cross_prefix}ranlib LD=${cross_prefix}ld LINK=${cross_prefix}gcc STRIP=${cross_prefix}strip CXX=${cross_prefix}g++ AS=${cross_prefix}as CPP=${cross_prefix}cpp"
   mkdir -p win64
   cd win64
-    build_dependencies
-    build_apps
+    {
+      build_dependencies 
+      build_apps
+    }
+    sudo update-binfmts --enable wine || exit 1
   cd ..
 fi
 
