@@ -872,6 +872,36 @@ build_retro86() {
     if [[ ! -e libelf/src/sysconf.cpp ]]; then
       cp $externals_dir/sysconf_windows/sysconf.cpp libelf/src/sysconf.cpp || exit 1
     fi
+    if [[ ! -e Elf2Mac/err.c ]]; then
+      cp $externals_dir/err_windows/err.c Elf2Mac/err.c || exit 1
+    fi
+    if [[ ! -e Elf2Mac/err.h ]]; then
+      cp $externals_dir/err_windows/err.h Elf2Mac/err.h || exit 1
+    fi
+    if [[ ! -e Elf2Mac/wait.h ]]; then
+      cp $externals_dir/sys_wait_h/sys/wait.h Elf2Mac/wait.h || exit 1
+    fi
+    if [[ ! -e LaunchAPPL/Client/wait.h ]]; then
+      cp $externals_dir/sys_wait_h/sys/wait.h LaunchAPPL/Client/wait.h || exit 1
+    fi
+    if [[ ! -e LaunchAPPL/Client/env.h ]]; then
+      cp $externals_dir/env_windows/env.h LaunchAPPL/Client/env.h || exit 1
+    fi
+    if [[ ! -e LaunchAPPL/Client/env.c ]]; then
+      cp $externals_dir/env_windows/env.c LaunchAPPL/Client/env.c || exit 1
+    fi
+    if [[ ! -e LaunchAPPL/Client/pspawn.h ]]; then
+      cp $externals_dir/pspawn/pspawn.h LaunchAPPL/Client/pspawn.h || exit 1
+    fi
+    if [[ ! -e LaunchAPPL/Client/pspawn.c ]]; then
+      cp $externals_dir/pspawn/pspawn.c LaunchAPPL/Client/pspawn.c || exit 1
+    fi
+    if [[ ! -e LaunchAPPL/Client/tpspawn.c ]]; then
+      cp $externals_dir/pspawn/tpspawn.c LaunchAPPL/Client/tpspawn.c || exit 1
+    fi
+    if [[ ! -e LaunchAPPL/Client/wpspawn.c ]]; then
+      cp $externals_dir/pspawn/wpspawn.c LaunchAPPL/Client/wpspawn.c || exit 1
+    fi
     if [[ ! -e $patch_dir/wine_tmp_path.reg.done ]]; then
       wine regedit $patch_dir/wine_tmp_path.reg || exit 1
       touch $patch_dir/wine_tmp_path.reg.done || exit 1

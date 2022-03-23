@@ -16,3 +16,12 @@
 [submodule "externals/sysconf_windows"]
 	path = externals/sysconf_windows
 	url = https://github.com/roydmerkel/sysconf_windows.git
+[submodule "externals/pspawn"]
+	path = externals/pspawn
+	url = https://github.com/roydmerkel/pspawn.git
+[submodule "externals/err_windows"]
+	path = externals/err_windows
+	url = https://github.com/roydmerkel/err_windows.git
+[submodule "externals/env_windows"]
+	path = externals/env_windows
+	url = https://github.com/roydmerkel/env_windows.git
