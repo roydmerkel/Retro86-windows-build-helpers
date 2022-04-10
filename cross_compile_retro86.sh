@@ -902,6 +902,21 @@ build_retro86() {
     if [[ ! -e LaunchAPPL/Client/wpspawn.c ]]; then
       cp $externals_dir/pspawn/wpspawn.c LaunchAPPL/Client/wpspawn.c || exit 1
     fi
+    if [[ ! -e LaunchAPPL/Client/strFuncs.c ]]; then
+      cp $externals_dir/pspawn/strFuncs.c LaunchAPPL/Client/strFuncs.c || exit 1
+    fi
+    if [[ ! -e LaunchAPPL/Client/strFuncs.h ]]; then
+      cp $externals_dir/pspawn/strFuncs.h LaunchAPPL/Client/strFuncs.h || exit 1
+    fi
+    if [[ ! -e LaunchAPPL/Client/errFuncs.c ]]; then
+      cp $externals_dir/pspawn/errFuncs.c LaunchAPPL/Client/errFuncs.c || exit 1
+    fi
+    if [[ ! -e LaunchAPPL/Client/errFuncs.h ]]; then
+      cp $externals_dir/pspawn/errFuncs.h LaunchAPPL/Client/errFuncs.h || exit 1
+    fi
+    if [[ ! -e LaunchAPPL/Client/ioinfo.h ]]; then
+      cp $externals_dir/pspawn/ioinfo.h LaunchAPPL/Client/ioinfo.h || exit 1
+    fi
     if [[ ! -e $patch_dir/wine_tmp_path.reg.done ]]; then
       wine regedit $patch_dir/wine_tmp_path.reg || exit 1
       touch $patch_dir/wine_tmp_path.reg.done || exit 1

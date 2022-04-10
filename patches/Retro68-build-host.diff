@@ -99,16 +99,25 @@ diff -Naur Retro68.old/Elf2Mac/Object.cc Retro68/Elf2Mac/Object.cc
  #include <iostream>
 diff -Naur Retro68.old/LaunchAPPL/Client/CMakeLists.txt Retro68/LaunchAPPL/Client/CMakeLists.txt
 --- Retro68.old/LaunchAPPL/Client/CMakeLists.txt	2022-03-02 21:58:34.523150433 -0800
-+++ Retro68/LaunchAPPL/Client/CMakeLists.txt	2022-03-22 22:35:37.148016902 -0700
++++ Retro68/LaunchAPPL/Client/CMakeLists.txt	2022-04-09 22:31:22.653030819 -0700
 @@ -8,6 +8,8 @@
      Serial.h Serial.cc
      TCP.h TCP.cc
      SharedFile.h SharedFile.cc
 +    env.h env.c
-+    pspawn.c pspawn.h tpspawn.c wpspawn.c
++    pspawn.c pspawn.h tpspawn.c wpspawn.c strFuncs.c errFuncs.c
  )
  
  if(APPLE)
+@@ -39,4 +41,8 @@
+     target_link_libraries(LaunchAPPL ${APPLICATIONSERVICES_FW})    
+ endif()
+ 
++if(WIN32)
++    target_link_libraries(LaunchAPPL wsock32 ws2_32)
++endif()
++
+ install(TARGETS LaunchAPPL RUNTIME DESTINATION bin)
 diff -Naur Retro68.old/LaunchAPPL/Client/Executor.cc Retro68/LaunchAPPL/Client/Executor.cc
 --- Retro68.old/LaunchAPPL/Client/Executor.cc	2022-03-02 21:58:34.523150433 -0800
 +++ Retro68/LaunchAPPL/Client/Executor.cc	2022-03-20 21:33:17.600730257 -0700
@@ -120,6 +129,494 @@ diff -Naur Retro68.old/LaunchAPPL/Client/Executor.cc Retro68/LaunchAPPL/Client/E
  
  namespace po = boost::program_options;
  
+diff -Naur Retro68.old/LaunchAPPL/Client/Serial.cc Retro68/LaunchAPPL/Client/Serial.cc
+--- Retro68.old/LaunchAPPL/Client/Serial.cc	2022-03-02 21:58:34.523150433 -0800
++++ Retro68/LaunchAPPL/Client/Serial.cc	2022-04-09 21:13:07.345814936 -0700
+@@ -4,23 +4,49 @@
+ #include "Stream.h"
+ #include "ReliableStream.h"
+ #include "ServerProtocol.h"
+-#include <termios.h>
++//#include <termios.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+-#include <arpa/inet.h>
+-#include <poll.h>
++//#include <arpa/inet.h>
++//#include <poll.h>
++#include <windows.h>
++#include <stdexcept>
+ #include <chrono>
+ #include <iostream>
++#include <queue>
+ 
+ namespace po = boost::program_options;
+ using namespace std::literals::chrono_literals;
+ 
++void InvalidateHandle(HANDLE& hHandle )
++{
++    hHandle = INVALID_HANDLE_VALUE;
++}
++
++#define SERIAL_STREAM_BUFFER_SIZE 4096
++static DWORD WINAPI EventThreadProcInit(LPVOID lpParameter);
+ class SerialStream : public WaitableStream
+ {
+-    static const long kReadBufferSize = 4096;
+-    uint8_t readBuffer[kReadBufferSize];
++    static const long kReadBufferSize;
++    uint8_t readBuffer[SERIAL_STREAM_BUFFER_SIZE];
++    friend DWORD WINAPI EventThreadProcInit(LPVOID lpParameter);
++private:
++    unsigned EventThreadProc();
++    CRITICAL_SECTION readSection;
++    BOOL readSectionInitialized;
++    CRITICAL_SECTION hDataRxSection;
++    BOOL hDataRxInitialized;
++    HANDLE eventThread;
++    DWORD threadId;
++    HANDLE hThreadTerm;
++    HANDLE hThreadStarted;
++    HANDLE hDataRx;
++    HANDLE hDataTx;
++    BOOL isConnected;
++    std::queue<uint8_t> readData;
+ public:
+-    int fd;
++    //int fd;
++    HANDLE h;
+     int baud;
+ 
+     virtual void write(const void* p, size_t n) override;
+@@ -31,6 +57,8 @@
+     ~SerialStream();
+ };
+ 
++const long SerialStream::kReadBufferSize = SERIAL_STREAM_BUFFER_SIZE;
++
+ class SerialLauncher : public StreamBasedLauncher
+ {
+     SerialStream stream;
+@@ -39,21 +67,181 @@
+     SerialLauncher(po::variables_map& options);
+ };
+ 
++static DWORD WINAPI EventThreadProcInit(LPVOID lpParameter)
++{
++    class SerialStream FAR * thisFunc = (class SerialStream FAR *)lpParameter;
++    return thisFunc->EventThreadProc();
++}
++
++unsigned SerialStream::EventThreadProc()
++{
++    BOOL cont = TRUE;
++    DWORD eventMask = 0;
++
++    OVERLAPPED ov;
++    memset(&ov, 0, sizeof ov);
++    ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
++    HANDLE handles[2];
++    handles[0] = this->hThreadTerm;
++    handles[1] = ov.hEvent;
++
++
++    DWORD wait;
++    SetEvent(this->hThreadStarted);
++
++    while(cont)
++    {
++        BOOL event = WaitCommEvent(h, &eventMask, &ov);
++
++        if(!event)
++        {
++            if(GetLastError() != ERROR_IO_PENDING)
++            {
++                fprintf(stderr, "last Error: %lx\n", (unsigned long)GetLastError());
++                throw std::runtime_error("failed to read serial port.\n");
++            }
++        }
++
++        do {
++            wait = WaitForMultipleObjects(2, handles, FALSE, INFINITE);
++
++            switch(wait)
++            {
++                case WAIT_OBJECT_0:
++                    {
++                        fprintf(stderr, "exit thread.\n");
++                        ExitThread(1);
++                    }
++                    break;
++                case WAIT_OBJECT_0 + 1:
++                    {
++                        DWORD mask;
++
++                        if(GetCommMask(h, &mask))
++                        {
++                            if(mask & EV_TXEMPTY)
++                            {
++                                ResetEvent(ov.hEvent);
++                                SetEvent(this->hDataTx);
++                            }
++                            if(mask & EV_RXCHAR)
++                            {
++                                int accum = 0;
++
++                                EnterCriticalSection(&readSection);
++                                BOOL readFileRet = FALSE;
++                                DWORD bytesRead = 0;
++                                OVERLAPPED ovRead;
++                                memset(&ovRead, '\0', sizeof ovRead);
++                                ovRead.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
++                                do
++                                {
++                                    ResetEvent(ovRead.hEvent);
++                                    char szTmp[1];
++                                    memset(szTmp, '\0', sizeof szTmp);
++                                    readFileRet = ReadFile(h, szTmp, sizeof szTmp, &bytesRead, &ovRead);
++                                    if(!readFileRet)
++                                    {
++                                        cont = FALSE;
++                                        break;
++                                    }
++                                    if(bytesRead > 0)
++                                    {
++                                        size_t curByte;
++                                        for(curByte = 0; curByte < bytesRead; curByte++)
++                                        {
++                                            readData.push(((uint8_t*)szTmp)[curByte]);
++                                        }
++                                        accum += bytesRead;
++                                    }
++                                }
++                                while(0);
++                                CloseHandle(ovRead.hEvent);
++
++                                LeaveCriticalSection(&readSection);
++
++                                if(accum > 0)
++                                {
++                                    EnterCriticalSection(&hDataRxSection);
++                                    SetEvent(hDataRx);
++                                    LeaveCriticalSection(&hDataRxSection);
++                                }
++                                ResetEvent(ov.hEvent);
++                            }
++                        }
++                    }
++                    break;
++            }
++        } while(wait == 0x102);
++    }
++    return 0;
++}
+ 
+ SerialStream::SerialStream(po::variables_map &options)
+ {
++    readSectionInitialized = FALSE;
++    hDataRxInitialized = FALSE;
++    eventThread = INVALID_HANDLE_VALUE;
++    threadId = 0;
++    hThreadTerm = INVALID_HANDLE_VALUE;
++    hThreadStarted = INVALID_HANDLE_VALUE;
++    hDataRx = INVALID_HANDLE_VALUE;
++    hDataTx = INVALID_HANDLE_VALUE;
++    isConnected = FALSE;
++
+     std::string port = options["serial-port"].as<std::string>();
+     baud = options["serial-baud"].as<int>();
+-    fd = open(port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY );
+-    if(fd < 0)
++    //fd = open(port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY );
++    h = CreateFile(port.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
++    //if(fd < 0)
++    //    throw std::runtime_error("Cannot open serial port.\n");
++    if(h == NULL || h == INVALID_HANDLE_VALUE)
++        throw std::runtime_error("Cannot open serial port.\n");
++
++    DCB dcb;
++    COMMTIMEOUTS cto;
++    if(!GetCommState(h, &dcb))
++    {
+         throw std::runtime_error("Cannot open serial port.\n");
++    }
++    if(!GetCommTimeouts(h, &cto))
++    {
++        throw std::runtime_error("Cannot open serial port.\n");
++    }
+ 
+-    struct termios tios;
+-    tcgetattr(fd,&tios);
++    //struct termios tios;
++    //tcgetattr(fd,&tios);
+ 
+-    tios.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
++    //tios.c_cflag = CRTSCTS | CS8 | CLOCAL | CREAD;
++    //tios.c_iflag = 0;//IGNPAR | ICRNL;
++    //tios.c_lflag = 0;
++    //tios.c_oflag = 0;
++    dcb.DCBlength = sizeof (DCB);
++    dcb.fBinary = TRUE;
++    dcb.fParity = FALSE;
++    dcb.fOutxCtsFlow = TRUE;
++    dcb.fOutxDsrFlow = FALSE;
++    dcb.fDtrControl = DTR_CONTROL_ENABLE;
++    dcb.fDsrSensitivity = FALSE;
++    dcb.fTXContinueOnXoff = TRUE;
++    dcb.fOutX = FALSE;
++    dcb.fInX = FALSE;
++    dcb.fErrorChar = FALSE;
++    dcb.fNull = FALSE;
++    dcb.fRtsControl = RTS_CONTROL_ENABLE;
++    dcb.fAbortOnError = FALSE;
++    dcb.XonLim = 0;
++    dcb.XoffLim = 0;
++    dcb.ByteSize = 8;
++    dcb.Parity = NOPARITY;
++    dcb.StopBits = ONESTOPBIT;
++    dcb.XonChar = 0; // TODO
++    dcb.XoffChar = 0; // TODO
++    dcb.ErrorChar = 0; // TODO
++    dcb.EofChar = 0; // TODO
++    dcb.EvtChar = 0; // TODO
+ 
+-    switch(baud)
++    /*switch(baud)
+     {
+         case 9600:      tios.c_cflag |= B9600; break;
+         case 19200:     tios.c_cflag |= B19200; break;
+@@ -63,39 +251,139 @@
+         case 230400:    tios.c_cflag |= B230400; break;
+         default:
+             throw std::runtime_error("Unsupported baud rate.\n");
++    }*/
++    switch(baud)
++    {
++        case 9600:      dcb.BaudRate = CBR_9600; break;
++        case 19200:     dcb.BaudRate = CBR_19200; break;
++        case 38400:     dcb.BaudRate = CBR_38400; break;
++        case 57600:     dcb.BaudRate = CBR_57600; break;
++        case 115200:    dcb.BaudRate = CBR_115200; break;
++        case 230400:    dcb.BaudRate = 230400; break;
++        case 256000:    dcb.BaudRate = CBR_256000; break;
++        default:
++            throw std::runtime_error("Unsupported baud rate.\n");
++    }
++
++
++    //tios.c_iflag = 0;//IGNPAR | ICRNL;
++    //tios.c_lflag = 0;
++    //tios.c_oflag = 0;
++    //tios.c_cc[VTIME]    = 0;   /* inter-character timer unused */
++    //tios.c_cc[VMIN]     = 1;   /* blocking read until 1 chars received */
++    cto.ReadIntervalTimeout = MAXDWORD;
++    cto.ReadTotalTimeoutMultiplier = 0;
++    cto.ReadTotalTimeoutConstant = 0;
++    cto.WriteTotalTimeoutMultiplier = 0;
++    cto.WriteTotalTimeoutConstant = 0;
++    //tcsetattr(fd,TCSANOW,&tios);
++    if(!SetCommState(h, &dcb))
++    {
++        throw std::runtime_error("Cannot open set comm attrs.\n");
++    }
++    if(!SetCommTimeouts(h, &cto))
++    {
++        throw std::runtime_error("Cannot open set comm attrs.\n");
++    }
++    if(!SetCommMask(h, EV_RXCHAR| EV_TXEMPTY))
++    {
++        throw std::runtime_error("Cannot open set comm attrs.\n");
+     }
+ 
+-    tios.c_iflag = 0;//IGNPAR | ICRNL;
+-    tios.c_lflag = 0;
+-    tios.c_oflag = 0;
+-    tios.c_cc[VTIME]    = 0;   /* inter-character timer unused */
+-    tios.c_cc[VMIN]     = 1;   /* blocking read until 1 chars received */
+-    tcsetattr(fd,TCSANOW,&tios);
++    isConnected = FALSE;
++
++    InitializeCriticalSection(&readSection);
++    readSectionInitialized = TRUE;
++
++    InitializeCriticalSection(&hDataRxSection);
++    hDataRxInitialized = TRUE;
++
++    //create thread terminator event...
++    hDataRx = CreateEvent(NULL,FALSE,FALSE,NULL);
++    hDataTx = CreateEvent(NULL,FALSE,TRUE,NULL);
++    hThreadTerm = CreateEvent(NULL,FALSE,FALSE,NULL);
++    hThreadStarted = CreateEvent(NULL,FALSE,FALSE,NULL); 
++
++    eventThread = CreateThread(NULL, 0, EventThreadProcInit, (LPVOID)this, 0, &threadId);
++    DWORD wait = WaitForSingleObject(hThreadStarted, INFINITE);
++
++    if(wait != WAIT_OBJECT_0)
++    {
++        throw std::runtime_error("Cannot create event thread.\n");
++    }
++
++    CloseHandle(hThreadStarted);
++    InvalidateHandle(hThreadStarted);
+     usleep(500000);
++
++    isConnected = TRUE;
+ }
+ SerialStream::~SerialStream()
+ {
+-    tcdrain(fd);
++    isConnected = FALSE;
++    if(hThreadTerm != INVALID_HANDLE_VALUE)
++    {
++        SetEvent(hThreadTerm);
++        WaitForSingleObject(eventThread,INFINITE);
++        CloseHandle( hThreadTerm);
++        InvalidateHandle(hThreadTerm);
++    }
++    if(hDataRx != INVALID_HANDLE_VALUE)
++    {
++        CloseHandle( hDataRx);
++        InvalidateHandle(hDataRx);
++    }
++    if(hDataTx != INVALID_HANDLE_VALUE)
++    {
++        CloseHandle( hDataTx);
++        InvalidateHandle(hDataTx);
++    }
++    if(eventThread != INVALID_HANDLE_VALUE)
++    {
++        CloseHandle( eventThread);
++        InvalidateHandle(eventThread);
++    }
++    if(readSectionInitialized)
++    {
++        readSectionInitialized = FALSE;
++        DeleteCriticalSection(&readSection);
++    }
++    if(hDataRxInitialized)
++    {
++        hDataRxInitialized = FALSE;
++        DeleteCriticalSection(&hDataRxSection);
++    }
++    //tcdrain(fd);
++    FlushFileBuffers(h);
+     usleep(500000);
+-    close(fd);
++    //close(fd);
++    CloseHandle(h);
+ }
+ 
+ void SerialStream::write(const void* p, size_t n)
+ {
+     while(n)
+     {
+-        struct pollfd pfd;
+-        pfd.fd = fd;
+-        pfd.events = POLLOUT;
+-        pfd.revents = 0;
+-        poll(&pfd, 1, 1000);
+-        if(pfd.revents & POLLOUT)
++        DWORD waitRes = WaitForSingleObject(this->hDataTx, 1000);
++        if(waitRes == WAIT_OBJECT_0)
+         {
+-            ssize_t written = ::write(fd, p, n);
+-            if(written > 0)
++            //ssize_t written = ::write(fd, p, n);
++            DWORD dwBytesWritten = 0;
++            OVERLAPPED ov;
++            memset(&ov, '\0', sizeof ov);
++            ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
++            BOOL writeRes = WriteFile(h, p, n, &dwBytesWritten, &ov);
++            if(writeRes || (!writeRes && GetLastError() == ERROR_IO_PENDING))
+             {
+-                p = (const void*) ( (const char*)p + written );
+-                n -= written;
++                waitRes = WaitForSingleObject(ov.hEvent, INFINITE);
++                if(waitRes == WAIT_OBJECT_0)
++                {
++                    if(GetOverlappedResult(h, &ov, &dwBytesWritten, FALSE))
++                    {
++                        p = (const void*) ( (const char*)p + dwBytesWritten );
++                        n -= dwBytesWritten;
++                    }
++                }
+             }
+         }
+     }
+@@ -103,18 +391,35 @@
+ 
+ void SerialStream::wait()
+ {
+-    struct pollfd pfd;
+-    pfd.fd = fd;
+-    pfd.events = POLLIN;
+-    pfd.revents = 0;
+-    poll(&pfd, 1, 1000);
+-    if(pfd.revents & POLLIN)
++    EnterCriticalSection(&readSection);
++    if(readData.size() > 0)
++    {
++        size_t curByte;
++        for(curByte = 0; readData.size() && curByte + 1 < kReadBufferSize; curByte++)
++        {
++            readBuffer[curByte] = readData.front();
++            readData.pop();
++        }
++        notifyReceive(readBuffer, curByte);
++        return;
++    }
++    LeaveCriticalSection(&readSection);
++
++    DWORD waitRes = WaitForSingleObject(hDataRx, 1000);
++    if(waitRes == WAIT_OBJECT_0)
+     {
+-        ssize_t n = ::read(fd, readBuffer, kReadBufferSize);
+-        if(n > 0)
++        EnterCriticalSection(&hDataRxSection);
++        ResetEvent(hDataRx);
++        EnterCriticalSection(&readSection);
++        size_t curByte;
++        for(curByte = 0; readData.size() && curByte + 1 < kReadBufferSize; curByte++)
+         {
+-            notifyReceive(readBuffer, n);
++            readBuffer[curByte] = readData.front();
++            readData.pop();
+         }
++        notifyReceive(readBuffer, curByte);
++        LeaveCriticalSection(&readSection);
++        LeaveCriticalSection(&hDataRxSection);
+     }
+ }
+ 
+diff -Naur Retro68.old/LaunchAPPL/Client/SharedFile.cc Retro68/LaunchAPPL/Client/SharedFile.cc
+--- Retro68.old/LaunchAPPL/Client/SharedFile.cc	2022-03-02 21:58:34.523150433 -0800
++++ Retro68/LaunchAPPL/Client/SharedFile.cc	2022-04-09 21:54:03.297391313 -0700
+@@ -6,6 +6,7 @@
+ #include <chrono>
+ #include <iostream>
+ #include <boost/filesystem.hpp>
++#include <windows.h>
+ 
+ namespace fs = boost::filesystem;
+ namespace po = boost::program_options;
+@@ -56,13 +57,15 @@
+     
+     do
+     {
+-        usleep(100000);
++        //usleep(100000);
++        ::Sleep(100);
+     } while(fs::exists(shared_directory / "in_channel"));
+ }
+ 
+ void SharedFileStream::wait()
+ {
+-    usleep(100000);
++    //usleep(100000);
++    ::Sleep(100);
+     if(fs::exists(shared_directory / "out_channel"))
+     {
+         {
 diff -Naur Retro68.old/LaunchAPPL/Client/SSH.cc Retro68/LaunchAPPL/Client/SSH.cc
 --- Retro68.old/LaunchAPPL/Client/SSH.cc	2022-03-02 21:58:34.523150433 -0800
 +++ Retro68/LaunchAPPL/Client/SSH.cc	2022-03-22 22:23:35.225155177 -0700
@@ -255,17 +752,72 @@ diff -Naur Retro68.old/LaunchAPPL/Client/SSH.cc Retro68/LaunchAPPL/Client/SSH.cc
      }
 diff -Naur Retro68.old/LaunchAPPL/Client/StreamBasedLauncher.cc Retro68/LaunchAPPL/Client/StreamBasedLauncher.cc
 --- Retro68.old/LaunchAPPL/Client/StreamBasedLauncher.cc	2022-03-02 21:58:34.523150433 -0800
-+++ Retro68/LaunchAPPL/Client/StreamBasedLauncher.cc	2022-03-22 22:47:54.392408446 -0700
-@@ -3,7 +3,8 @@
++++ Retro68/LaunchAPPL/Client/StreamBasedLauncher.cc	2022-04-09 22:19:14.731709633 -0700
+@@ -3,7 +3,11 @@
  #include "ServerProtocol.h"
  #include <iostream>
  #include <sstream>
 -#include <arpa/inet.h>
 +//#include <arpa/inet.h>
-+#include <winsock2.h>
++extern "C" {
++    #include <winsock2.h>
++    #include <windows.h>
++}
  
  StreamBasedLauncher::StreamBasedLauncher(boost::program_options::variables_map &options)
      : Launcher(options)
+diff -Naur Retro68.old/LaunchAPPL/Client/TCP.cc Retro68/LaunchAPPL/Client/TCP.cc
+--- Retro68.old/LaunchAPPL/Client/TCP.cc	2022-03-02 21:58:34.523150433 -0800
++++ Retro68/LaunchAPPL/Client/TCP.cc	2022-04-09 22:19:20.303689058 -0700
+@@ -3,12 +3,16 @@
+ #include "Utilities.h"
+ #include "Stream.h"
+ #include "ServerProtocol.h"
+-#include <termios.h>
+-#include <arpa/inet.h>
++//#include <termios.h>
++//#include <arpa/inet.h>
++extern "C" {
++    #include <winsock2.h>
++    #include <windows.h>
++}
+ #include <chrono>
+ #include <iostream>
+ #include <sys/types.h>
+-#include <sys/socket.h>
++//#include <sys/socket.h>
+ #include <unistd.h>
+ 
+ namespace po = boost::program_options;
+@@ -20,7 +24,8 @@
+     static const long kReadBufferSize = 4096;
+     uint8_t readBuffer[kReadBufferSize];
+ public:
+-    int fd;
++    //int fd;
++    SOCKET fd;
+ 
+     virtual void write(const void* p, size_t n) override;
+ 
+@@ -47,7 +52,7 @@
+     addr.sin_port = htons( 1984 );
+  
+     //Connect to remote server
+-    int result = connect(fd , (struct sockaddr *)&addr , sizeof(addr));
++    int result = connect(fd , (struct sockaddr FAR *)&addr , sizeof(addr));
+     if(result < 0)
+         perror("connect");
+ }
+@@ -55,7 +60,8 @@
+ {
+     close(fd);
+     // a little hack: delay 0.1 seconds so that LaunchAPPLServer has time to reopen the port
+-    usleep(100000);
++    //usleep(100000);
++    Sleep(100);
+ }
+ 
+ void TCPStream::write(const void* p, size_t n)
 diff -Naur Retro68.old/LaunchAPPL/Client/Utilities.cc Retro68/LaunchAPPL/Client/Utilities.cc
 --- Retro68.old/LaunchAPPL/Client/Utilities.cc	2022-03-02 21:58:34.523150433 -0800
 +++ Retro68/LaunchAPPL/Client/Utilities.cc	2022-03-20 18:14:51.542723081 -0700
