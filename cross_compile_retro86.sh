@@ -28,7 +28,7 @@ check_missing_packages () {
   fi
   # zeranoe's build scripts use wget, though we don't here...
   # other things we might need: cmake libgmp-dev libmpfr-dev libmpc-dev libboost-all-dev texinfo
-  local check_packages=('curl' 'pkg-config' 'make' 'git' 'svn' 'gcc' 'autoconf' 'automake' 'yasm' 'cvs' 'flex' 'bison' 'makeinfo' 'g++' 'ed' 'hg' 'pax' 'unzip' 'patch' 'wget' 'xz' 'nasm' 'gperf' 'autogen' 'bzip2' 'cargo' 'wine' 'node' 'npm')  
+  local check_packages=('curl' 'pkg-config' 'make' 'git' 'svn' 'gcc' 'autoconf' 'automake' 'yasm' 'cvs' 'flex' 'bison' 'makeinfo' 'g++' 'ed' 'hg' 'pax' 'unzip' 'patch' 'wget' 'xz' 'nasm' 'gperf' 'autogen' 'bzip2' 'cargo' 'wine' 'node' 'npm' 'ruby')  
   # autoconf-archive is just for leptonica FWIW
   # I'm not actually sure if VENDOR being set to centos is a thing or not. On all the centos boxes I can test on it's not been set at all.
   # that being said, if it where set I would imagine it would be set to centos... And this contition will satisfy the "Is not initially set"
@@ -51,6 +51,8 @@ check_missing_packages () {
   fi
   check_packages+=('wine-binfmt') # the rest of the world
   ls /usr/share/binfmts/wine 2>/dev/null 1>/dev/null || missing_packages=("wine-binfmt" "${missing_packages[@]}")
+  check_packages+=('hfsutils') # the rest of the world
+  hash hcopy 2>/dev/null 1>/dev/null || missing_packages=('hfsutils' "${missing_packages[@]}")
   if [[ -n "${missing_packages[@]}" ]]; then
     clear
     echo "Could not find the following execs (svn is actually package subversion, makeinfo is actually package texinfo, hg is actually package mercurial if you're missing them): ${missing_packages[*]}"
@@ -279,7 +281,7 @@ do_git_checkout() {
     if [ ! -d $to_dir ]; then
       echo "Downloading (via git clone) $to_dir from $repo_url"
       rm -rf $to_dir.tmp # just in case it was interrupted previously...
-      git clone $repo_url $to_dir.tmp || exit 1
+      git clone --recursive $repo_url $to_dir.tmp || exit 1
       # prevent partial checkouts by renaming it only after success
       mv $to_dir.tmp $to_dir
       echo "done git cloning to $to_dir"
@@ -745,6 +747,24 @@ build_dependencies() {
 		  exit 1
 	  fi
   fi
+  if [ ! -d ../../MPW-GM/SharedLibraryBins ]; then
+    if [ -f ../../mpw-gm.img__0.bin ]; then
+      mkdir -p tmp || exit 1
+      NODE_PATH=$(npm root -g) node ../../ndif_research/decompress.js ../../mpw-gm.img__0.bin ../../mpw-gm.ro.img || exit 1
+      mkdir -p ../../MPW-GM/SharedLibraryBins
+      hmount ../../mpw-gm.ro.img
+      hcd MPW-GM
+      hcd "Interfaces&Libraries"
+      hcd Libraries
+      hcd SharedLibraries
+      OLDIFS=$IFS;IFS=$'\r\n';for i in `hls -1`; do hcopy -m "$i" "../../MPW-GM/SharedLibraryBins/$i.bin"; done;IFS=$OLDIFS
+      humount
+      rmdir tmp || exit 1
+    else
+      echo 'Failed to find a MPW-GM image file, please put one into the Retro86 build directory. The following images are handled: mpw-gm.img__0.bin'
+      exit 1
+    fi
+  fi
 
   build_gmp
   build_mpfr
@@ -770,6 +790,7 @@ build_retro86() {
     mkdir -p ~/.wine/drive_c/temp
     apply_patch file://$patch_dir/Retro68-build-toolchain.bash.diff "-p0"
     apply_patch file://$patch_dir/Retro68-build-host.diff "-p1"
+    apply_patch file://$patch_dir/Retro68-interfaces-and-libraries.diff "-p0"
     cd hfsutils
     apply_patch file://$patch_dir/hfsutils.diff "-p1"
     cd ../gcc
@@ -944,8 +965,8 @@ build_retro86() {
 	    cp -r ../../../MPW-GM/Interfaces\&Libraries/Libraries/Libraries InterfacesAndLibraries/Libraries
     fi
     if [ ! -d InterfacesAndLibraries/SharedLibraries ]; then
-	    echo cp -r ../../../MPW-GM/Interfaces\&Libraries/Libraries/SharedLibraries InterfacesAndLibraries/SharedLibraries
-	    cp -r ../../../MPW-GM/Interfaces\&Libraries/Libraries/SharedLibraries InterfacesAndLibraries/SharedLibraries
+	    echo cp -r ../../../MPW-GM/SharedLibraryBins InterfacesAndLibraries/SharedLibraries
+	    cp -r ../../../MPW-GM/SharedLibraryBins InterfacesAndLibraries/SharedLibraries
     fi
     if [ ! -d InterfacesAndLibraries/CIncludes ]; then
 	    echo cp -r ../../../MPW-GM/Interfaces\&Libraries/Interfaces/CIncludes InterfacesAndLibraries/CIncludes

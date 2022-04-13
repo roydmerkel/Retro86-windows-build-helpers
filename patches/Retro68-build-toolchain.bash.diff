@@ -1,5 +1,5 @@
---- build-toolchain.bash.old	2022-03-01 21:50:31.615525645 -0800
-+++ build-toolchain.bash	2022-04-09 23:17:52.529057427 -0700
+--- build-toolchain.bash.old	2022-04-11 22:16:32.488349264 -0700
++++ build-toolchain.bash	2022-04-12 23:13:41.318503184 -0700
 @@ -41,9 +41,18 @@
  BUILD_PPC=true
  BUILD_CARBON=true
@@ -99,6 +99,21 @@
  ##################### Sanity checks
  
  if [ `pwd -P` == "$SRC" ]; then
+@@ -195,10 +256,10 @@
+ 
+ if [ $SKIP_THIRDPARTY != true ]; then
+ 
+-	if [ "$PREFIX" = "$DEFAULT_PREFIX" ]; then
+-		# Remove old install tree
+-		rm -rf $PREFIX
+-	fi
++	#if [ "$PREFIX" = "$DEFAULT_PREFIX" ]; then
++	#	# Remove old install tree
++	#	rm -rf $PREFIX
++	#fi
+ 	mkdir -p $PREFIX
+ 
+ 	if [ `uname` = Darwin ]; then
 @@ -220,25 +281,87 @@
  	fi
  		
@@ -301,7 +316,7 @@
  		make -j8
  		make install
  		unset target_configargs
-@@ -294,6 +480,11 @@
+@@ -294,17 +480,29 @@
  			rm -rf gcc-build-ppc
  		fi
  	fi
@@ -313,7 +328,10 @@
  
  	unset CPPFLAGS
  	unset LDFLAGS
-@@ -304,7 +495,15 @@
+ 
+-
+ 	# Build hfsutil
+ 	mkdir -p $PREFIX/lib
  	mkdir -p $PREFIX/share/man/man1
  	mkdir -p hfsutils
  	cd hfsutils
@@ -330,8 +348,13 @@
  	make
  	make install
  	cd ..
-@@ -322,9 +521,37 @@
+@@ -320,11 +518,42 @@
  
+ echo "Building host-based tools..."
+ 
++export WINEPATH="$(winepath -w "$PREFIX/bin");$WINEPATHPOST"
++echo "WINEPATH: $WINEPATH"
++
  mkdir -p build-host
  cd build-host
 -cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
@@ -370,13 +393,39 @@
  
  echo 'subdirs("build-host")' > CTestTestfile.cmake
  
-@@ -351,8 +578,8 @@
- 				 -DCMAKE_BUILD_TYPE=Release \
+@@ -352,7 +581,10 @@
  				 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
  				 ${CMAKE_GENERATOR}
-+	cmake --build . --target install
  	cd ..
 -	cmake --build build-target --target install
++	cmake --target install --build build-target
++	cd build-target
++		make install
++	cd ..
  
  	echo 'subdirs("build-target")' >> CTestTestfile.cmake
+ fi
+@@ -367,7 +599,10 @@
+ 				 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+ 				 ${CMAKE_GENERATOR}
+ 	cd ..
+-	cmake --build build-target-ppc --target install
++	cmake --target install --build build-target-ppc
++	cd build-target-ppc
++		make install
++	cd ..
+ 
+ 	echo 'subdirs("build-target-ppc")' >> CTestTestfile.cmake
+ fi
+@@ -382,7 +617,10 @@
+ 				 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+ 				 ${CMAKE_GENERATOR}
+ 	cd ..
+-	cmake --build build-target-carbon --target install
++	cmake --target install --build build-target-carbon
++	cd build-target-carbon
++		make install
++	cd ..
+ 
+ 	echo 'subdirs("build-target-carbon")' >> CTestTestfile.cmake
  fi

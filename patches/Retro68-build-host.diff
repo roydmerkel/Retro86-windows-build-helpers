@@ -1,3 +1,23 @@
+diff -Naur Retro68.old/ConvertObj/ConvertObj.cc Retro68/ConvertObj/ConvertObj.cc
+--- Retro68.old/ConvertObj/ConvertObj.cc	2022-03-02 21:58:33.839198649 -0800
++++ Retro68/ConvertObj/ConvertObj.cc	2022-04-10 16:01:44.958542874 -0700
+@@ -11,6 +11,7 @@
+ #include <ctype.h>
+ #include <sstream>
+ #include <memory>
++#include <ios>
+ 
+ using std::string;
+ using std::vector;
+@@ -304,7 +305,7 @@
+         std::cerr << "Usage: ConvertOBJ mpw.o > retro68.s\n";
+         return 1;
+     }
+-    std::ifstream in(argv[1]);
++    std::ifstream in(argv[1], std::ios_base::in | std::ios_base::binary);
+     if(!in)
+     {
+         std::cerr << "Could not read imput file \"" << argv[1] << "\"\n";
 diff -Naur Retro68.old/Elf2Mac/CMakeLists.txt Retro68/Elf2Mac/CMakeLists.txt
 --- Retro68.old/Elf2Mac/CMakeLists.txt	2022-03-02 21:58:33.839198649 -0800
 +++ Retro68/Elf2Mac/CMakeLists.txt	2022-03-20 14:32:04.404177762 -0700
@@ -81,7 +101,7 @@ diff -Naur Retro68.old/Elf2Mac/Elf2Mac.cc Retro68/Elf2Mac/Elf2Mac.cc
  int main(int argc, char *argv[])
 diff -Naur Retro68.old/Elf2Mac/Object.cc Retro68/Elf2Mac/Object.cc
 --- Retro68.old/Elf2Mac/Object.cc	2022-03-02 21:58:33.843198366 -0800
-+++ Retro68/Elf2Mac/Object.cc	2022-03-20 14:36:39.321871436 -0700
++++ Retro68/Elf2Mac/Object.cc	2022-04-12 12:02:04.711025330 -0700
 @@ -24,10 +24,12 @@
  #include "SegmentMap.h"
  #include "Reloc.h"
@@ -97,6 +117,27 @@ diff -Naur Retro68.old/Elf2Mac/Object.cc Retro68/Elf2Mac/Object.cc
  #include <fstream>
  #include <sstream>
  #include <iostream>
+@@ -55,7 +57,7 @@
+     if(elf_version ( EV_CURRENT ) == EV_NONE)
+         errx(EXIT_FAILURE , "ELF library initialization failed: %s", elf_errmsg( -1));
+ 
+-    int fd = open(input.c_str(), O_RDONLY, 0);
++    int fd = open(input.c_str(), O_RDONLY | _O_BINARY, 0);
+     elf = elf_begin(fd, ELF_C_READ, NULL);
+ 
+     elf_getshdrstrndx(elf, &sectionHeaderStringTableIdx);
+diff -Naur Retro68.old/Elf2Mac/SegmentMap.cc Retro68/Elf2Mac/SegmentMap.cc
+--- Retro68.old/Elf2Mac/SegmentMap.cc	2022-03-02 21:58:33.843198366 -0800
++++ Retro68/Elf2Mac/SegmentMap.cc	2022-04-12 12:02:49.030218655 -0700
+@@ -71,7 +71,7 @@
+                           "*/libc.a:*"
+                           );
+ 
+-    std::ifstream in(filename);
++    std::ifstream in(filename, std::ios_base::in | std::ios_base::binary);
+     int id = -1;
+     int nextID = 3;
+     while(in)
 diff -Naur Retro68.old/LaunchAPPL/Client/CMakeLists.txt Retro68/LaunchAPPL/Client/CMakeLists.txt
 --- Retro68.old/LaunchAPPL/Client/CMakeLists.txt	2022-03-02 21:58:34.523150433 -0800
 +++ Retro68/LaunchAPPL/Client/CMakeLists.txt	2022-04-09 22:31:22.653030819 -0700
@@ -1020,7 +1061,7 @@ diff -Naur Retro68.old/libelf/src/elf32_updatefile.c Retro68/libelf/src/elf32_up
  #include "libelfP.h"
 diff -Naur Retro68.old/libelf/src/elf_begin.c Retro68/libelf/src/elf_begin.c
 --- Retro68.old/libelf/src/elf_begin.c	2022-03-02 21:58:34.647141701 -0800
-+++ Retro68/libelf/src/elf_begin.c	2022-03-02 22:04:00.931498487 -0800
++++ Retro68/libelf/src/elf_begin.c	2022-04-12 12:06:40.362621721 -0700
 @@ -39,7 +39,9 @@
  #include <stddef.h>
  #include <string.h>
@@ -1097,7 +1138,7 @@ diff -Naur Retro68.old/libelf/src/libelfP.h Retro68/libelf/src/libelfP.h
  #include <errno.h>
 diff -Naur Retro68.old/libelf/src/nlist.c Retro68/libelf/src/nlist.c
 --- Retro68.old/libelf/src/nlist.c	2022-03-02 21:58:34.655141137 -0800
-+++ Retro68/libelf/src/nlist.c	2022-03-02 22:22:07.587881561 -0800
++++ Retro68/libelf/src/nlist.c	2022-04-12 12:06:23.642852574 -0700
 @@ -37,8 +37,17 @@
  #include <nlist.h>
  #include <unistd.h>
@@ -1121,7 +1162,7 @@ diff -Naur Retro68.old/libelf/src/nlist.c Retro68/libelf/src/nlist.c
  
    /* Open the file.  */
 -  fd = open (filename, O_RDONLY);
-+  fd = open (filename, _O_RDONLY);
++  fd = open (filename, _O_RDONLY | _O_BINARY);
    if (fd == -1)
      {
        __libelf_seterrno (ELF_E_NOFILE);
@@ -1240,7 +1281,7 @@ diff -Naur Retro68.old/PEFTools/CMakeLists.txt Retro68/PEFTools/CMakeLists.txt
  
 diff -Naur Retro68.old/PEFTools/MakeImport.cc Retro68/PEFTools/MakeImport.cc
 --- Retro68.old/PEFTools/MakeImport.cc	2022-03-02 21:58:34.659140856 -0800
-+++ Retro68/PEFTools/MakeImport.cc	2022-03-20 10:26:16.411884435 -0700
++++ Retro68/PEFTools/MakeImport.cc	2022-04-12 23:01:44.829120435 -0700
 @@ -8,9 +8,11 @@
  #include <algorithm>
  
@@ -1297,9 +1338,40 @@ diff -Naur Retro68.old/PEFTools/MakeImport.cc Retro68/PEFTools/MakeImport.cc
          exit(1);
      }
  }
+@@ -202,10 +191,10 @@
+         }
+         
+         //cerr << "Generating: " << name << " -> " << libname << endl;
+-        RunCommand("powerpc-apple-macos-as", std::vector<std::string> {
++        RunCommand("powerpc-apple-macos-as.exe", std::vector<std::string> {
+                        stub_s.string(), "-o", stub_o.string()
+                    });
+-        RunCommand("powerpc-apple-macos-ld", std::vector<std::string> {
++        RunCommand("powerpc-apple-macos-ld.exe", std::vector<std::string> {
+                        "-shared", "--no-check-sections", "-bexport:" + stub_exp.string(),
+                        "-o", dest.string(), stub_o.string()
+                    });
+@@ -336,7 +325,7 @@
+             }
+         }
+ 
+-        RunCommand("powerpc-apple-macos-ar", arArguments);
++        RunCommand("powerpc-apple-macos-ar.exe", arArguments);
+         fs::rename(archiveTmp, libname);
+     }
+     catch(...)
+@@ -358,7 +347,7 @@
+         return 1;
+     }
+     
+-    int fd = open(argv[1], O_RDONLY, 0);
++    int fd = open(argv[1], O_RDONLY | _O_BINARY, 0);
+     if(fd < 0)
+     {
+         perror(argv[1]);
 diff -Naur Retro68.old/PEFTools/MakePEF.cc Retro68/PEFTools/MakePEF.cc
 --- Retro68.old/PEFTools/MakePEF.cc	2022-03-02 21:58:34.659140856 -0800
-+++ Retro68/PEFTools/MakePEF.cc	2022-03-20 10:28:43.955234320 -0700
++++ Retro68/PEFTools/MakePEF.cc	2022-04-12 09:33:12.539737402 -0700
 @@ -6,7 +6,8 @@
  #include <set>
  #include <algorithm>
@@ -1310,6 +1382,98 @@ diff -Naur Retro68.old/PEFTools/MakePEF.cc Retro68/PEFTools/MakePEF.cc
  
  #include <assert.h>
  #include <stdint.h>
+@@ -278,7 +279,7 @@
+ 
+ void mkpef(const std::string& inFn, const std::string& outFn)
+ {
+-    std::ifstream in(inFn);
++    std::ifstream in(inFn, std::ios_base::in | std::ios_base::binary);
+ 
+     external_filehdr xcoffHeader;
+     external_aouthdr aoutHeader;
+diff -Naur Retro68.old/ResourceFiles/ResourceFile.cc Retro68/ResourceFiles/ResourceFile.cc
+--- Retro68.old/ResourceFiles/ResourceFile.cc	2022-03-02 21:58:34.659140856 -0800
++++ Retro68/ResourceFiles/ResourceFile.cc	2022-04-12 12:40:37.612421705 -0700
+@@ -124,7 +124,7 @@
+ static bool CheckAppleDouble(fs::path path, std::string prefix)
+ {
+     fs::path adPath = path.parent_path() / (prefix  + path.filename().string());
+-    fs::ifstream in(adPath);
++    fs::ifstream in(adPath, std::ios_base::in | std::ios_base::binary);
+     if(in)
+     {
+         int magic1 = longword(in);
+@@ -181,7 +181,7 @@
+     }
+     if(format == Format::autodetect)
+     {
+-        fs::ifstream in(path);
++        fs::ifstream in(path, std::ios_base::in | std::ios_base::binary);
+         if(in)
+         {
+             int magic1 = longword(in);
+@@ -286,7 +286,7 @@
+ 
+     if(isSingleFork(format))
+     {
+-        fs::ifstream in(path);
++        fs::ifstream in(path, std::ios_base::in | std::ios_base::binary);
+         return read(in, format);
+     }
+ 
+@@ -294,16 +294,16 @@
+     {
+         case Format::basilisk:
+             {
+-                fs::ifstream dataIn(path);
++                fs::ifstream dataIn(path, std::ios_base::in | std::ios_base::binary);
+                 if(!dataIn)
+                     return false;
+                 data = std::string(std::istreambuf_iterator<char>(dataIn),
+                                    std::istreambuf_iterator<char>());
+ 
+-                fs::ifstream rsrcIn(path.parent_path() / ".rsrc" / path.filename());
++                fs::ifstream rsrcIn(path.parent_path() / ".rsrc" / path.filename(), std::ios_base::in | std::ios_base::binary);
+                 if(rsrcIn)
+                     resources = Resources(rsrcIn);
+-                fs::ifstream finfIn(path.parent_path() / ".finf" / path.filename());
++                fs::ifstream finfIn(path.parent_path() / ".finf" / path.filename(), std::ios_base::in | std::ios_base::binary);
+                 if(finfIn)
+                 {
+                     type = ostype(finfIn);
+@@ -314,12 +314,12 @@
+ #ifdef __APPLE__
+         case Format::real:
+             {
+-                fs::ifstream dataIn(path);
++                fs::ifstream dataIn(path, std::ios_base::in | std::ios_base::binary);
+                 if(!dataIn)
+                     return false;
+                 data = std::string(std::istreambuf_iterator<char>(dataIn),
+                                    std::istreambuf_iterator<char>());
+-                fs::ifstream rsrcIn(path / "..namedfork" / "rsrc");
++                fs::ifstream rsrcIn(path / "..namedfork" / "rsrc", std::ios_base::in | std::ios_base::binary);
+                 if(rsrcIn)
+                     resources = Resources(rsrcIn);
+ 
+@@ -339,7 +339,7 @@
+         case Format::underscore_appledouble:
+         case Format::percent_appledouble:
+             {
+-                fs::ifstream dataIn(path);
++                fs::ifstream dataIn(path, std::ios_base::in | std::ios_base::binary);
+                 data = std::string(std::istreambuf_iterator<char>(dataIn),
+                                    std::istreambuf_iterator<char>());
+ 
+@@ -347,7 +347,7 @@
+                                         "._" : "%";
+ 
+                 fs::path adPath = path.parent_path() / (prefix  + path.filename().string());
+-                fs::ifstream in(adPath);
++                fs::ifstream in(adPath, std::ios_base::in | std::ios_base::binary);
+                 if(longword(in) != 0x00051607)
+                     return false;
+                 if(longword(in) != 0x00020000)
 diff -Naur Retro68.old/Rez/CMakeLists.txt Retro68/Rez/CMakeLists.txt
 --- Retro68.old/Rez/CMakeLists.txt	2022-03-02 21:58:34.659140856 -0800
 +++ Retro68/Rez/CMakeLists.txt	2022-03-02 22:29:11.721311562 -0800
@@ -1322,6 +1486,39 @@ diff -Naur Retro68.old/Rez/CMakeLists.txt Retro68/Rez/CMakeLists.txt
  
  # Look for bison.
      # We need Version 3, and Mac OS X still comes with an outdated version (2.3).
+diff -Naur Retro68.old/Rez/Expression.cc Retro68/Rez/Expression.cc
+--- Retro68.old/Rez/Expression.cc	2022-03-02 21:58:34.659140856 -0800
++++ Retro68/Rez/Expression.cc	2022-04-12 09:28:09.404101549 -0700
+@@ -188,7 +188,7 @@
+ std::string ReadExpr::evaluateString(ResourceCompiler *ctx)
+ {
+     std::string filename = arg->evaluateString(ctx);
+-    std::ifstream instream(filename);
++    std::ifstream instream(filename, std::ios_base::in | std::ios_base::binary);
+     if(!instream)
+     {
+         ctx->problem(Diagnostic(Diagnostic::Severity::error, "could not $$read file " + filename, location));
+diff -Naur Retro68.old/Rez/RezLexer.cc Retro68/Rez/RezLexer.cc
+--- Retro68.old/Rez/RezLexer.cc	2022-03-02 21:58:34.663140574 -0800
++++ Retro68/Rez/RezLexer.cc	2022-04-12 09:26:35.384149915 -0700
+@@ -47,7 +47,7 @@
+             typedef typename IterContextT::iterator_type iterator_type;
+ 
+             // read in the file
+-            std::ifstream instream(iter_ctx.filename.c_str());
++            std::ifstream instream(iter_ctx.filename.c_str(), std::ios_base::in | std::ios_base::binary);
+             if (!instream.is_open()) {
+                 BOOST_WAVE_THROW_CTX(iter_ctx.ctx, preprocess_exception,
+                     bad_include_file, iter_ctx.filename.c_str(), act_pos);
+@@ -92,7 +92,7 @@
+ 
+ static std::string readInitial(RezWorld& world, std::string filename)
+ {
+-    std::ifstream in(filename);
++    std::ifstream in(filename, std::ios_base::in | std::ios_base::binary);
+     if(!in.is_open())
+     {
+         world.problem(Diagnostic(Diagnostic::error,
 diff -Naur Retro68.old/Rez/Test/UnitTests.cc Retro68/Rez/Test/UnitTests.cc
 --- Retro68.old/Rez/Test/UnitTests.cc	2022-03-02 21:58:34.663140574 -0800
 +++ Retro68/Rez/Test/UnitTests.cc	2022-03-19 13:50:19.565614114 -0700
