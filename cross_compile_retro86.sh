@@ -619,7 +619,8 @@ reset_cflags() {
 }
 
 build_gmp() {
-  download_and_unpack_file https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
+  #download_and_unpack_file https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
+  download_and_unpack_file https://web.archive.org/web/20190928024320/https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
   cd gmp-6.1.2
     sudo update-binfmts --disable wine || exit 1
     #export CC_FOR_BUILD=/usr/bin/gcc # Are these needed?
@@ -791,6 +792,7 @@ build_retro86() {
     apply_patch file://$patch_dir/Retro68-build-toolchain.bash.diff "-p0"
     apply_patch file://$patch_dir/Retro68-build-host.diff "-p1"
     apply_patch file://$patch_dir/Retro68-interfaces-and-libraries.diff "-p0"
+    apply_patch file://$patch_dir/Retro68-samples.diff "-p1"
     cd hfsutils
     apply_patch file://$patch_dir/hfsutils.diff "-p1"
     cd ../gcc
@@ -991,8 +993,14 @@ build_retro86() {
       touch build-toolchain.bash.ppc
     fi
     if [[ ! -e build-toolchain.bash.tools ]]; then
-      ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc --boost-rootdir=$mingw_w64_x86_64_prefix --boost-libdir=$mingw_w64_x86_64_prefix/lib --skip-68k-gcc-build --skip-ppc-gcc-build || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
+      ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc --boost-rootdir=$mingw_w64_x86_64_prefix --boost-libdir=$mingw_w64_x86_64_prefix/lib --skip-68k-gcc-build --skip-ppc-gcc-build --stop-after-tools || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
       touch build-toolchain.bash.tools
+    fi
+    if [[ ! -e build-toolchain.bash.samples ]]; then
+      export CFLAGS="${CFLAGS/--mtune=generic/}"
+      export CFLAGS="${CFLAGS/-mtune=generic/}"
+      ../Retro68/build-toolchain.bash --cross-prefix=${cross_prefix} --host=$host_target --host-cxx-compiler=${cross_prefix}g++ --host-c-compiler=${cross_prefix}gcc --boost-rootdir=$mingw_w64_x86_64_prefix --boost-libdir=$mingw_w64_x86_64_prefix/lib --skip-68k-gcc-build --skip-ppc-gcc-build --skip-tools-build || exit 1 # not nice on purpose, so that if some other script is running as nice, this one will get priority :)
+      touch build-toolchain.bash.samples
     fi
     unset LDFLAGS
     unset LIBS

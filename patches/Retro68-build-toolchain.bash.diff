@@ -1,13 +1,15 @@
---- build-toolchain.bash.old	2022-04-11 22:16:32.488349264 -0700
-+++ build-toolchain.bash	2022-04-12 23:13:41.318503184 -0700
-@@ -41,9 +41,18 @@
+--- build-toolchain.bash.old	2023-01-04 17:59:53.276249850 -0800
++++ build-toolchain.bash	2023-01-04 18:38:01.820056989 -0800
+@@ -41,9 +41,20 @@
  BUILD_PPC=true
  BUILD_CARBON=true
  CLEAN_AFTER_BUILD=false
 +STOP_AFTER_68K_GCC=false
 +STOP_AFTER_PPC_GCC=false
++STOP_AFTER_TOOLS=false
 +SKIP_68K_GCC=false
 +SKIP_PPC_GCC=false
++SKIP_TOOLS=false
 +
  HOST_CMAKE_FLAGS=()
  CMAKE_GENERATOR=
@@ -19,7 +21,7 @@
  function usage()
  {
  	echo "Usage: $0 [options]"
-@@ -61,6 +70,16 @@
+@@ -61,6 +72,18 @@
      echo "    --universal               use Apple's universal interfaces (default: autodetect)"
      echo "    --multiversal             use the open-source multiversal interfaces (default: autodetect)"
  	echo "    --help                    show this help message"
@@ -31,12 +33,14 @@
 +	echo "    --boost-incdir            boost root dir for hfsutils"
 +	echo "    --stop-after-68k-gcc      stop build after 68k gcc."
 +	echo "    --stop-after-ppc-gcc      stop build after ppc gcc."
++	echo "    --stop-after-tools        stop build after tools."
 +	echo "    --skip-68k-gcc-build      skip 68k gcc build."
 +	echo "    --skip-ppc-gcc-build      skip ppc gcc build."
++	echo "    --skip-tools-build        skip tools build."
  }
  
  for ARG in $*; do
-@@ -78,6 +97,18 @@
+@@ -78,6 +101,24 @@
  			BUILD_PPC=false
  			BUILD_CARBON=false
  			;;
@@ -46,16 +50,22 @@
 +		--stop-after-ppc-gcc)
 +			STOP_AFTER_PPC_GCC=true
 +			;;
++		--stop-after-tools)
++			STOP_AFTER_TOOLS=true
++			;;
 +		--skip-68k-gcc-build)
 +			SKIP_68K_GCC=true
 +			;;
 +		--skip-ppc-gcc-build)
 +			SKIP_PPC_GCC=true
 +			;;
++		--skip-tools-build)
++			SKIP_TOOLS=true
++			;;
  		--no-carbon)
  			BUILD_CARBON=false
  			;;
-@@ -92,6 +123,26 @@
+@@ -92,6 +133,26 @@
  			HOST_CMAKE_FLAGS[${#HOST_CMAKE_FLAGS[@]}]="-DCMAKE_C_COMPILER=${ARG#*=}"
  			HOST_C_COMPILER="${ARG#*=}"
  			;;
@@ -82,7 +92,7 @@
  		--ninja)
  			CMAKE_GENERATOR=-GNinja
  			;;
-@@ -113,6 +164,16 @@
+@@ -113,6 +174,16 @@
  	esac
  done
  
@@ -99,7 +109,7 @@
  ##################### Sanity checks
  
  if [ `pwd -P` == "$SRC" ]; then
-@@ -195,10 +256,10 @@
+@@ -195,10 +266,10 @@
  
  if [ $SKIP_THIRDPARTY != true ]; then
  
@@ -114,7 +124,7 @@
  	mkdir -p $PREFIX
  
  	if [ `uname` = Darwin ]; then
-@@ -220,25 +281,87 @@
+@@ -220,25 +291,87 @@
  	fi
  		
  	# Components needed for targeting 68K: binutils, gcc
@@ -207,7 +217,7 @@
  		# There seems to be a build failure in parallel builds; ignore any errors and try again without -j8.
  		make -j8 || make
  		make install
-@@ -250,10 +373,10 @@
+@@ -250,10 +383,10 @@
  
  		# Move the real linker aside and install symlinks to Elf2Mac
  		# (Elf2Mac is built by cmake below)
@@ -215,14 +225,14 @@
 -		mv $PREFIX/m68k-apple-macos/bin/ld $PREFIX/m68k-apple-macos/bin/ld.real
 -		ln -s Elf2Mac $PREFIX/bin/m68k-apple-macos-ld
 -		ln -s ../../bin/Elf2Mac $PREFIX/m68k-apple-macos/bin/ld
-+		mv $PREFIX/bin/m68k-apple-macos-ld.exe $PREFIX/bin/m68k-apple-macos-ld.exe.real
-+		mv $PREFIX/m68k-apple-macos/bin/ld.exe $PREFIX/m68k-apple-macos/bin/ld.exe.real
++		mv $PREFIX/bin/m68k-apple-macos-ld.exe $PREFIX/bin/m68k-apple-macos-ld.exe.real.exe
++		mv $PREFIX/m68k-apple-macos/bin/ld.exe $PREFIX/m68k-apple-macos/bin/ld.exe.real.exe
 +		ln -s Elf2Mac.exe $PREFIX/bin/m68k-apple-macos-ld.exe
 +		ln -s ../../bin/Elf2Mac.exe $PREFIX/m68k-apple-macos/bin/ld.exe
  
  		if [ $CLEAN_AFTER_BUILD != false ]; then
  			rm -rf binutils-build
-@@ -261,26 +384,89 @@
+@@ -261,26 +394,89 @@
  		fi
  
  	fi
@@ -316,7 +326,7 @@
  		make -j8
  		make install
  		unset target_configargs
-@@ -294,17 +480,29 @@
+@@ -294,23 +490,37 @@
  			rm -rf gcc-build-ppc
  		fi
  	fi
@@ -329,100 +339,188 @@
  	unset CPPFLAGS
  	unset LDFLAGS
  
--
- 	# Build hfsutil
- 	mkdir -p $PREFIX/lib
- 	mkdir -p $PREFIX/share/man/man1
- 	mkdir -p hfsutils
- 	cd hfsutils
++	if [ $SKIP_TOOLS != true ]; then
++		# Build hfsutil
++		mkdir -p $PREFIX/lib
++		mkdir -p $PREFIX/share/man/man1
++		mkdir -p hfsutils
++		cd hfsutils
++		if [ "$BUILD" != "" -a "$HOST" != "" ]; then
++			$SRC/hfsutils/configure --host=$HOST --build=$BUILD --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
++		elif [ "$BUILD" != "" ]; then
++			$SRC/hfsutils/configure --build=$BUILD --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
++		elif [ "$HOST" != "" ]; then
++			$SRC/hfsutils/configure --host=$HOST --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
++		else
++			$SRC/hfsutils/configure --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
++		fi
++		make
++		make install
++		cd ..
+ 
+-	# Build hfsutil
+-	mkdir -p $PREFIX/lib
+-	mkdir -p $PREFIX/share/man/man1
+-	mkdir -p hfsutils
+-	cd hfsutils
 -	$SRC/hfsutils/configure --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
-+	if [ "$BUILD" != "" -a "$HOST" != "" ]; then
-+		$SRC/hfsutils/configure --host=$HOST --build=$BUILD --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
-+	elif [ "$BUILD" != "" ]; then
-+		$SRC/hfsutils/configure --build=$BUILD --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
-+	elif [ "$HOST" != "" ]; then
-+		$SRC/hfsutils/configure --host=$HOST --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
-+	else
-+		$SRC/hfsutils/configure --prefix=$PREFIX --mandir=$PREFIX/share/man --enable-devlibs
-+	fi
- 	make
- 	make install
- 	cd ..
-@@ -320,11 +518,42 @@
+-	make
+-	make install
+-	cd ..
+-
+-	if [ $CLEAN_AFTER_BUILD != false ]; then
+-		rm -rf hfsutils
++		if [ $CLEAN_AFTER_BUILD != false ]; then
++			rm -rf hfsutils
++		fi
+ 	fi
+ else # SKIP_THIRDPARTY
+     removeInterfacesAndLibraries
+@@ -318,26 +528,70 @@
  
- echo "Building host-based tools..."
+ ##################### Build host-based components: MakePEF, MakeImport, ConvertObj, Rez, ...
  
-+export WINEPATH="$(winepath -w "$PREFIX/bin");$WINEPATHPOST"
-+echo "WINEPATH: $WINEPATH"
+-echo "Building host-based tools..."
++if [ $SKIP_TOOLS != true ]; then
++	echo "Building host-based tools..."
 +
- mkdir -p build-host
- cd build-host
++	export WINEPATH="$(winepath -w "$PREFIX/bin");$WINEPATHPOST"
++	echo "WINEPATH: $WINEPATH"
++
++	mkdir -p build-host
++	cd build-host
++	if [ "$CROSS_PREFIX" != "" ]; then
++		if [ "$BOOST_ROOT" != "" ]; then
++			echo 'Boost_DIR="'"$Boost_DIR"'" BOOST_DIR="'"$Boost_DIR"'" BOOST_ROOT="'"$BOOST_ROOT"'" cmake '"${SRC}"' -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB='"${CROSS_PREFIX}"'ranlib -DCMAKE_C_COMPILER='"${CROSS_PREFIX}"'gcc -DCMAKE_CXX_COMPILER='"${CROSS_PREFIX}"'g++ -DCMAKE_RC_COMPILER='"${CROSS_PREFIX}"'windres -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS:BOOL=ON -DBOOST_ROOT:PATH="'"$BOOST_ROOT"'" -DBOOST_DIR:PATH="'"$Boost_DIR"'" -DBoost_DIR:PATH="'"$Boost_DIR"'" "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
++			Boost_DIR="$Boost_DIR" BOOST_DIR="$Boost_DIR" BOOST_ROOT="$BOOST_ROOT" cmake ${SRC} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS:BOOL=ON -DBOOST_ROOT:PATH="$BOOST_ROOT" -DBOOST_DIR:PATH="$Boost_DIR" -DBoost_DIR:PATH="$Boost_DIR" "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
++		else
++			echo 'cmake '"${SRC}"' -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB='"${CROSS_PREFIX}"'ranlib -DCMAKE_C_COMPILER='"${CROSS_PREFIX}"'gcc -DCMAKE_CXX_COMPILER='"${CROSS_PREFIX}"'g++ -DCMAKE_RC_COMPILER='"${CROSS_PREFIX}"'windres -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
++			cmake ${SRC} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
++		fi
++	else
++		if [ "$BOOST_ROOT" != "" ]; then
++			echo 'Boost_DIR="'"$Boost_DIR"'" BOOST_DIR="'"$Boost_DIR"'" BOOST_ROOT="'"$BOOST_ROOT"'" cmake '"${SRC}"' -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS:BOOL=ON -DBOOST_ROOT:PATH="'"$BOOST_ROOT"'" -DBOOST_DIR:PATH="'"$Boost_DIR"'" -DBoost_DIR:PATH="'"$Boost_DIR"'" "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
++			Boost_DIR="$Boost_DIR" BOOST_DIR="$Boost_DIR" BOOST_ROOT="$BOOST_ROOT" cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS:BOOL=ON -DBOOST_ROOT:PATH="$BOOST_ROOT" -DBOOST_DIR:PATH="$Boost_DIR" -DBoost_DIR:PATH="$Boost_DIR" "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
++		else
++			echo 'cmake '"${SRC}"' -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
++			cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
++		fi
++	fi
++	make
++	cd ..
+ 
+-mkdir -p build-host
+-cd build-host
 -cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
-+if [ "$CROSS_PREFIX" != "" ]; then
-+	if [ "$BOOST_ROOT" != "" ]; then
-+		echo 'Boost_DIR="'"$Boost_DIR"'" BOOST_DIR="'"$Boost_DIR"'" BOOST_ROOT="'"$BOOST_ROOT"'" cmake '"${SRC}"' -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB='"${CROSS_PREFIX}"'ranlib -DCMAKE_C_COMPILER='"${CROSS_PREFIX}"'gcc -DCMAKE_CXX_COMPILER='"${CROSS_PREFIX}"'g++ -DCMAKE_RC_COMPILER='"${CROSS_PREFIX}"'windres -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS:BOOL=ON -DBOOST_ROOT:PATH="'"$BOOST_ROOT"'" -DBOOST_DIR:PATH="'"$Boost_DIR"'" -DBoost_DIR:PATH="'"$Boost_DIR"'" "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
-+		Boost_DIR="$Boost_DIR" BOOST_DIR="$Boost_DIR" BOOST_ROOT="$BOOST_ROOT" cmake ${SRC} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS:BOOL=ON -DBOOST_ROOT:PATH="$BOOST_ROOT" -DBOOST_DIR:PATH="$Boost_DIR" -DBoost_DIR:PATH="$Boost_DIR" "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
-+	else
-+		echo 'cmake '"${SRC}"' -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB='"${CROSS_PREFIX}"'ranlib -DCMAKE_C_COMPILER='"${CROSS_PREFIX}"'gcc -DCMAKE_CXX_COMPILER='"${CROSS_PREFIX}"'g++ -DCMAKE_RC_COMPILER='"${CROSS_PREFIX}"'windres -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
-+		cmake ${SRC} -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
-+	fi
-+else
-+	if [ "$BOOST_ROOT" != "" ]; then
-+		echo 'Boost_DIR="'"$Boost_DIR"'" BOOST_DIR="'"$Boost_DIR"'" BOOST_ROOT="'"$BOOST_ROOT"'" cmake '"${SRC}"' -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS:BOOL=ON -DBOOST_ROOT:PATH="'"$BOOST_ROOT"'" -DBOOST_DIR:PATH="'"$Boost_DIR"'" -DBoost_DIR:PATH="'"$Boost_DIR"'" "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
-+		Boost_DIR="$Boost_DIR" BOOST_DIR="$Boost_DIR" BOOST_ROOT="$BOOST_ROOT" cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug -DBoost_USE_STATIC_LIBS:BOOL=ON -DBOOST_ROOT:PATH="$BOOST_ROOT" -DBOOST_DIR:PATH="$Boost_DIR" -DBoost_DIR:PATH="$Boost_DIR" "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
-+	else
-+		echo 'cmake '"${SRC}"' -DCMAKE_INSTALL_PREFIX='"$PREFIX"' -DCMAKE_BUILD_TYPE=Debug "'"${HOST_CMAKE_FLAGS[@]}"'" '"${CMAKE_GENERATOR}"
-+		cmake ${SRC} -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Debug "${HOST_CMAKE_FLAGS[@]}" ${CMAKE_GENERATOR}
-+	fi
-+fi
-+make
-+cd ..
-+
-+mkdir -p install
-+if [ "$CROSS_PREFIX" != "" ]; then
-+	echo "cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=\"$PREFIX\" --target install --build build-host"
-+	cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX="$PREFIX" --target install --build build-host
-+else
-+	echo "cmake --target install --build build-host"
-+	cmake --target install --build build-host
-+fi
-+cd build-host
-+	make install
- cd ..
+-cd ..
 -cmake --build build-host --target install
++	mkdir -p install
++	if [ "$CROSS_PREFIX" != "" ]; then
++		#echo "cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX=\"$PREFIX\" --target install --build build-host"
++		#cmake -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RANLIB=${CROSS_PREFIX}ranlib -DCMAKE_C_COMPILER=${CROSS_PREFIX}gcc -DCMAKE_CXX_COMPILER=${CROSS_PREFIX}g++ -DCMAKE_RC_COMPILER=${CROSS_PREFIX}windres -DCMAKE_INSTALL_PREFIX="$PREFIX" --target install --build build-host
++		echo "cmake --build build-host --target install"
++		cmake --build build-host --target install
++	else
++		echo "cmake --build build-host --target install"
++		cmake --build build-host --target install
++	fi
++	cd build-host
++		make install
++	cd ..
  
- echo 'subdirs("build-host")' > CTestTestfile.cmake
+-echo 'subdirs("build-host")' > CTestTestfile.cmake
++	echo 'subdirs("build-host")' > CTestTestfile.cmake
  
-@@ -352,7 +581,10 @@
- 				 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
- 				 ${CMAKE_GENERATOR}
+ 	# make tools (such as MakeImport and the compilers) available for later commands
+-export PATH=$PREFIX/bin:$PATH
++	export PATH=$PREFIX/bin:$PATH
+ 
+ ##################### Set up Interfaces & Libraries
+ 
+-(cd "${SRC}/multiversal" && ruby make-multiverse.rb -G CIncludes -o "${PREFIX}/multiversal")
+-mkdir -p "${PREFIX}/multiversal/libppc"
+-cp "${SRC}/ImportLibraries"/*.a "${PREFIX}/multiversal/libppc/"
+-setUpInterfacesAndLibraries
+-linkInterfacesAndLibraries ${INTERFACES_KIND}
++	(cd "${SRC}/multiversal" && ruby make-multiverse.rb -G CIncludes -o "${PREFIX}/multiversal")
++	mkdir -p "${PREFIX}/multiversal/libppc"
++	cp "${SRC}/ImportLibraries"/*.a "${PREFIX}/multiversal/libppc/"
++	setUpInterfacesAndLibraries
++	linkInterfacesAndLibraries ${INTERFACES_KIND}
++
++	if [ $STOP_AFTER_TOOLS != false ]; then
++		exit 0
++	fi
++else
++	export WINEPATH="$(winepath -w "$PREFIX/bin");$WINEPATHPOST"
++	echo "WINEPATH=$WINEPATH"
++	export PATH=$PREFIX/bin:$PATH
++	echo "PATH=$PATH"
++fi
+ 
+ ##################### Build target libraries and samples
+ 
+@@ -347,12 +601,42 @@
+ 	mkdir -p build-target
+ 	cd build-target
+ 
+-	cmake ${SRC} -DCMAKE_TOOLCHAIN_FILE=../build-host/cmake/intree.toolchain.cmake \
+-				 -DCMAKE_BUILD_TYPE=Release \
+-				 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+-				 ${CMAKE_GENERATOR}
++	if [ "$BOOST_ROOT" != "" ]; then
++		echo 'Boost_DIR="'"$Boost_DIR"'" BOOST_DIR="'"$Boost_DIR"'" BOOST_ROOT="'"$BOOST_ROOT"'" \
++		cmake '"${SRC}"' -DCMAKE_TOOLCHAIN_FILE=../build-host/cmake/intree.toolchain.cmake \
++					 -DCMAKE_INSTALL_PREFIX='"$PREFIX"' \
++					 -DCMAKE_BUILD_TYPE=Release \
++					 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
++					 -DBOOST_ROOT:PATH="'"$BOOST_ROOT"'" \
++					 -DBOOST_DIR:PATH="'"$Boost_DIR"'" \
++					 -DBoost_DIR:PATH="'"$Boost_DIR"'" \
++					 '"${CMAKE_GENERATOR}"
++		Boost_DIR="$Boost_DIR" BOOST_DIR="$Boost_DIR" BOOST_ROOT="$BOOST_ROOT" \
++		cmake ${SRC} -DCMAKE_TOOLCHAIN_FILE=../build-host/cmake/intree.toolchain.cmake \
++					 -DCMAKE_INSTALL_PREFIX=$PREFIX \
++					 -DCMAKE_BUILD_TYPE=Release \
++					 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
++					 -DBOOST_ROOT:PATH="$BOOST_ROOT" \
++					 -DBOOST_DIR:PATH="$Boost_DIR" \
++					 -DBoost_DIR:PATH="$Boost_DIR" \
++					 ${CMAKE_GENERATOR}
++	else
++		echo 'cmake '"${SRC}"' -DCMAKE_TOOLCHAIN_FILE=../build-host/cmake/intree.toolchain.cmake \
++					 -DCMAKE_INSTALL_PREFIX='"$PREFIX"' \
++					 -DCMAKE_BUILD_TYPE=Release \
++					 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
++					 '"${CMAKE_GENERATOR}"
++		cmake ${SRC} -DCMAKE_TOOLCHAIN_FILE=../build-host/cmake/intree.toolchain.cmake \
++					 -DCMAKE_INSTALL_PREFIX=$PREFIX \
++					 -DCMAKE_BUILD_TYPE=Release \
++					 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
++					 ${CMAKE_GENERATOR}
++	fi
  	cd ..
--	cmake --build build-target --target install
-+	cmake --target install --build build-target
+ 	cmake --build build-target --target install
 +	cd build-target
 +		make install
 +	cd ..
  
  	echo 'subdirs("build-target")' >> CTestTestfile.cmake
  fi
-@@ -367,7 +599,10 @@
- 				 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+@@ -368,6 +652,9 @@
  				 ${CMAKE_GENERATOR}
  	cd ..
--	cmake --build build-target-ppc --target install
-+	cmake --target install --build build-target-ppc
+ 	cmake --build build-target-ppc --target install
 +	cd build-target-ppc
 +		make install
 +	cd ..
  
  	echo 'subdirs("build-target-ppc")' >> CTestTestfile.cmake
  fi
-@@ -382,7 +617,10 @@
- 				 -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY \
+@@ -383,6 +670,9 @@
  				 ${CMAKE_GENERATOR}
  	cd ..
--	cmake --build build-target-carbon --target install
-+	cmake --target install --build build-target-carbon
+ 	cmake --build build-target-carbon --target install
 +	cd build-target-carbon
 +		make install
 +	cd ..

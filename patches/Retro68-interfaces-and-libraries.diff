@@ -1,14 +1,16 @@
 --- interfaces-and-libraries.sh.old	2022-04-10 11:21:27.930117864 -0700
-+++ interfaces-and-libraries.sh	2022-04-12 23:22:49.210276509 -0700
-@@ -58,7 +58,7 @@
++++ interfaces-and-libraries.sh	2022-04-14 13:25:39.249724863 -0700
+@@ -58,8 +58,8 @@
      echo "  - a directory with C header files (usually \"CIncludes\")"
      echo "  - a directory with Rez header files (usually \"RIncludes\")"
      echo "  - (for 68K) a directory containing Interface.o (usually \"Libraries\")"
 -    echo "  - (for PPC) a directory containing InterfaceLib (usually \"SharedLibraries\")"
+-    echo "  - (for Carbon) Carbon.h and CarbonLib, in the same directories"
 +    echo "  - (for PPC) a directory containing InterfaceLib.bin (usually \"SharedLibraries\")"
-     echo "  - (for Carbon) Carbon.h and CarbonLib, in the same directories"
++    echo "  - (for Carbon) Carbon.h and CarbonLib.bin, in the same directories"
      echo
      echo "The Interfaces&Libraries folder from Apple's last MPW release (MPW 3.5 "
+     echo "aka MPW GM 'Golden Master') is known to work."
 @@ -116,11 +116,11 @@
  
      if [ $BUILD_PPC != false ]; then
@@ -23,15 +25,27 @@
          fi
  
          if locateInterfaceThing OPENTRANSPORTAPPPPC OpenTransportAppPPC.o; then
-@@ -151,7 +151,7 @@
-         if locateInterfaceThing CARBONLIB CarbonLib; then
+@@ -148,17 +148,17 @@
+             explainInterfaces
+             return
+         fi
+-        if locateInterfaceThing CARBONLIB CarbonLib; then
++        if locateInterfaceThing CARBONLIB CarbonLib.bin; then
              carbondir=`dirname "$CARBONLIB"`
              if [ "$carbondir" != "$SHAREDLIBRARIES" ]; then
 -                echo "CarbonLib found, but not in the same directory as InterfaceLib."
-+                echo "CarbonLib found, but not in the same directory as InterfaceLib.bin."
++                echo "CarbonLib.bin found, but not in the same directory as InterfaceLib.bin."
                  echo "This is confusing."
                  echo
                  explainInterfaces
+                 return
+             fi
+         else
+-            echo "Could not find CarbonLib anywhere inside $INTERFACES_DIR"
++            echo "Could not find CarbonLib.bin anywhere inside $INTERFACES_DIR"
+             echo "(This file is required for Carbon support only)"
+             echo
+             explainInterfaces
 @@ -248,9 +248,9 @@
  
              rm -f $lib
