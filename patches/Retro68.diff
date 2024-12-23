@@ -15867,7 +15867,7 @@ index 31ff95500c..f8888bdae6 100644
  	      then multi_dir=""; \
  	    else \
 diff --git a/gcc/gcc/configure b/gcc/gcc/configure
-index 5ce0557719..3aed8d7d1a 100755
+index 5ce0557719..828c8b09bf 100755
 --- a/gcc/gcc/configure
 +++ b/gcc/gcc/configure
 @@ -726,18 +726,25 @@ thin_archive_support
@@ -17619,7 +17619,7 @@ index 5ce0557719..3aed8d7d1a 100755
 -    "dsymutil":F) chmod +x dsymutil ;;
 +    "as.cmd":F) chmod +x as.cmd ;;
 +    "collect-ld.cmd":F) chmod +x collect-ld.cmd ;;
-+    "nm.cmd":F) chmod +x nmc.cmd ;;
++    "nm.cmd":F) chmod +x nm.cmd ;;
 +    "dsymutil.cmd":F) chmod +x dsymutil.cmd ;;
      "default":C)
  case ${CONFIG_HEADERS} in

@@ -4,6 +4,8 @@ SET arg1=%1
 SET arg2=%2
 SET args=%*
 
+CALL :logging "exec-tool.cmd: %*" 1>&2
+
 
 SET ORIGINAL_AS_FOR_TARGET=@WINE_ORIGINAL_AS_FOR_TARGET@
 SET ORIGINAL_LD_FOR_TARGET=@WINE_ORIGINAL_LD_FOR_TARGET@
@@ -134,6 +136,7 @@ echo %originalreplacedotdot% | wineFindStrWorkarround "\"
 if %ERRORLEVEL% EQU 0 goto origdotdot
 
 REM echo exec-tool.cmd: call %original% %args%
+CALL :logging "call %original% %args%" 1>&2
 call %original% %args%
 goto end
 
@@ -150,12 +153,14 @@ if exist %scriptdir%\..\%dir%\%prog%.cmd goto testxscrdirprg
 if exist %scriptdir%\..\%dir%\%prog%.bat goto testxscrdirprg
 
 REM echo exec-tool.cmd: call %scriptdir%\..\prev-%dir%\%prog% %args%
+CALL :logging "call %scriptdir%\..\prev-%dir%\%prog% %args%" 1>&2
 call %scriptdir%\..\prev-%dir%\%prog% %args%
 goto end
 
 :testxscrdirprg
 
 REM if NOT x%fast_install%==xyes echo exec-tool.cmd: call %scriptdir%\..\%dir%\%prog% %args%
+if NOT x%fast_install%==xyes CALL :logging "call %scriptdir%\..\%dir%\%prog% %args%" 1>&2
 if NOT x%fast_install%==xyes call %scriptdir%\..\%dir%\%prog% %args%
 if NOT x%fast_install%==xyes goto end
 
@@ -163,15 +168,19 @@ REM if libtool did everything it needs to do, there's a fast path
 SET lt_prog=%scriptdir%\..\%dir%\%objdir%\lt-%prog%
 
 REM if exist %lt_prog%.exe echo exec-tool.cmd: %lt_prog%.exe %args%
+if exist %lt_prog%.exe CALL :logging "%lt_prog%.exe %args%" 1>&2
 if exist %lt_prog%.exe %lt_prog%.exe %args%
 if exist %lt_prog%.exe goto end
 REM if exist %lt_prog%.cmd echo exec-tool.cmd: call %lt_prog%.cmd %args%
+if exist %lt_prog%.cmd CALL :logging "call %lt_prog%.cmd %args%" 1>&2
 if exist %lt_prog%.cmd call %lt_prog%.cmd %args%
 if exist %lt_prog%.cmd goto end
 REM if exist %lt_prog%.cmd echo exec-tool.cmd: call %lt_prog%.bat %args%
+if exist %lt_prog%.bat CALL :logging "call %lt_prog%.bat %args%" 1>&2
 if exist %lt_prog%.bat call %lt_prog%.bat %args%
 if exist %lt_prog%.bat goto end
 REM if exist %lt_prog% echo exec-tool.cmd: call %lt_prog% %args%
+if exist %lt_prog%.exe CALL :logging "call %lt_prog% %args%" 1>&2
 if exist %lt_prog% call %lt_prog% %args%
 if exist %lt_prog% goto end
 
@@ -180,12 +189,20 @@ REM previous stage (because then the relinking would just never happen!).
 REM So we take extra care to use prev-ld/ld-new *on recursive calls*.
 CALL SET LT_RCU=%%LT_RCU_%id%%%
 REM if x%LT_RCU%==x1 echo exec-tool.cmd: call %scriptdir%\..\prev-%dir%\%prog% %args%
+if x%LT_RCU%==x1 CALL :logging "call %scriptdir%\..\prev-%dir%\%prog% %args%" 1>&2
 if x%LT_RCU%==x1 call %scriptdir%\..\prev-%dir%\%prog% %args%
 if x%LT_RCU%==x1 goto end
 
 CALL SET LT_RCU_%id%=1
 REM echo exec-tool.cmd: call %scriptdir%\..\%dir%\%prog% %args%
+CALL :logging "call %scriptdir%\..\%dir%\%prog% %args%" 1>&2
 call %scriptdir%\..\%dir%\%prog% %args%
 exit /b %errorlevel%
 
 :end
+goto end2
+
+:logging
+ECHO exec-tool.cmd: %*
+
+:end2

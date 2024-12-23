@@ -126,7 +126,7 @@ int execvp_print(const char *file, char *const argv[])
 {
 	int i;
 
-	fprintf(stderr, "exec-tool: exec: \"%s\"", ((file != NULL) ? file : "null"));
+	fprintf(stderr, "exec-tool.exe: exec: \"%s\"", ((file != NULL) ? file : "null"));
 	for(i = 0; argv && argv[i]; i++)
 	{
 		fprintf(stderr, " \"%s\"", argv[i]);
@@ -144,7 +144,7 @@ intptr_t _spawnvp_printf(int mode, const char *cmdname, const char *const *argv)
 {
 	int i;
 
-	fprintf(stderr, "exec-tool: spawn: %x \"%s\"", mode, ((cmdname != NULL) ? cmdname : "null"));
+	fprintf(stderr, "exec-tool.exe: spawn: %x \"%s\"", mode, ((cmdname != NULL) ? cmdname : "null"));
 	for(i = 0; argv && argv[i]; i++)
 	{
 		fprintf(stderr, " \"%s\"", argv[i]);
@@ -172,6 +172,12 @@ int main(int argc, char **argv)
 
 	fast_install = FAST_INSTALL;
 
+	fprintf(stderr, "exec-tool.exe:");
+	for(i = 0; i < argc; i++)
+	{
+		fprintf(stderr, " %s", argv[i]);
+	}
+	fprintf(stderr, "\n");
 	//fprintf(stderr, "PATH: \"%s\"\n", getenv("PATH"));
 	//for(i = 0; _environ[i]; i++)
 	//{
