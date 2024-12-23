@@ -25,3 +25,12 @@
 [submodule "externals/env_windows"]
 	path = externals/env_windows
 	url = https://github.com/roydmerkel/env_windows.git
+[submodule "externals/mingw-w64-build"]
+	path = externals/mingw-w64-build
+	url = https://github.com/Zeranoe/mingw-w64-build.git
+[submodule "externals/memmem_windows"]
+	path = externals/memmem_windows
+	url = https://github.com/roydmerkel/memmem_windows.git
+[submodule "externals/preadwrite_windows"]
+	path = externals/preadwrite_windows
+	url = https://github.com/roydmerkel/preadwrite_windows.git

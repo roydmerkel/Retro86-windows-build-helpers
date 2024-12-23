@@ -3,6 +3,7 @@
 # Copyright (C) 2012 Roger Pack, the script is under the GPLv3, but output FFmpeg's executables aren't
 # set -x
 
+#TODO: add check for mount.hfs, if it fails suggest https://github.com/microsoft/WSL/issues/8073 for WSL
 set_box_memory_size_bytes() {
   if [[ $OSTYPE == darwin* ]]; then
     box_memory_size_bytes=20000000000 # 20G fake it out for now :|
@@ -53,6 +54,10 @@ check_missing_packages () {
   ls /usr/share/binfmts/wine 2>/dev/null 1>/dev/null || missing_packages=("wine-binfmt" "${missing_packages[@]}")
   check_packages+=('hfsutils') # the rest of the world
   hash hcopy 2>/dev/null 1>/dev/null || missing_packages=('hfsutils' "${missing_packages[@]}")
+  check_packages+=('hfsprogs') # the rest of the world
+  hash fsck.hfs 2>/dev/null 1>/dev/null || missing_packages=('hfsprogs' "${missing_packages[@]}")
+  check_packages+=('hfsplus') # the rest of the world
+  hash hpmount 2>/dev/null 1>/dev/null || missing_packages=('hfsplus' "${missing_packages[@]}")
   if [[ -n "${missing_packages[@]}" ]]; then
     clear
     echo "Could not find the following execs (svn is actually package subversion, makeinfo is actually package texinfo, hg is actually package mercurial if you're missing them): ${missing_packages[*]}"
@@ -181,14 +186,6 @@ EOF
   esac
 }
 
-# made into a method so I don't/don't have to download this script every time if only doing just 32 or just6 64 bit builds...
-download_gcc_build_script() {
-    local zeranoe_script_name=$1
-    rm -f $zeranoe_script_name || exit 1
-    curl -4 file://$patch_dir/$zeranoe_script_name -O --fail || exit 1
-    chmod u+x $zeranoe_script_name
-}
-
 install_cross_compiler() {
   local win32_gcc="cross_compilers/mingw-w64-i686/bin/i686-w64-mingw32-gcc"
   local win64_gcc="cross_compilers/mingw-w64-x86_64/bin/x86_64-w64-mingw32-gcc"
@@ -214,15 +211,13 @@ install_cross_compiler() {
     echo ""
 
     # --disable-shared allows c++ to be distributed at all...which seemed necessary for some random dependency which happens to use/require c++...
-    local zeranoe_script_name=mingw-w64-build-r22.local
-    local zeranoe_script_options="--gcc-ver=8.3.0 --default-configure --cpu-count=$gcc_cpu_count --pthreads-w32-ver=2-9-1 --disable-shared --clean-build --verbose --allow-overwrite" # allow-overwrite to avoid some crufty prompts if I do rebuilds [or maybe should just nuke everything...]
+    local zeranoe_script_name=mingw-w64-build
+    local zeranoe_script_options="--jobs $gcc_cpu_count" # allow-overwrite to avoid some crufty prompts if I do rebuilds [or maybe should just nuke everything...]
     if [[ ($compiler_flavors == "win32" || $compiler_flavors == "multi") && ! -f ../$win32_gcc ]]; then
       echo "Building win32 cross compiler..."
-      download_gcc_build_script $zeranoe_script_name
-      if [[ `uname` =~ "5.1" ]]; then # Avoid using secure API functions for compatibility with msvcrt.dll on Windows XP.
-        sed -i "s/ --enable-secure-api//" $zeranoe_script_name
-      fi
-      nice ./$zeranoe_script_name $zeranoe_script_options --build-type=win32 || exit 1
+      cp $externals_dir/mingw-w64-build/mingw-w64-build $zeranoe_script_name
+      chmod u+x $zeranoe_script_name
+      nice ./$zeranoe_script_name $zeranoe_script_options --root "$(pwd)" --prefix "$(pwd)/mingw-w64-i686" i686 || exit 1
       if [[ ! -f ../$win32_gcc ]]; then
         echo "Failure building 32 bit gcc? Recommend nuke sandbox (rm -rf sandbox) and start over..."
         exit 1
@@ -230,8 +225,9 @@ install_cross_compiler() {
     fi
     if [[ ($compiler_flavors == "win64" || $compiler_flavors == "multi") && ! -f ../$win64_gcc ]]; then
       echo "Building win64 x86_64 cross compiler..."
-      download_gcc_build_script $zeranoe_script_name
-      nice ./$zeranoe_script_name $zeranoe_script_options --build-type=win64 || exit 1
+      cp $externals_dir/mingw-w64-build/mingw-w64-build $zeranoe_script_name
+      chmod u+x $zeranoe_script_name
+      nice ./$zeranoe_script_name $zeranoe_script_options --root "$(pwd)" --prefix "$(pwd)/mingw-w64-x86_64" x86_64 || exit 1
       if [[ ! -f ../$win64_gcc ]]; then
         echo "Failure building 64 bit gcc? Recommend nuke sandbox (rm -rf sandbox) and start over..."
         exit 1
@@ -499,6 +495,24 @@ apply_patch() {
   fi
 }
 
+apply_git_patch() {
+  local url=$1 # if you want it to use a local file instead of a url one [i.e. local file with local modifications] specify it like file://localhost/full/path/to/filename.patch
+  local patch_name=$(basename $url)
+  local patch_done_name="$patch_name.done"
+  if [[ ! -e $patch_done_name ]]; then
+    if [[ -f $patch_name ]]; then
+      rm $patch_name || exit 1 # remove old version in case it has been since updated on the server...
+    fi
+    curl -4 --retry 5 $url -O --fail || echo_and_exit "unable to download patch file $url"
+    echo "applying patch $patch_name"
+    git apply "$patch_name" || exit 1
+    touch $patch_done_name || exit 1
+    rm -f already_ran* # if it's a new patch, reset everything too, in case it's really really really new
+  #else
+    #echo "patch $patch_name already applied"
+  fi
+}
+
 echo_and_exit() {
   echo "failure, exiting: $1"
   exit 1
@@ -620,9 +634,10 @@ reset_cflags() {
 
 build_gmp() {
   #download_and_unpack_file https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
-  download_and_unpack_file https://web.archive.org/web/20190928024320/https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
+  download_and_unpack_file https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.xz
   cd gmp-6.1.2
     sudo update-binfmts --disable wine || exit 1
+    apply_patch file://$patch_dir/gmp-6.1.2.diff "-p1"
     #export CC_FOR_BUILD=/usr/bin/gcc # Are these needed?
     #export CPP_FOR_BUILD=usr/bin/cpp
     generic_configure "ABI=$bits_target"
@@ -634,7 +649,7 @@ build_gmp() {
 }
 
 build_mpfr() {
-  download_and_unpack_file https://www.mpfr.org/mpfr-3.1.5/mpfr-3.1.5.tar.xz
+  download_and_unpack_file https://ftp.gnu.org/gnu/mpfr/mpfr-3.1.5.tar.xz
   cd mpfr-3.1.5
     #export CC_FOR_BUILD=/usr/bin/gcc # Are these needed?
     #export CPP_FOR_BUILD=usr/bin/cpp
@@ -782,77 +797,14 @@ build_retro86() {
   if [[ ! -e Retro68.done ]]; then
     rm -rf Retro68-build
   fi
-  do_git_checkout https://github.com/autc04/Retro68.git Retro68 6e00994e45cb09231d6fff08d9c2680a1834002c
+  do_git_checkout https://github.com/autc04/Retro68.git Retro68 018c064180d6c51b1cc5af8efdb098cd8bfcf6b1
   do_compile $patch_dir/wineFindStrWorkarround.c Retro68/gcc/gcc/wineFindStrWorkarround.exe
   cp $patch_dir/exec-tool.c.in Retro68/gcc/gcc/exec-tool.c.in
   cp $patch_dir/exec-tool.cmd.in Retro68/gcc/gcc/exec-tool.cmd.in
   #apply_patch file://$patch_dir/dosbox.diff
   cd Retro68
     mkdir -p ~/.wine/drive_c/temp
-    apply_patch file://$patch_dir/Retro68-build-toolchain.bash.diff "-p0"
-    apply_patch file://$patch_dir/Retro68-build-host.diff "-p1"
-    apply_patch file://$patch_dir/Retro68-interfaces-and-libraries.diff "-p0"
-    apply_patch file://$patch_dir/Retro68-samples.diff "-p1"
-    cd hfsutils
-    apply_patch file://$patch_dir/hfsutils.diff "-p1"
-    cd ../gcc
-    apply_patch file://$patch_dir/gcc-Makefile.tpl.diff "-p0"
-    apply_patch file://$patch_dir/gcc-Makefile.in.diff "-p0"
-    apply_patch file://$patch_dir/gcc-config-ml.in.diff "-p0"
-    cd gcc
-    apply_patch file://$patch_dir/gcc-gcc-exec-tool.in.diff "-p0"
-    apply_patch file://$patch_dir/gcc-gcc-configure.ac.diff "-p0"
-    apply_patch file://$patch_dir/gcc-gcc-configure.diff "-p0"
-    apply_patch file://$patch_dir/gcc-gcc-Makefile.in.diff "-p0"
-    cd ../libgcc
-    apply_patch file://$patch_dir/gcc-libgcc-configure.diff "-p0"
-    apply_patch file://$patch_dir/gcc-libgcc-Makefile.in.diff "-p0"
-    apply_patch file://$patch_dir/gcc-libgcc-fixed-obj.mk.diff "-p0"
-    apply_patch file://$patch_dir/gcc-libgcc-shared-object.mk.diff "-p0"
-    apply_patch file://$patch_dir/gcc-libgcc-siditi-object.mk.diff "-p0"
-    apply_patch file://$patch_dir/gcc-libgcc-static-object.mk.diff "-p0"
-    cd ../libatomic
-    apply_patch file://$patch_dir/gcc-libatomic-configure.diff "-p0"
-    cd ../libitm
-    apply_patch file://$patch_dir/gcc-libitm-configure.diff "-p0"
-    cd ../libgomp
-    apply_patch file://$patch_dir/gcc-libgomp-configure.diff "-p0"
-    cd ../libada
-    apply_patch file://$patch_dir/gcc-libada-configure.diff "-p0"
-    cd ../zlib
-    apply_patch file://$patch_dir/gcc-zlib-configure.diff "-p0"
-    cd ../libffi
-    apply_patch file://$patch_dir/gcc-libffi-configure.diff "-p0"
-    cd ../libphobos
-    apply_patch file://$patch_dir/gcc-libphobos-configure.diff "-p0"
-    cd ../libhsail-rt
-    apply_patch file://$patch_dir/gcc-libhsail-rt-configure.diff "-p0"
-    cd ../libgo
-    apply_patch file://$patch_dir/gcc-libgo-configure.diff "-p0"
-    cd ../libobjc
-    apply_patch file://$patch_dir/gcc-libobjc-configure.diff "-p0"
-    cd ../libgfortran
-    apply_patch file://$patch_dir/gcc-libgfortran-configure.diff "-p0"
-    cd ../libquadmath
-    apply_patch file://$patch_dir/gcc-libquadmath-configure.diff "-p0"
-    cd ../libbacktrace
-    apply_patch file://$patch_dir/gcc-libbacktrace-configure.diff "-p0"
-    cd ../newlib
-    apply_patch file://$patch_dir/gcc-newlib-configure.diff "-p0"
-    cd ../libssp
-    apply_patch file://$patch_dir/gcc-libssp-configure.diff "-p0"
-    cd ../liboffloadmic
-    apply_patch file://$patch_dir/gcc-liboffloadmic-configure.diff "-p0"
-    cd ../libvtv
-    apply_patch file://$patch_dir/gcc-libvtv-configure.diff "-p0"
-    cd ../libsanitizer
-    apply_patch file://$patch_dir/gcc-libsanitizer-configure.diff "-p0"
-    cd ../libstdc++-v3
-    apply_patch file://$patch_dir/gcc-libstdc++-v3-configure.diff "-p0"
-    cd include/bits
-    apply_patch file://$patch_dir/gcc-libstdc++-v3-include-bits-random.diff "-p0"
-    cd ../..
-    cd ../..
+    apply_git_patch file://$patch_dir/Retro68.diff
     if [[ ! -e PEFTools/wait.h ]]; then
       cp $externals_dir/sys_wait_h/sys/wait.h PEFTools/wait.h || exit 1
     fi
@@ -939,6 +891,12 @@ build_retro86() {
     fi
     if [[ ! -e LaunchAPPL/Client/ioinfo.h ]]; then
       cp $externals_dir/pspawn/ioinfo.h LaunchAPPL/Client/ioinfo.h || exit 1
+    fi
+    if [[ ! -e gcc/fixincludes/memmem.h ]]; then
+      cp $externals_dir/memmem_windows/memmem.h gcc/fixincludes/memmem.h || exit 1
+    fi
+    if [[ ! -e gcc/fixincludes/memmem.c ]]; then
+      cp $externals_dir/memmem_windows/memmem.c gcc/fixincludes/memmem.c || exit 1
     fi
     if [[ ! -e $patch_dir/wine_tmp_path.reg.done ]]; then
       wine regedit $patch_dir/wine_tmp_path.reg || exit 1

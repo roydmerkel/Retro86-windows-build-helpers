@@ -27,6 +27,7 @@
 #define ORIGINAL_LD_GOLD_FOR_TARGET "@ORIGINAL_LD_GOLD_FOR_TARGET@"
 #define ORIGINAL_PLUGIN_LD_FOR_TARGET "@ORIGINAL_PLUGIN_LD_FOR_TARGET@"
 #define ORIGINAL_NM_FOR_TARGET "@ORIGINAL_NM_FOR_TARGET@"
+#define ORIGINAL_DSYMUTIL_FOR_TARGET "@ORIGINAL_DSYMUTIL_FOR_TARGET@"
 #define exeext "@host_exeext@"
 #define FAST_INSTALL "@enable_fast_install@"
 #define objdir "@objdir@"
@@ -159,8 +160,8 @@ intptr_t _spawnvp_printf(int mode, const char *cmdname, const char *const *argv)
 
 int main(int argc, char **argv)
 {
-	const char *strrchrFSlash = strrchr(argv[0], '/');
-	const char *strrchrBSlash = strrchr(argv[0], '\\');
+	//const char *strrchrFSlash = strrchr(argv[0], '/');
+	//const char *strrchrBSlash = strrchr(argv[0], '\\');
 	char invoked[PATH_MAX];
 	char id[PATH_MAX];
 	const char *original;
@@ -171,11 +172,11 @@ int main(int argc, char **argv)
 
 	fast_install = FAST_INSTALL;
 
-	fprintf(stderr, "PATH: \"%s\"\n", getenv("PATH"));
-	for(i = 0; _environ[i]; i++)
-	{
-		fprintf(stderr, "environment[%d]: \"%s\"\n", i, _environ[i]);
-	}
+	//fprintf(stderr, "PATH: \"%s\"\n", getenv("PATH"));
+	//for(i = 0; _environ[i]; i++)
+	//{
+	//	fprintf(stderr, "environment[%d]: \"%s\"\n", i, _environ[i]);
+	//}
 
 	basename(argv[0], invoked);
 	strcpy(id, invoked);
@@ -271,6 +272,12 @@ int main(int argc, char **argv)
 		original=ORIGINAL_NM_FOR_TARGET;
 		prog="nm-new" exeext;
 		dir="binutils";
+	}
+	else if(!strcasecmp(invoked, "dsymutil"))
+	{
+		original=ORIGINAL_DSYMUTIL_FOR_TARGET;
+		prog=
+		dir=
 	}
 
 	if(!strncmp(original, "../", 3))
